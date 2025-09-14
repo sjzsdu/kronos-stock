@@ -1,0 +1,30 @@
+
+version: '3'
+
+services:
+  kronos-csweb:
+    image: sjzsdu/kronos-china-stock-prediction:latest
+    container_name: kronos-csweb
+    environment:
+      - FLASK_ENV=production
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./models:/app/models
+      - ./cache:/app/cache
+      - ./prediction_results:/app/prediction_results
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kronos-csweb-http.rule=Host(`kronos-api.wnbgj.com`)"
+      - "traefik.http.routers.kronos-csweb-http.entrypoints=web"
+      - "traefik.http.routers.kronos-csweb-https.rule=Host(`kronos-api.wnbgj.com`)"
+      - "traefik.http.routers.kronos-csweb-https.entrypoints=websecure"
+      - "traefik.http.routers.kronos-csweb-https.tls=true"
+      - "traefik.http.routers.kronos-csweb-https.tls.certresolver=letsencrypt"
+      - "traefik.http.services.kronos-csweb.loadbalancer.server.port=5001"
+
+networks:
+  traefik-public:
+    external: true
