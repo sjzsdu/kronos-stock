@@ -1,0 +1,22 @@
+# Exclude model directories - they will be downloaded during build
+kronos-mini/
+kronos-small/
+kronos-base/
+
+# Exclude common cache/temp directories
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+.coverage
+.DS_Store
+.git/
+.gitignore
+
+# Exclude prediction results and cache
+prediction_results/
+cache/
+*.log
