@@ -1,27 +1,39 @@
-# Simple Dockerfile for csweb application
-# Build from csweb directory: docker build -t kronos-csweb .
+# Multi-stage Dockerfile for Kronos Stock Prediction
+# Build: docker build -t kronos-stock .
 
+# Build stage - for installing dependencies and cleaning up
+FROM python:3.12-slim as builder
+
+ENV PYTHONUNBUFFERED=1
+WORKDIR /build
+
+# Install system dependencies needed for building
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Production stage - minimal runtime image
 FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
-# Install system dependencies
+# Install only runtime system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy Python packages from builder stage
+COPY --from=builder /root/.local /root/.local
 
-# Install huggingface_hub for model downloading
-RUN pip install --no-cache-dir huggingface_hub
+# Make sure scripts in .local are usable
+ENV PATH=/root/.local/bin:$PATH
 
 # Copy application code
 COPY . .
-
-# Download models during build (only if not already present)
-RUN python download_models.py
 
 # Create non-root user
 RUN useradd -m appuser && chown -R appuser:appuser /app
