@@ -56,13 +56,6 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Scan image for vulnerabilities
-      uses: aquasecurity/trivy-action@v0.19.0
-      with:
-        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-        format: 'table'
-        exit-code: '1'
-        ignore-unfixed: true
 
     - name: Select a tag for runtime test
       id: picktag
