@@ -3,7 +3,11 @@ flask-cors==4.0.0
 pandas>=2.2.3,<3.0.0
 numpy>=1.26.0,<2.0.0
 requests>=2.31.0
+
+# PyTorch CPU version (much smaller than default)
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch>=2.1.0,<2.3.0
+
 einops>=0.6.0
 china_stock_data==0.2.1
 safetensors>=0.3.0
