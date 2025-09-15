@@ -14,8 +14,7 @@ COPY requirements.txt .
 
 # Install Python dependencies with better caching
 # Use CPU-only PyTorch for smaller image size and faster builds
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.txt && \
+RUN pip install --no-cache-dir -r requirements.txt && \
     python -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}')"
 
 # Copy application code
