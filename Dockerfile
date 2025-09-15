@@ -12,17 +12,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy requirements first for Docker layer caching
 COPY requirements.txt .
 
-# Install Python dependencies with better caching
-# Use CPU-only PyTorch for smaller image size and faster builds
-RUN pip install --no-cache-dir -r requirements.txt && \
-    python -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}')"
+# Install Python dependencies
+# Avoid Docker here-doc for wider compatibility
+RUN python -m pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    python -c "import sys,torch;print('PyTorch version:',torch.__version__);print('CUDA available:',torch.cuda.is_available());print('Sys.path:');print('\n'.join(sys.path))"
 
 # Copy application code
 COPY . .
 
-# Create non-root user
+# (Optional) create non-root user; will stay root for now to ensure packages visible
 RUN useradd -m appuser && chown -R appuser:appuser /app
-USER appuser
+# To drop privileges later, uncomment:
+# USER appuser
 
 EXPOSE 5001
 
