@@ -1,0 +1,395 @@
+{% extends "layout.html" %}
+
+{% block title %}Kronos 智能投资平台 - 首页{% endblock %}
+
+{% block page_title %}智能股票预测{% endblock %}
+{% block page_subtitle %}基于先进AI模型的智能投资决策平台{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary btn-lg" hx-get="/predict" hx-target="#prediction-area">
+    <i class="fas fa-magic"></i>
+    开始智能预测
+</button>
+<button class="btn btn-secondary" hx-get="/stocks/search" hx-target="#search-modal">
+    <i class="fas fa-search"></i>
+    股票搜索
+</button>
+<button class="btn btn-success">
+    <i class="fas fa-plus"></i>
+    添加关注
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Quick Stats Banner -->
+<div class="stats-banner">
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">256</div>
+            <div class="stat-label">今日预测</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="fas fa-bullseye"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">87.3%</div>
+            <div class="stat-label">预测准确率</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">12,489</div>
+            <div class="stat-label">活跃用户</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon danger">
+            <i class="fas fa-coins"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">¥2.8M</div>
+            <div class="stat-label">累计收益</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Prediction Area -->
+<div class="prediction-container" id="prediction-area">
+    <div class="prediction-header">
+        <h2>
+            <i class="fas fa-brain text-primary"></i>
+            AI智能预测
+        </h2>
+        <p>选择股票代码，获取基于多模型分析的预测结果</p>
+    </div>
+    
+    <div class="prediction-form-card">
+        <form hx-post="/api/predict" hx-target="#prediction-results" hx-indicator="#prediction-loading">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="stock_symbol">股票代码</label>
+                    <div class="input-group">
+                        <input type="text" 
+                               id="stock_symbol" 
+                               name="stock_symbol" 
+                               class="form-control" 
+                               placeholder="输入股票代码，如 000001"
+                               hx-get="/api/stocks/suggest" 
+                               hx-target="#suggestions"
+                               hx-trigger="keyup changed delay:300ms">
+                        <button type="button" class="btn-input-addon" onclick="showStockSearch()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div id="suggestions" class="suggestions-dropdown"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="model_type">预测模型</label>
+                    <select id="model_type" name="model_type" class="form-control">
+                        <option value="kronos-base">Kronos Base (平衡型)</option>
+                        <option value="kronos-mini">Kronos Mini (快速型)</option>
+                        <option value="kronos-small">Kronos Small (精准型)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="prediction_days">预测天数</label>
+                    <select id="prediction_days" name="prediction_days" class="form-control">
+                        <option value="1">1天</option>
+                        <option value="3">3天</option>
+                        <option value="5" selected>5天</option>
+                        <option value="10">10天</option>
+                        <option value="30">30天</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-lg prediction-btn">
+                        <i class="fas fa-magic"></i>
+                        <span>开始预测</span>
+                        <div id="prediction-loading" class="htmx-indicator">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Prediction Results -->
+<div id="prediction-results" class="prediction-results">
+    <!-- Results will be loaded here via HTMX -->
+</div>
+
+<!-- Recent Predictions -->
+<div class="recent-predictions">
+    <div class="section-header">
+        <h3>
+            <i class="fas fa-history text-secondary"></i>
+            最近预测
+        </h3>
+        <a href="/history" class="btn btn-secondary btn-sm">查看全部</a>
+    </div>
+    
+    <div class="predictions-grid" hx-get="/api/predictions/recent" hx-trigger="load" hx-target="this">
+        <!-- Recent predictions will be loaded here -->
+        <div class="loading-placeholder">
+            <div class="skeleton prediction-card"></div>
+            <div class="skeleton prediction-card"></div>
+            <div class="skeleton prediction-card"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Popular Stocks -->
+<div class="popular-stocks">
+    <div class="section-header">
+        <h3>
+            <i class="fas fa-fire text-warning"></i>
+            热门股票
+        </h3>
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">全部</button>
+            <button class="filter-tab" data-filter="tech">科技</button>
+            <button class="filter-tab" data-filter="finance">金融</button>
+            <button class="filter-tab" data-filter="energy">能源</button>
+        </div>
+    </div>
+    
+    <div class="stocks-grid" hx-get="/api/stocks/popular" hx-trigger="load" hx-target="this">
+        <!-- Popular stocks will be loaded here -->
+        <div class="loading-placeholder">
+            <div class="skeleton stock-card"></div>
+            <div class="skeleton stock-card"></div>
+            <div class="skeleton stock-card"></div>
+            <div class="skeleton stock-card"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content_sidebar %}
+<!-- Usage Stats Card -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-chart-pie text-primary"></i>
+            今日使用统计
+        </h3>
+    </div>
+    <div class="card-content">
+        <div class="usage-stats">
+            <div class="usage-item">
+                <div class="usage-label">预测次数</div>
+                <div class="usage-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%"></div>
+                    </div>
+                    <span class="usage-count">6/10</span>
+                </div>
+            </div>
+            <div class="usage-item">
+                <div class="usage-label">API调用</div>
+                <div class="usage-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 30%"></div>
+                    </div>
+                    <span class="usage-count">30/100</span>
+                </div>
+            </div>
+            <div class="upgrade-prompt">
+                <p class="text-muted">升级到专业版，享受更多预测次数</p>
+                <button class="btn btn-warning btn-sm">
+                    <i class="fas fa-crown"></i>
+                    立即升级
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Market Overview Card -->
+<div class="card" hx-get="/api/market/overview" hx-trigger="load, every 30s" hx-target="this">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-chart-line text-success"></i>
+            市场概览
+        </h3>
+    </div>
+    <div class="card-content">
+        <div class="market-stats">
+            <div class="stat-item">
+                <span class="stat-label">上证指数</span>
+                <span class="stat-value text-success">3,247.32 (+1.2%)</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">深证成指</span>
+                <span class="stat-value text-danger">10,892.45 (-0.8%)</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">创业板指</span>
+                <span class="stat-value text-success">2,156.78 (+0.5%)</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">沪深300</span>
+                <span class="stat-value text-success">4,123.56 (+0.9%)</span>
+            </div>
+        </div>
+        <div class="market-sentiment">
+            <div class="sentiment-header">市场情绪</div>
+            <div class="sentiment-bar">
+                <div class="sentiment-fill bullish" style="width: 65%"></div>
+            </div>
+            <div class="sentiment-labels">
+                <span class="text-danger">看跌</span>
+                <span class="text-success">看涨 65%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Insights Card -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-brain text-primary"></i>
+            AI市场洞察
+        </h3>
+    </div>
+    <div class="card-content">
+        <div class="ai-insights">
+            <div class="insight-item">
+                <div class="insight-icon">
+                    <i class="fas fa-trending-up text-success"></i>
+                </div>
+                <div class="insight-content">
+                    <div class="insight-title">新能源板块机会</div>
+                    <div class="insight-desc">基于技术面分析，新能源板块有望在未来3-5天内上涨</div>
+                    <div class="insight-confidence">置信度: 85%</div>
+                </div>
+            </div>
+            
+            <div class="insight-item">
+                <div class="insight-icon">
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                </div>
+                <div class="insight-content">
+                    <div class="insight-title">消费股调整</div>
+                    <div class="insight-desc">消费类股票可能面临短期调整，建议谨慎操作</div>
+                    <div class="insight-confidence">置信度: 72%</div>
+                </div>
+            </div>
+            
+            <div class="insight-item">
+                <div class="insight-icon">
+                    <i class="fas fa-chart-bar text-primary"></i>
+                </div>
+                <div class="insight-content">
+                    <div class="insight-title">科技股震荡</div>
+                    <div class="insight-desc">科技股整体处于震荡整理阶段，等待方向突破</div>
+                    <div class="insight-confidence">置信度: 78%</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn btn-primary btn-sm" style="width: 100%; margin-top: 1rem;">
+            <i class="fas fa-plus"></i>
+            查看更多洞察
+        </button>
+    </div>
+</div>
+
+<!-- Quick Actions Card -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-bolt text-warning"></i>
+            快速操作
+        </h3>
+    </div>
+    <div class="card-content">
+        <div class="quick-actions">
+            <button class="quick-action-btn" onclick="showStockSearch()">
+                <i class="fas fa-search"></i>
+                <span>搜索股票</span>
+            </button>
+            <button class="quick-action-btn" onclick="showWatchlist()">
+                <i class="fas fa-star"></i>
+                <span>我的关注</span>
+            </button>
+            <button class="quick-action-btn" onclick="showAlerts()">
+                <i class="fas fa-bell"></i>
+                <span>价格预警</span>
+            </button>
+            <button class="quick-action-btn" onclick="showHistory()">
+                <i class="fas fa-history"></i>
+                <span>预测历史</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Stock search functionality
+function showStockSearch() {
+    // Implementation for stock search modal
+    htmx.ajax('GET', '/stocks/search', {target: '#search-modal'});
+}
+
+function showWatchlist() {
+    // Implementation for watchlist modal
+    htmx.ajax('GET', '/watchlist', {target: '#watchlist-modal'});
+}
+
+function showAlerts() {
+    // Implementation for alerts modal
+    htmx.ajax('GET', '/alerts', {target: '#alerts-modal'});
+}
+
+function showHistory() {
+    // Navigate to history page
+    window.location.href = '/history';
+}
+
+// Filter tabs functionality
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('filter-tab')) {
+        // Remove active class from all tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Add active class to clicked tab
+        e.target.classList.add('active');
+        
+        // Load filtered content
+        const filter = e.target.getAttribute('data-filter');
+        htmx.ajax('GET', `/api/stocks/popular?filter=${filter}`, {
+            target: '.stocks-grid'
+        });
+    }
+});
+
+// Real-time updates
+document.addEventListener('DOMContentLoaded', function() {
+    // Update market data every 30 seconds
+    setInterval(() => {
+        htmx.ajax('GET', '/api/market/overview', {
+            target: '[hx-get="/api/market/overview"]'
+        });
+    }, 30000);
+});
+</script>
+{% endblock %}
