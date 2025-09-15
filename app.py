@@ -44,6 +44,8 @@ predictor = None
 
 # Local model directories (already downloaded under csweb/)
 MODEL_DIRS_ROOT = CURRENT_DIR
+# Additional model root (mounted or packaged models directory)
+EXTERNAL_MODELS_DIR = os.path.join(CURRENT_DIR, 'models')
 AVAILABLE_MODELS = {
     'kronos-mini': {
         'name': 'kronos-mini',
@@ -237,9 +239,22 @@ def load_model():
     conf = AVAILABLE_MODELS.get(key)
     if not conf:
         return jsonify({'success': False, 'error': f'unknown model: {key}'}), 400
-    model_dir = os.path.join(MODEL_DIRS_ROOT, conf['path'])
-    if not os.path.isdir(model_dir):
-        return jsonify({'success': False, 'error': f'model directory missing: {model_dir}'}), 500
+    # Resolve model directory (prefer /app/models/<name> then fallback to current dir)
+    candidates = [
+        os.path.join(EXTERNAL_MODELS_DIR, conf['path']),
+        os.path.join(MODEL_DIRS_ROOT, conf['path'])
+    ]
+    model_dir = None
+    for c in candidates:
+        if os.path.isdir(c):
+            model_dir = c
+            break
+    if model_dir is None:
+        return jsonify({
+            'success': False,
+            'error': 'model directory missing',
+            'candidates': candidates
+        }), 500
     try:
         tokenizer = KronosTokenizer.from_pretrained(model_dir)
         model = Kronos.from_pretrained(model_dir)
