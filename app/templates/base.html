@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kronos 股票预测系统{% endblock %}</title>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    
+    <!-- Charts -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <h1>{% block header_title %}Kronos 股票预测系统{% endblock %}</h1>
+            <p>{% block header_subtitle %}基于先进AI模型的智能股票价格预测{% endblock %}</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="navigation">
+            <a href="{{ url_for('views.index') }}" class="nav-link">主页</a>
+            <a href="{{ url_for('views.dashboard') }}" class="nav-link">仪表盘</a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Kronos Stock Prediction System</p>
+        </footer>
+    </div>
+
+    <!-- HTMX Configuration -->
+    <script src="{{ url_for('static', filename='js/htmx-config.js') }}"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

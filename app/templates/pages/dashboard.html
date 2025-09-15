@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}仪表盘 - Kronos 股票预测系统{% endblock %}
+
+{% block header_title %}智能仪表盘{% endblock %}
+{% block header_subtitle %}全方位股票预测与分析{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Model Status Section -->
+    <section class="card model-section">
+        <h2>🤖 模型状态</h2>
+        <div id="model-status" 
+             hx-get="{{ url_for('views.model_status_component') }}"
+             hx-trigger="load, model-loaded from:body">
+            <div class="loading">正在检查模型状态...</div>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="card quick-actions">
+        <h2>🚀 快速操作</h2>
+        <div class="action-buttons">
+            <button class="btn btn-primary" 
+                    hx-get="{{ url_for('views.prediction_form_component') }}"
+                    hx-target="#prediction-form">
+                新建预测
+            </button>
+            <button class="btn btn-secondary"
+                    onclick="window.open('/api/models', '_blank')">
+                查看API
+            </button>
+        </div>
+    </section>
+
+    <!-- Prediction Form Section -->
+    <section class="card prediction-section">
+        <h2>📈 股票预测</h2>
+        <div id="prediction-form"
+             hx-get="{{ url_for('views.prediction_form_component') }}"
+             hx-trigger="load">
+            <div class="loading">加载预测表单...</div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="card results-section">
+        <h2>📊 预测结果</h2>
+        <div id="prediction-results">
+            <div class="placeholder">
+                <p>🎯 请先选择股票代码并点击预测按钮</p>
+                <small>支持主流A股代码：000001、600000、600519等</small>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chart Section -->
+    <section class="card chart-section">
+        <h2>📈 价格走势图</h2>
+        <div id="chart-container">
+            <div class="placeholder">
+                <p>📊 图表将在预测完成后显示</p>
+                <small>包含K线图和成交量图表</small>
+            </div>
+        </div>
+    </section>
+
+    <!-- System Info -->
+    <section class="card system-info">
+        <h2>ℹ️ 系统信息</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">架构版本:</span>
+                <span class="info-value">HTMX 现代化</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">模型支持:</span>
+                <span class="info-value">Kronos Mini/Small/Base</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">数据源:</span>
+                <span class="info-value">实时/模拟数据</span>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Dashboard-specific JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard loaded with HTMX architecture');
+    
+    // Auto-refresh model status every 30 seconds
+    setInterval(function() {
+        htmx.ajax('GET', '{{ url_for("views.model_status_component") }}', {
+            target: '#model-status'
+        });
+    }, 30000);
+});
+
+// Enhanced HTMX event handlers for dashboard
+document.body.addEventListener('htmx:afterRequest', function(event) {
+    if (event.detail.target.id === 'prediction-results') {
+        // Update chart after prediction
+        const stockCode = document.querySelector('input[name="stock_code"]')?.value;
+        if (stockCode) {
+            htmx.ajax('GET', '/components/chart-container?stock_code=' + stockCode, {
+                target: '#chart-container'
+            });
+        }
+        
+        // Show success notification
+        if (event.detail.successful) {
+            showNotification('预测完成！查看结果和图表', 'success');
+        }
+    }
+    
+    if (event.detail.target.id === 'model-status') {
+        // Trigger model-loaded event for other components
+        document.body.dispatchEvent(new CustomEvent('model-loaded'));
+    }
+});
+
+// Form validation
+document.body.addEventListener('htmx:configRequest', function(event) {
+    if (event.detail.path === '/components/prediction-result') {
+        const form = event.detail.elt;
+        const stockCode = form.querySelector('input[name="stock_code"]')?.value;
+        
+        if (!stockCode) {
+            event.preventDefault();
+            showNotification('请输入股票代码', 'error');
+            return false;
+        }
+        
+        // Show loading notification
+        showNotification('开始预测，请稍候...', 'info');
+    }
+});
+
+// Utility function for notifications (if not already defined)
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} notification`;
+    notification.innerHTML = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 400px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Fade in
+    setTimeout(() => {
+        notification.style.opacity = '1';
+    }, 10);
+    
+    // Fade out and remove
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 4000);
+}
+</script>
+{% endblock %}

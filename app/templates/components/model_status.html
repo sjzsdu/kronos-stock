@@ -1,0 +1,75 @@
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+{% if success_message %}
+<div class="alert alert-success">{{ success_message }}</div>
+{% endif %}
+
+<div class="model-status">
+    {% if status.available %}
+        <div class="status-item">
+            <span class="status-label">模型代码:</span>
+            <span class="status-value status-available">可用</span>
+        </div>
+        
+        <div class="status-item">
+            <span class="status-label">当前状态:</span>
+            {% if status.loaded %}
+                <span class="status-value status-loaded">已加载</span>
+            {% else %}
+                <span class="status-value status-not-loaded">未加载</span>
+            {% endif %}
+        </div>
+
+        {% if not status.loaded %}
+        <div class="model-selector">
+            <h3>选择模型:</h3>
+            <form hx-post="{{ url_for('views.load_model_component') }}" 
+                  hx-target="#model-status"
+                  hx-trigger="submit"
+                  hx-indicator="#loading-indicator">
+                
+                {% for model_name, model_info in status.models.items() %}
+                <div class="model-option">
+                    <input type="radio" 
+                           id="model-{{ model_name }}" 
+                           name="model_name" 
+                           value="{{ model_name }}">
+                    <label for="model-{{ model_name }}">
+                        <strong>{{ model_name }}</strong>
+                        <p>{{ model_info.description }}</p>
+                        <small>大小: {{ model_info.size }} | 性能: {{ model_info.performance }}</small>
+                    </label>
+                </div>
+                {% endfor %}
+                
+                <button type="submit" class="btn btn-primary">
+                    加载模型
+                </button>
+                
+                <div id="loading-indicator" class="loading-indicator htmx-indicator">
+                    <span>加载中...</span>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="model-actions">
+            <button hx-post="{{ url_for('views.load_model_component') }}"
+                    hx-target="#model-status" 
+                    hx-vals='{"model_name": ""}'
+                    class="btn btn-secondary">
+                卸载模型
+            </button>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="status-item">
+            <span class="status-label">模型代码:</span>
+            <span class="status-value status-error">不可用</span>
+        </div>
+        <div class="alert alert-warning">
+            <p>模型代码不可用。请检查模型文件是否正确安装。</p>
+        </div>
+    {% endif %}
+</div>

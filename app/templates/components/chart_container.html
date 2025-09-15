@@ -1,0 +1,83 @@
+{% if chart_data %}
+<div class="chart-container">
+    <div id="stock-chart" class="chart"></div>
+    
+    <script>
+        (function() {
+            const chartData = {{ chart_data_json | safe }};
+            
+            // Prepare data for Plotly
+            const dates = chartData.map(d => d.date);
+            const prices = chartData.map(d => d.close);
+            const volumes = chartData.map(d => d.volume);
+            
+            // Create candlestick trace
+            const candlestickTrace = {
+                x: dates,
+                open: chartData.map(d => d.open),
+                high: chartData.map(d => d.high),
+                low: chartData.map(d => d.low),
+                close: chartData.map(d => d.close),
+                type: 'candlestick',
+                name: '{{ stock_code }}',
+                yaxis: 'y',
+                increasing: {line: {color: '#26C281'}},
+                decreasing: {line: {color: '#E74C3C'}}
+            };
+            
+            // Create volume trace
+            const volumeTrace = {
+                x: dates,
+                y: volumes,
+                type: 'bar',
+                name: '成交量',
+                yaxis: 'y2',
+                marker: {
+                    color: 'rgba(158,158,158,0.5)'
+                }
+            };
+            
+            const layout = {
+                title: {
+                    text: '{{ stock_code }} 股价走势',
+                    font: {size: 16}
+                },
+                xaxis: {
+                    title: '日期',
+                    rangeslider: {visible: false}
+                },
+                yaxis: {
+                    title: '价格 (CNY)',
+                    domain: [0.3, 1],
+                    side: 'left'
+                },
+                yaxis2: {
+                    title: '成交量',
+                    domain: [0, 0.25],
+                    side: 'right'
+                },
+                margin: {l: 50, r: 50, t: 50, b: 50},
+                showlegend: true,
+                legend: {
+                    x: 0,
+                    y: 1
+                }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d'],
+                displaylogo: false
+            };
+            
+            Plotly.newPlot('stock-chart', [candlestickTrace, volumeTrace], layout, config);
+        })();
+    </script>
+</div>
+{% else %}
+<div class="chart-placeholder">
+    <p>暂无图表数据</p>
+    <small>请先进行股票预测</small>
+</div>
+{% endif %}

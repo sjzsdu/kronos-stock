@@ -1,0 +1,89 @@
+{% if success %}
+<div class="prediction-results">
+    <!-- Summary Section -->
+    <div class="prediction-summary">
+        <h3>预测摘要</h3>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <span class="label">股票代码:</span>
+                <span class="value">{{ data.stock_code }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">当前价格:</span>
+                <span class="value">¥{{ "%.2f"|format(data.prediction_summary.current_price) }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">目标价格:</span>
+                <span class="value">¥{{ "%.2f"|format(data.prediction_summary.target_price) }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">预期涨幅:</span>
+                <span class="value {% if data.prediction_summary.total_change_pct > 0 %}positive{% else %}negative{% endif %}">
+                    {{ "%.2f"|format(data.prediction_summary.total_change_pct) }}%
+                </span>
+            </div>
+            <div class="summary-item">
+                <span class="label">趋势:</span>
+                <span class="value trend-{{ data.prediction_summary.trend }}">
+                    {% if data.prediction_summary.trend == 'bullish' %}看涨
+                    {% elif data.prediction_summary.trend == 'bearish' %}看跌
+                    {% else %}中性{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Results -->
+    <div class="prediction-details">
+        <h3>详细预测数据</h3>
+        <div class="results-table-container">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>星期</th>
+                        <th>开盘</th>
+                        <th>最高</th>
+                        <th>最低</th>
+                        <th>收盘</th>
+                        <th>涨跌幅</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in data.prediction_results %}
+                    <tr>
+                        <td>{{ result.date }}</td>
+                        <td>{{ result.weekday }}</td>
+                        <td>¥{{ "%.2f"|format(result.open) }}</td>
+                        <td>¥{{ "%.2f"|format(result.high) }}</td>
+                        <td>¥{{ "%.2f"|format(result.low) }}</td>
+                        <td>¥{{ "%.2f"|format(result.close) }}</td>
+                        <td class="{% if result.change_pct > 0 %}positive{% else %}negative{% endif %}">
+                            {{ "%.2f"|format(result.change_pct) }}%
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Chart Trigger -->
+    <script>
+        // Trigger chart update
+        htmx.ajax('GET', '/components/chart-container?stock_code={{ data.stock_code }}', {
+            target: '#chart-container'
+        });
+        
+        // Trigger model status update
+        htmx.trigger(document.body, 'model-loaded');
+    </script>
+</div>
+{% else %}
+<div class="prediction-error">
+    <div class="alert alert-error">
+        <h3>预测失败</h3>
+        <p>{{ error }}</p>
+    </div>
+</div>
+{% endif %}
