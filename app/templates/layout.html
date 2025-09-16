@@ -81,24 +81,29 @@
 
         <!-- Sidebar -->
         <aside class="app-sidebar" id="sidebar">
+            <!-- Sidebar Toggle Button -->
+            <div class="sidebar-toggle" onclick="toggleSidebarCollapse()">
+                <i class="fas fa-chevron-left" id="sidebar-toggle-icon"></i>
+            </div>
+            
             <div class="sidebar-content">
                 <!-- Quick Actions -->
                 <div class="sidebar-section">
                     <div class="sidebar-title">快速操作</div>
                     <nav class="sidebar-nav">
-                        <a href="{{ url_for('views.index') }}" class="sidebar-item {% if request.endpoint == 'views.index' %}active{% endif %}">
+                        <a href="{{ url_for('views.index') }}" class="sidebar-item {% if request.endpoint == 'views.index' %}active{% endif %}" title="智能预测">
                             <div class="sidebar-icon">
                                 <i class="fas fa-magic"></i>
                             </div>
                             <span class="sidebar-text">智能预测</span>
                         </a>
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="股票搜索">
                             <div class="sidebar-icon">
                                 <i class="fas fa-search"></i>
                             </div>
                             <span class="sidebar-text">股票搜索</span>
                         </a>
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="添加监控">
                             <div class="sidebar-icon">
                                 <i class="fas fa-plus"></i>
                             </div>
@@ -111,25 +116,25 @@
                 <div class="sidebar-section">
                     <div class="sidebar-title">我的投资</div>
                     <nav class="sidebar-nav">
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="投资组合">
                             <div class="sidebar-icon">
                                 <i class="fas fa-chart-pie"></i>
                             </div>
                             <span class="sidebar-text">投资组合</span>
                         </a>
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="预测历史">
                             <div class="sidebar-icon">
                                 <i class="fas fa-history"></i>
                             </div>
                             <span class="sidebar-text">预测历史</span>
                         </a>
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="我的关注">
                             <div class="sidebar-icon">
                                 <i class="fas fa-star"></i>
                             </div>
                             <span class="sidebar-text">我的关注</span>
                         </a>
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="价格预警">
                             <div class="sidebar-icon">
                                 <i class="fas fa-bell"></i>
                             </div>
@@ -142,19 +147,19 @@
                 <div class="sidebar-section">
                     <div class="sidebar-title">分析工具</div>
                     <nav class="sidebar-nav">
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="AI模型对比">
                             <div class="sidebar-icon">
                                 <i class="fas fa-brain"></i>
                             </div>
                             <span class="sidebar-text">AI模型对比</span>
                         </a>
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="技术分析">
                             <div class="sidebar-icon">
                                 <i class="fas fa-chart-bar"></i>
                             </div>
                             <span class="sidebar-text">技术分析</span>
                         </a>
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="市场资讯">
                             <div class="sidebar-icon">
                                 <i class="fas fa-newspaper"></i>
                             </div>
@@ -167,19 +172,19 @@
                 <div class="sidebar-section">
                     <div class="sidebar-title">账户设置</div>
                     <nav class="sidebar-nav">
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="个人资料">
                             <div class="sidebar-icon">
                                 <i class="fas fa-user-circle"></i>
                             </div>
                             <span class="sidebar-text">个人资料</span>
                         </a>
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="订阅管理">
                             <div class="sidebar-icon">
                                 <i class="fas fa-credit-card"></i>
                             </div>
                             <span class="sidebar-text">订阅管理</span>
                         </a>
-                        <a href="#" class="sidebar-item">
+                        <a href="#" class="sidebar-item" title="系统设置">
                             <div class="sidebar-icon">
                                 <i class="fas fa-cog"></i>
                             </div>
@@ -316,6 +321,17 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('collapsed');
+        }
+        
+        // Toggle sidebar collapse (new function for the toggle button)
+        function toggleSidebarCollapse() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleIcon = document.getElementById('sidebar-toggle-icon');
+            
+            sidebar.classList.toggle('collapsed');
+            
+            // Update icon rotation (handled by CSS)
+            // Could add additional logic here if needed
         }
         
         // Toggle user dropdown

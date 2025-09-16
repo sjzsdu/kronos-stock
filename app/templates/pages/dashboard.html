@@ -7,12 +7,23 @@
 
 {% block content %}
 <div class="dashboard-container">
+    <!-- 重定向到现代版本的提示 -->
+    <div class="alert alert-info">
+        <h4><i class="fas fa-rocket"></i> 新版本可用</h4>
+        <p>我们推荐使用新的现代化界面，体验更好的功能和界面设计。</p>
+        <a href="/" class="btn btn-primary">
+            <i class="fas fa-arrow-right"></i>
+            前往现代版本
+        </a>
+    </div>
+    
     <!-- Model Status Section -->
     <section class="card model-section">
         <h2>🤖 模型状态</h2>
         <div id="model-status" 
              hx-get="{{ url_for('views.model_status_component') }}"
-             hx-trigger="load, model-loaded from:body">
+             hx-trigger="load, model-loaded from:body"
+             hx-on:htmx:responseError="handleComponentError">
             <div class="loading">正在检查模型状态...</div>
         </div>
     </section>
@@ -23,12 +34,13 @@
         <div class="action-buttons">
             <button class="btn btn-primary" 
                     hx-get="{{ url_for('views.prediction_form_component') }}"
-                    hx-target="#prediction-form">
+                    hx-target="#prediction-form"
+                    hx-on:htmx:responseError="handleComponentError">
                 新建预测
             </button>
             <button class="btn btn-secondary"
-                    onclick="window.open('/api/models', '_blank')">
-                查看API
+                    onclick="window.open('/', '_blank')">
+                现代版本
             </button>
         </div>
     </section>
@@ -38,7 +50,8 @@
         <h2>📈 股票预测</h2>
         <div id="prediction-form"
              hx-get="{{ url_for('views.prediction_form_component') }}"
-             hx-trigger="load">
+             hx-trigger="load"
+             hx-on:htmx:responseError="handleComponentError">
             <div class="loading">加载预测表单...</div>
         </div>
     </section>
@@ -169,6 +182,20 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }, 300);
     }, 4000);
+}
+
+function handleComponentError(event) {
+    console.log('HTMX component error:', event);
+    const target = event.detail.target;
+    target.innerHTML = `
+        <div class="alert alert-warning">
+            <h6><i class="fas fa-exclamation-triangle"></i> 组件加载失败</h6>
+            <p>请尝试刷新页面，或者使用 <a href="/" class="alert-link">现代版本界面</a>。</p>
+            <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
+                <i class="fas fa-refresh"></i> 刷新页面
+            </button>
+        </div>
+    `;
 }
 </script>
 {% endblock %}

@@ -1,35 +1,300 @@
 # Kronos 智能投资平台 - 技术实现指南
 
-## 🎯 架构实现路线图
+## 🎯 架构实现路线图（功能优先策略）
 
-### Phase 1: 基础架构搭建 (当前阶段)
+### Phase 1: 核心功能演示版本 (当前阶段)
 - [x] Flask应用基础架构
 - [x] HTMX前端框架集成
-- [x] 基础UI/UX设计
-- [x] 数据库模型设计
-- [ ] 用户认证系统
+- [x] 现代化UI/UX设计
+- [x] 数据库结构完整设计
+- [ ] **核心功能Mock版本** - 使用虚拟数据展示完整功能流程
+- [ ] **AI模型集成对接** - 将现有模型与前端界面连通
+- [ ] **数据可视化增强** - 完善预测结果的图表展示
 
-### Phase 2: 核心功能实现
-- [ ] AI预测引擎优化
-- [ ] 用户管理系统
+### Phase 2: 用户系统与数据持久化
+- [ ] 用户认证系统 (注册/登录)
+- [ ] 用户数据持久化
+- [ ] 预测历史记录管理
+- [ ] 个人中心功能
+
+### Phase 3: 商业化功能
 - [ ] 计费与订阅系统
-- [ ] 预测历史管理
+- [ ] 支付系统集成
+- [ ] 使用限制管理
+- [ ] 会员权益系统
 
-### Phase 3: 高级功能
+### Phase 4: 高级功能与优化
 - [ ] 社区功能开发
 - [ ] 实时监控预警
 - [ ] 移动端适配
-- [ ] 支付系统集成
+- [ ] 性能优化与生产部署
 
-### Phase 4: 生产部署
-- [ ] 性能优化
-- [ ] 安全加固
-- [ ] 监控告警
-- [ ] 自动化部署
+## 🚀 Phase 1 详细实现计划（功能优先）
 
-## 🏗️ 详细实现计划
+### 目标：让整个网站完整跑起来，展示所有核心功能
 
-### 1. 数据库模型重构
+#### 1.1 创建Mock数据服务
+首先建立一个Mock数据层，模拟所有真实数据：
+
+```python
+# app/services/mock_service.py
+from datetime import datetime, timedelta
+import random
+import uuid
+
+class MockDataService:
+    """Mock数据服务 - 提供演示用的虚拟数据"""
+    
+    @staticmethod
+    def get_hot_stocks():
+        """获取热门股票列表"""
+        return [
+            {
+                'symbol': '000001',
+                'name': '平安银行',
+                'current_price': 12.75,
+                'change_percent': 2.34,
+                'volume': 1250000,
+                'market_cap': '2465.8亿'
+            },
+            {
+                'symbol': '000002',
+                'name': '万科A',
+                'current_price': 18.90,
+                'change_percent': -1.56,
+                'volume': 980000,
+                'market_cap': '2089.4亿'
+            },
+            {
+                'symbol': '600519',
+                'name': '贵州茅台',
+                'current_price': 1695.50,
+                'change_percent': 0.89,
+                'volume': 45000,
+                'market_cap': '2.13万亿'
+            },
+            {
+                'symbol': '600036',
+                'name': '招商银行',
+                'current_price': 35.20,
+                'change_percent': 1.78,
+                'volume': 890000,
+                'market_cap': '9876.5亿'
+            },
+            {
+                'symbol': '000858',
+                'name': '五粮液',
+                'current_price': 128.45,
+                'change_percent': -0.67,
+                'volume': 320000,
+                'market_cap': '4987.6亿'
+            }
+        ]
+    
+    @staticmethod
+    def generate_prediction(stock_symbol, stock_name, prediction_days, model_type):
+        """生成模拟预测结果"""
+        # 模拟当前价格
+        current_price = random.uniform(10.0, 200.0)
+        
+        # 模拟预测价格（根据不同模型有不同的变化范围）
+        model_volatility = {
+            'kronos-base': 0.15,    # 15%波动
+            'kronos-mini': 0.08,    # 8%波动  
+            'kronos-small': 0.12    # 12%波动
+        }
+        
+        volatility = model_volatility.get(model_type, 0.10)
+        change_factor = random.uniform(-volatility, volatility)
+        predicted_price = current_price * (1 + change_factor)
+        
+        # 模拟置信度（不同模型有不同的置信度范围）
+        confidence_range = {
+            'kronos-base': (75, 90),
+            'kronos-mini': (60, 80),
+            'kronos-small': (70, 85)
+        }
+        
+        conf_min, conf_max = confidence_range.get(model_type, (65, 85))
+        confidence = random.uniform(conf_min, conf_max)
+        
+        # 生成图表数据
+        chart_data = MockDataService._generate_chart_data(
+            current_price, predicted_price, prediction_days
+        )
+        
+        return {
+            'id': str(uuid.uuid4()),
+            'stock_symbol': stock_symbol,
+            'stock_name': stock_name,
+            'model_type': model_type,
+            'prediction_days': prediction_days,
+            'current_price': round(current_price, 2),
+            'predicted_price': round(predicted_price, 2),
+            'confidence': round(confidence, 1),
+            'prediction_change_percent': round(((predicted_price - current_price) / current_price) * 100, 2),
+            'is_bullish': predicted_price > current_price,
+            'status': 'active',
+            'created_at': datetime.now().isoformat(),
+            'expires_at': (datetime.now() + timedelta(days=prediction_days)).isoformat(),
+            'chart_data': chart_data
+        }
+    
+    @staticmethod
+    def _generate_chart_data(current_price, predicted_price, days):
+        """生成预测图表数据"""
+        data_points = []
+        
+        # 历史数据点（过去7天）
+        for i in range(7, 0, -1):
+            date = datetime.now() - timedelta(days=i)
+            # 生成历史价格（围绕当前价格波动）
+            price = current_price * random.uniform(0.95, 1.05)
+            data_points.append({
+                'date': date.strftime('%Y-%m-%d'),
+                'price': round(price, 2),
+                'type': 'historical'
+            })
+        
+        # 当前价格点
+        data_points.append({
+            'date': datetime.now().strftime('%Y-%m-%d'),
+            'price': current_price,
+            'type': 'current'
+        })
+        
+        # 预测数据点
+        for i in range(1, days + 1):
+            date = datetime.now() + timedelta(days=i)
+            # 生成预测价格曲线（逐渐趋向预测价格）
+            progress = i / days
+            price = current_price + (predicted_price - current_price) * progress
+            # 添加一些随机波动
+            price *= random.uniform(0.98, 1.02)
+            data_points.append({
+                'date': date.strftime('%Y-%m-%d'),
+                'price': round(price, 2),
+                'type': 'predicted'
+            })
+        
+        return data_points
+    
+    @staticmethod
+    def get_mock_user():
+        """获取模拟用户信息"""
+        return {
+            'id': 'demo-user',
+            'email': 'demo@kronos.app',
+            'display_name': '演示用户',
+            'subscription_tier': 'pro',
+            'is_verified': True,
+            'usage_today': {
+                'predictions': 3,
+                'api_calls': 15
+            },
+            'usage_limits': {
+                'predictions': 500,
+                'api_calls': 1000
+            },
+            'stats': {
+                'total_predictions': 127,
+                'successful_predictions': 89,
+                'success_rate': 70.1
+            }
+        }
+    
+    @staticmethod
+    def get_prediction_history(page=1, per_page=10):
+        """获取模拟预测历史"""
+        # 生成一些历史预测数据
+        predictions = []
+        for i in range(per_page):
+            stock = random.choice(MockDataService.get_hot_stocks())
+            model = random.choice(['kronos-base', 'kronos-mini', 'kronos-small'])
+            days = random.choice([1, 3, 5, 10])
+            
+            prediction = MockDataService.generate_prediction(
+                stock['symbol'], stock['name'], days, model
+            )
+            
+            # 模拟一些历史预测（已过期的）
+            created_time = datetime.now() - timedelta(days=random.randint(1, 30))
+            prediction['created_at'] = created_time.isoformat()
+            prediction['expires_at'] = (created_time + timedelta(days=days)).isoformat()
+            
+            # 随机设置一些为已验证状态
+            if random.random() < 0.6:  # 60%概率已验证
+                prediction['status'] = 'verified'
+                prediction['actual_price'] = prediction['predicted_price'] * random.uniform(0.95, 1.05)
+                prediction['accuracy'] = random.uniform(60, 95)
+            
+            predictions.append(prediction)
+        
+        return {
+            'predictions': predictions,
+            'total': 127,  # 模拟总数
+            'pages': 13,   # 模拟总页数
+            'current_page': page
+        }
+
+class MockStockService:
+    """Mock股票数据服务"""
+    
+    @staticmethod
+    def search_stocks(query):
+        """股票搜索"""
+        all_stocks = MockDataService.get_hot_stocks()
+        
+        # 模拟搜索逻辑
+        if not query:
+            return all_stocks[:3]
+        
+        results = []
+        query = query.lower()
+        
+        for stock in all_stocks:
+            if (query in stock['symbol'].lower() or 
+                query in stock['name'].lower()):
+                results.append(stock)
+        
+        # 如果没找到，返回一些相似的
+        if not results and len(query) >= 2:
+            results = all_stocks[:2]
+        
+        return results
+    
+    @staticmethod
+    def get_stock_detail(symbol):
+        """获取股票详细信息"""
+        stocks = MockDataService.get_hot_stocks()
+        for stock in stocks:
+            if stock['symbol'] == symbol:
+                # 添加更多详细信息
+                stock.update({
+                    'industry': '金融业',
+                    'pe_ratio': round(random.uniform(8, 25), 2),
+                    'pb_ratio': round(random.uniform(0.8, 3.5), 2),
+                    'dividend_yield': round(random.uniform(1.5, 6.0), 2),
+                    'recent_news': [
+                        {'title': '公司发布Q3财报，营收同比增长15%', 'time': '2小时前'},
+                        {'title': '获得新的业务合作伙伴', 'time': '1天前'},
+                        {'title': '股东大会决议通过分红方案', 'time': '3天前'}
+                    ]
+                })
+                return stock
+        
+        # 如果没找到，返回一个默认的
+        return {
+            'symbol': symbol,
+            'name': '未知股票',
+            'current_price': random.uniform(10, 100),
+            'change_percent': random.uniform(-5, 5),
+            'volume': random.randint(10000, 1000000),
+            'market_cap': f'{random.randint(10, 1000)}亿'
+        }
+```
+
+#### 1.2 完善预测功能路由
 
 #### 1.1 用户管理模型
 ```python
