@@ -11,10 +11,12 @@
     /* Color scheme */
     --primary-color: #2563eb;
     --primary-dark: #1d4ed8;
+    --primary-light: rgba(37, 99, 235, 0.1);
     --secondary-color: #10b981;
     --accent-color: #f59e0b;
     --danger-color: #ef4444;
     --warning-color: #f97316;
+    --success-color: #22c55e;
     
     /* UI colors */
     --bg-primary: #ffffff;
@@ -24,9 +26,13 @@
     --text-secondary: #64748b;
     --text-light: #94a3b8;
     --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    
+    /* Shadow variants */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
     
     /* Layout */
     --header-height: 64px;
@@ -45,11 +51,36 @@
     --space-lg: 1.5rem;
     --space-xl: 2rem;
     --space-2xl: 3rem;
+    --space-3xl: 4rem;
     
     /* Transitions */
     --transition-fast: 150ms ease;
     --transition-normal: 300ms ease;
     --transition-slow: 500ms ease;
+    
+    /* Status colors */
+    --status-success-bg: #d4edda;
+    --status-success-text: #155724;
+    --status-info-bg: #d1ecf1;
+    --status-info-text: #0c5460;
+    --status-warning-bg: #fff3cd;
+    --status-warning-text: #856404;
+    --status-error-bg: #f8d7da;
+    --status-error-text: #721c24;
+    
+    /* Chart colors */
+    --chart-primary: var(--primary-color);
+    --chart-secondary: var(--secondary-color);
+    --chart-accent: var(--accent-color);
+    --chart-danger: var(--danger-color);
+    --chart-background: var(--bg-secondary);
+    
+    /* Border radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
 }
 
 /* Custom Scrollbar Styles */
@@ -127,6 +158,42 @@ body {
     display: flex;
     align-items: center;
     gap: var(--space-lg);
+}
+
+/* Sidebar Toggle Button - 移动到header区域 */
+.sidebar-toggle {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-right: var(--space-md);
+}
+
+.sidebar-toggle:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.sidebar-toggle:hover i {
+    color: white;
+}
+
+.sidebar-toggle i {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    transition: all var(--transition-normal);
+    display: inline-block;
+}
+
+.app-sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
 }
 
 .logo {
@@ -277,51 +344,8 @@ body {
     width: var(--sidebar-collapsed);
 }
 
-/* Sidebar Toggle Button */
-.sidebar-toggle {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 36px;
-    height: 36px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    z-index: 1001;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.sidebar-toggle:hover {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.sidebar-toggle:hover i {
-    color: white;
-}
-
-.sidebar-toggle i {
-    font-size: 1.125rem;
-    color: var(--text-secondary);
-    transition: all var(--transition-normal);
-    display: inline-block;
-}
-
-.app-sidebar.collapsed .sidebar-toggle i {
-    transform: rotate(180deg);
-}
-
-.app-sidebar.collapsed .sidebar-toggle {
-    right: 22px;
-}
-
 .sidebar-content {
-    padding: calc(var(--space-sm) + 40px) var(--space-sm) var(--space-sm) var(--space-sm);
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-sm);
 }
 
 .sidebar-section {
@@ -415,7 +439,7 @@ body {
 }
 
 .app-sidebar.collapsed .sidebar-content {
-    padding: calc(var(--space-sm) + 40px) var(--space-sm) var(--space-sm) var(--space-sm);
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-sm);
 }
 
 .app-sidebar.collapsed .sidebar-item {
