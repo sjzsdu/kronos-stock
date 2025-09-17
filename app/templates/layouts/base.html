@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kronos 智能投资平台{% endblock %}</title>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    
+    <!-- Charts -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+    <!-- Alternative CDN as fallback -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css" crossorigin="anonymous" media="none" onload="if(media!='all')media='all'" onerror="this.onerror=null;this.media='all';">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <!-- Mobile Menu Toggle -->
+                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <!-- Logo -->
+                    <a href="{{ url_for('views.index') }}" class="logo">
+                        <div class="logo-icon">K</div>
+                        <span>Kronos</span>
+                    </a>
+                    
+                    <!-- Main Navigation -->
+                    <nav class="main-nav">
+                        <a href="{{ url_for('views.index') }}" class="nav-item {% if request.endpoint == 'views.index' %}active{% endif %}">
+                            <i class="fas fa-chart-line"></i>
+                            预测中心
+                        </a>
+                        <a href="{{ url_for('views.dashboard') }}" class="nav-item {% if request.endpoint == 'views.dashboard' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            投资仪表盘
+                        </a>
+                        <a href="{{ url_for('views.portfolio') }}" class="nav-item {% if request.endpoint == 'views.portfolio' %}active{% endif %}">
+                            <i class="fas fa-chart-pie"></i>
+                            投资组合
+                        </a>
+                        <a href="{{ url_for('views.market_news') }}" class="nav-item {% if request.endpoint == 'views.market_news' %}active{% endif %}">
+                            <i class="fas fa-newspaper"></i>
+                            市场资讯
+                        </a>
+                        <a href="{{ url_for('views.community') }}" class="nav-item {% if request.endpoint == 'views.community' %}active{% endif %}">
+                            <i class="fas fa-users"></i>
+                            投资社区
+                        </a>
+                        <a href="{{ url_for('views.learning') }}" class="nav-item {% if request.endpoint == 'views.learning' %}active{% endif %}">
+                            <i class="fas fa-graduation-cap"></i>
+                            学习中心
+                        </a>
+                    </nav>
+                </div>
+                
+                <div class="header-right">
+                    <!-- User Badge -->
+                    <div class="user-badge">
+                        <i class="fas fa-crown"></i>
+                        <span>{% block user_plan %}免费版{% endblock %}</span>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="notification-icon" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge">3</span>
+                    </div>
+                    
+                    <!-- User Menu -->
+                    <div class="user-menu" onclick="toggleUserDropdown()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="user-name">投资者</span>
+                        <i class="fas fa-chevron-down"></i>
+                        
+                        <!-- User Dropdown -->
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="dropdown-header">
+                                <div class="user-info">
+                                    <strong>投资者</strong>
+                                    <small>kronos@example.com</small>
+                                </div>
+                            </div>
+                            <div class="dropdown-content">
+                                <a href="{{ url_for('views.profile') }}" class="dropdown-item">
+                                    <i class="fas fa-user-circle"></i>
+                                    个人资料
+                                </a>
+                                <a href="{{ url_for('views.settings') }}" class="dropdown-item">
+                                    <i class="fas fa-cog"></i>
+                                    账户设置
+                                </a>
+                                <a href="{{ url_for('views.alerts') }}" class="dropdown-item">
+                                    <i class="fas fa-bell"></i>
+                                    预警设置
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    退出登录
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Body content will be defined by child layouts -->
+        {% block body %}{% endblock %}
+    </div>
+
+    <!-- Notification Dropdown -->
+    <div class="notification-dropdown" id="notificationDropdown">
+        <div class="notification-header">
+            <h4>消息通知</h4>
+            <button class="mark-all-read" onclick="markAllNotificationsRead()">
+                全部已读
+            </button>
+        </div>
+        <div class="notification-content" 
+             hx-get="/api/notifications/check" 
+             hx-trigger="load"
+             hx-indicator="#notification-loading">
+            <div id="notification-loading" class="htmx-indicator">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i> 加载中...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/htmx-config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
