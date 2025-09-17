@@ -1,0 +1,123 @@
+{% extends "layouts/dynamic_layout.html" %}
+
+{% block title %}股票预测 - Kronos{% endblock %}
+
+{% block page_title %}股票预测{% endblock %}
+
+{% block additional_css %}
+<style>
+.prediction-page {
+    padding: 20px;
+}
+
+.prediction-form {
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.prediction-results {
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.btn-predict {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-predict:hover {
+    background: #0056b3;
+}
+
+.prediction-chart {
+    height: 300px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    margin: 20px 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="prediction-page">
+    <div class="prediction-form">
+        <h3>AI股票预测</h3>
+        <form hx-post="/api/predict" hx-target="#prediction-results" hx-indicator="#loading">
+            <div class="form-group">
+                <label for="stock_code">股票代码</label>
+                <input type="text" id="stock_code" name="stock_code" placeholder="如：000001" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="prediction_days">预测天数</label>
+                <select id="prediction_days" name="prediction_days">
+                    <option value="7">7天</option>
+                    <option value="15">15天</option>
+                    <option value="30">30天</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="model_type">预测模型</label>
+                <select id="model_type" name="model_type">
+                    <option value="kronos-base">Kronos Base</option>
+                    <option value="kronos-small">Kronos Small</option>
+                    <option value="kronos-mini">Kronos Mini</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-predict">
+                <i class="fas fa-brain"></i> 开始预测
+            </button>
+            
+            <div id="loading" class="htmx-indicator" style="margin-left: 10px;">
+                <i class="fas fa-spinner fa-spin"></i> 预测中...
+            </div>
+        </form>
+    </div>
+    
+    <div class="prediction-results">
+        <h3>预测结果</h3>
+        <div id="prediction-results">
+            <div class="prediction-chart">
+                <i class="fas fa-chart-line fa-3x"></i>
+                <p style="margin-left: 20px;">请选择股票并点击预测按钮开始AI分析</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

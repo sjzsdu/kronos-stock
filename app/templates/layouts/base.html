@@ -47,30 +47,33 @@
                     
                     <!-- Main Navigation -->
                     <nav class="main-nav">
-                        <a href="{{ url_for('views.index') }}" class="nav-item {% if request.endpoint == 'views.index' %}active{% endif %}">
-                            <i class="fas fa-chart-line"></i>
-                            预测中心
-                        </a>
-                        <a href="{{ url_for('views.dashboard') }}" class="nav-item {% if request.endpoint == 'views.dashboard' %}active{% endif %}">
-                            <i class="fas fa-tachometer-alt"></i>
-                            投资仪表盘
-                        </a>
-                        <a href="{{ url_for('views.portfolio') }}" class="nav-item {% if request.endpoint == 'views.portfolio' %}active{% endif %}">
-                            <i class="fas fa-chart-pie"></i>
-                            投资组合
-                        </a>
-                        <a href="{{ url_for('views.market_news') }}" class="nav-item {% if request.endpoint == 'views.market_news' %}active{% endif %}">
-                            <i class="fas fa-newspaper"></i>
-                            市场资讯
-                        </a>
-                        <a href="{{ url_for('views.community') }}" class="nav-item {% if request.endpoint == 'views.community' %}active{% endif %}">
-                            <i class="fas fa-users"></i>
-                            投资社区
-                        </a>
-                        <a href="{{ url_for('views.learning') }}" class="nav-item {% if request.endpoint == 'views.learning' %}active{% endif %}">
-                            <i class="fas fa-graduation-cap"></i>
-                            学习中心
-                        </a>
+                        {% for menu_item in primary_menu %}
+                            {% if menu_item.has_sidebar %}
+                                <!-- Theme with submenu -->
+                                <div class="nav-dropdown">
+                                    <span class="nav-item main-nav-item {% if current_theme == menu_item.key %}active{% endif %}">
+                                        <i class="{{ menu_item.icon }}"></i>
+                                        {{ menu_item.title }}
+                                        <i class="fas fa-chevron-down nav-arrow"></i>
+                                    </span>
+                                    {% if sidebar_menu and current_theme == menu_item.key %}
+                                    <div class="nav-dropdown-content">
+                                        {% for section in sidebar_menu %}
+                                            {% for item in section['items'] %}
+                                            <a href="{{ url_for(item.endpoint) }}" class="dropdown-item">{{ item.title }}</a>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <!-- Simple link without submenu -->
+                                <a href="{{ url_for(menu_item.url) }}" class="nav-item {% if current_endpoint == menu_item.url %}active{% endif %}">
+                                    <i class="{{ menu_item.icon }}"></i>
+                                    {{ menu_item.title }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
                     </nav>
                 </div>
                 

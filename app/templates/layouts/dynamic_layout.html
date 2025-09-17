@@ -1,0 +1,58 @@
+{% extends "layouts/base.html" %}
+
+{% block body %}
+<div class="app-body">
+    <!-- Dynamic Sidebar -->
+    <aside class="app-sidebar dynamic-sidebar" id="sidebar">
+        <!-- Sidebar Edge Toggle Button -->
+        <div class="sidebar-edge-toggle" onclick="layoutManager.toggleSidebar()" title="切换侧边栏">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        
+        <div class="sidebar-content">
+            {% if sidebar_menu %}
+                {% for section in sidebar_menu %}
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">
+                        <i class="{{ section.icon }}"></i>
+                        {{ section.title }}
+                    </h3>
+                    
+                    {% if section['items'] %}
+                    <div class="sidebar-items">
+                        {% for item in section['items'] %}
+                        <a href="{{ url_for(item.endpoint) }}" 
+                           class="sidebar-item {% if request.endpoint == item.endpoint %}active{% endif %}" 
+                           title="{{ item.title }}">
+                            <div class="sidebar-icon">
+                                <i class="{{ item.icon }}"></i>
+                            </div>
+                            <span>{{ item.title }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">{% block page_title %}页面标题{% endblock %}</h1>
+                <p class="page-subtitle">{% block page_subtitle %}页面描述{% endblock %}</p>
+                {% block page_actions %}{% endblock %}
+            </div>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

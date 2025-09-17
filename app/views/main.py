@@ -46,6 +46,12 @@ def monitoring():
     model_status = model_service.get_model_status()
     return render_template('pages/monitoring.html', model_status=model_status)
 
+@views_bp.route('/prediction')
+def prediction():
+    """AI prediction page"""
+    model_status = model_service.get_model_status()
+    return render_template('pages/prediction.html', model_status=model_status)
+
 @views_bp.route('/portfolio')
 def portfolio():
     """Investment portfolio page"""
@@ -110,6 +116,11 @@ def settings():
 def test():
     """System test page"""
     return render_template('pages/test.html')
+
+@views_bp.route('/menu-test')
+def menu_test():
+    """Menu system test page"""
+    return render_template('pages/menu_test.html')
 
 # Component routes for HTMX
 @views_bp.route('/components/market-news')

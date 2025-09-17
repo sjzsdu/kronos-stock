@@ -24,6 +24,30 @@ def create_app(config_name='default'):
                 return value
         return value
     
+    # Register template context processors
+    @app.context_processor
+    def menu_processor():
+        """Provide menu data to all templates"""
+        from flask import request
+        from app.config.menu import (
+            PRIMARY_MENU, 
+            get_theme_for_endpoint, 
+            get_sidebar_menu_for_theme,
+            should_use_sidebar
+        )
+        
+        current_endpoint = request.endpoint if request.endpoint else None
+        current_theme = get_theme_for_endpoint(current_endpoint)
+        sidebar_menu = get_sidebar_menu_for_theme(current_theme) if current_theme else []
+        
+        return {
+            'primary_menu': PRIMARY_MENU,
+            'current_theme': current_theme,
+            'sidebar_menu': sidebar_menu,
+            'should_use_sidebar': should_use_sidebar(current_endpoint),
+            'current_endpoint': current_endpoint
+        }
+    
     # Register blueprints
     from app.api import api_bp
     from app.views import views_bp
