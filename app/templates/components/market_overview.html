@@ -1,0 +1,21 @@
+<div class="market-stats" id="market-stats">
+    {% for index in indices %}
+    <div class="stat-item">
+        <span class="stat-label">{{ index.name }}</span>
+        <span class="stat-value {% if index.change_percent > 0 %}text-success{% else %}text-danger{% endif %}">
+            {{ "%.2f"|format(index.value) }} ({% if index.change_percent > 0 %}+{% endif %}{{ "%.2f"|format(index.change_percent) }}%)
+        </span>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="market-sentiment">
+    <div class="sentiment-header">市场情绪</div>
+    <div class="sentiment-bar">
+        <div class="sentiment-fill bullish" style="width: 65%"></div>
+    </div>
+    <div class="sentiment-labels">
+        <span class="text-danger">看跌</span>
+        <span class="text-success">看涨 65%</span>
+    </div>
+</div>

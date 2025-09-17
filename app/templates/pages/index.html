@@ -14,7 +14,7 @@
         <h2>模型状态</h2>
         <div id="model-status" 
              hx-get="{{ url_for('views.model_status_component') }}"
-             hx-trigger="load, model-loaded from:body"
+             hx-trigger="load"
              hx-on:htmx:responseError="handleComponentError">
             <div class="loading">加载中...</div>
         </div>

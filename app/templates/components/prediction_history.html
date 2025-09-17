@@ -1,0 +1,103 @@
+<div class="prediction-history-container">
+    <div class="history-header">
+        <h3><i class="fas fa-history"></i> 预测历史</h3>
+        <div class="history-stats">
+            <span class="stat-item">总计: {{ total }} 条</span>
+            <span class="stat-item">当前第 {{ current_page }} 页</span>
+        </div>
+    </div>
+    
+    {% if predictions %}
+    <div class="history-table-container">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>股票</th>
+                    <th>模型</th>
+                    <th>预测天数</th>
+                    <th>当前价格</th>
+                    <th>预测价格</th>
+                    <th>涨跌幅</th>
+                    <th>置信度</th>
+                    <th>创建时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prediction in predictions %}
+                <tr class="history-row" data-prediction-id="{{ prediction.id }}">
+                    <td>
+                        <div class="stock-info">
+                            <div class="stock-symbol">{{ prediction.stock_symbol }}</div>
+                            <div class="stock-name">{{ prediction.stock_name }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="model-badge badge-{{ prediction.model_type.replace('-', '') }}">
+                            {{ prediction.model_type }}
+                        </span>
+                    </td>
+                    <td>{{ prediction.prediction_days }}天</td>
+                    <td>¥{{ "%.2f"|format(prediction.current_price) }}</td>
+                    <td>¥{{ "%.2f"|format(prediction.predicted_price) }}</td>
+                    <td class="{% if prediction.is_bullish %}text-success{% else %}text-danger{% endif %}">
+                        {% if prediction.is_bullish %}+{% endif %}{{ "%.2f"|format(prediction.prediction_change_percent) }}%
+                    </td>
+                    <td>
+                        <div class="confidence-display">
+                            <span>{{ "%.1f"|format(prediction.confidence) }}%</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: {{ prediction.confidence }}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ prediction.created_at.split('T')[0] }}</td>
+                    <td>
+                        {% if prediction.status == 'verified' %}
+                            <span class="status-badge status-verified">已验证</span>
+                        {% elif prediction.status == 'expired' %}
+                            <span class="status-badge status-expired">已过期</span>
+                        {% else %}
+                            <span class="status-badge status-active">进行中</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewPredictionDetail('{{ prediction.id }}')">
+                            <i class="fas fa-eye"></i> 查看
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination-container">
+        {% if has_prev %}
+        <button class="btn btn-secondary" onclick="loadPredictionHistory({{ current_page - 1 }})">
+            <i class="fas fa-chevron-left"></i> 上一页
+        </button>
+        {% endif %}
+        
+        <div class="pagination-info">
+            第 {{ current_page }} 页，共 {{ pages }} 页
+        </div>
+        
+        {% if has_next %}
+        <button class="btn btn-secondary" onclick="loadPredictionHistory({{ current_page + 1 }})">
+            下一页 <i class="fas fa-chevron-right"></i>
+        </button>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="no-history">
+        <i class="fas fa-history fa-3x"></i>
+        <p>暂无预测历史记录</p>
+        <a href="{{ url_for('views.index') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> 开始首次预测
+        </a>
+    </div>
+    {% endif %}
+</div>

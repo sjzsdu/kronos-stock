@@ -144,9 +144,39 @@ function showNotification(message, type = 'info') {
 }
 
 // Custom event for model loaded
+let lastModelLoadedTime = 0;
+const modelStatusUpdater = {
+    isUpdating: false,
+    updateModelStatus: function() {
+        if (this.isUpdating) return;
+        
+        const modelStatusElement = document.getElementById('model-status');
+        if (!modelStatusElement) return;
+        
+        this.isUpdating = true;
+        htmx.ajax('GET', modelStatusElement.getAttribute('hx-get'), {
+            target: '#model-status'
+        }).finally(() => {
+            this.isUpdating = false;
+        });
+    }
+};
+
+// Make modelStatusUpdater globally available
+window.modelStatusUpdater = modelStatusUpdater;
+
 document.body.addEventListener('model-loaded', function(event) {
-    console.log('Model loaded event triggered');
-    // Could trigger additional UI updates here
+    const now = Date.now();
+    // Only log once every 5 seconds to avoid spam
+    if (now - lastModelLoadedTime > 5000) {
+        console.log('Model loaded event triggered');
+        lastModelLoadedTime = now;
+    }
+    
+    // Update model status when model is loaded (but avoid infinite loops)
+    if (!modelStatusUpdater.isUpdating) {
+        modelStatusUpdater.updateModelStatus();
+    }
 });
 
 // Progressive enhancement for users without JavaScript

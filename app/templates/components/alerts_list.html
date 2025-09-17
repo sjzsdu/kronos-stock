@@ -1,0 +1,364 @@
+<!-- Alerts List Component -->
+{% if data and data.alerts %}
+<div class="alerts-table-container">
+    <table class="alerts-table">
+        <thead>
+            <tr>
+                <th>股票</th>
+                <th>预警类型</th>
+                <th>目标值</th>
+                <th>当前价格</th>
+                <th>状态</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alert in data.alerts %}
+            <tr class="alert-row" data-alert-id="{{ alert.id }}">
+                <td>
+                    <div class="stock-info">
+                        <span class="stock-symbol">{{ alert.stock_symbol }}</span>
+                        <span class="stock-name">{{ alert.stock_name }}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="alert-type {{ alert.alert_type }}">
+                        {% if alert.alert_type == 'above' %}
+                            价格高于
+                        {% elif alert.alert_type == 'below' %}
+                            价格低于
+                        {% elif alert.alert_type == 'change_percent' %}
+                            涨跌幅
+                        {% endif %}
+                    </span>
+                </td>
+                <td>
+                    {% if alert.alert_type == 'change_percent' %}
+                        {{ alert.target_value }}%
+                    {% else %}
+                        ¥{{ "%.2f"|format(alert.target_value) }}
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="current-price">
+                        ¥{{ "%.2f"|format(alert.current_price) }}
+                        {% if alert.change_percent is defined %}
+                            <span class="change-percent {{ 'positive' if alert.change_percent > 0 else 'negative' }}">
+                                {% if alert.change_percent > 0 %}+{% endif %}{{ "%.1f"|format(alert.change_percent) }}%
+                            </span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <span class="alert-status {{ alert.status }}">
+                        {% if alert.status == 'active' %}
+                            已启用
+                        {% elif alert.status == 'inactive' %}
+                            已禁用
+                        {% elif alert.status == 'triggered' %}
+                            已触发
+                        {% endif %}
+                    </span>
+                </td>
+                <td>
+                    <span class="created-time">{{ alert.created_at }}</span>
+                    {% if alert.triggered_at %}
+                        <small class="triggered-time">触发: {{ alert.triggered_at }}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-outline-primary" 
+                                onclick="toggleAlert({{ alert.id }})"
+                                title="{% if alert.status == 'active' %}禁用{% else %}启用{% endif %}预警">
+                            <i class="fas fa-toggle-{% if alert.status == 'active' %}on{% else %}off{% endif %}"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" 
+                                onclick="editAlert({{ alert.id }})"
+                                title="编辑预警">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" 
+                                onclick="deleteAlert({{ alert.id }})"
+                                title="删除预警">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Update Stats -->
+<script>
+    // Update stats in real-time
+    {% if data.stats %}
+    document.getElementById('totalAlerts').textContent = '{{ data.stats.total }}';
+    document.getElementById('activeAlerts').textContent = '{{ data.stats.active }}';
+    document.getElementById('triggeredAlerts').textContent = '{{ data.stats.triggered }}';
+    document.getElementById('todayAlerts').textContent = '{{ data.stats.today }}';
+    {% endif %}
+</script>
+
+{% else %}
+<div class="no-alerts">
+    <div class="empty-state">
+        <i class="fas fa-bell-slash fa-3x"></i>
+        <h3>暂无预警</h3>
+        <p>您还没有设置任何价格预警</p>
+        <button class="btn btn-primary" onclick="showCreateAlert()">
+            <i class="fas fa-plus"></i> 创建第一个预警
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.alerts-table-container {
+    overflow-x: auto;
+}
+
+.alerts-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.alerts-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.alerts-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.alerts-table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+.stock-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stock-symbol {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
+
+.stock-name {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.alert-type {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.alert-type.above {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.alert-type.below {
+    background: var(--danger-light);
+    color: var(--danger-color);
+}
+
+.alert-type.change_percent {
+    background: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.current-price {
+    display: flex;
+    flex-direction: column;
+}
+
+.change-percent {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.change-percent.positive {
+    color: var(--success-color);
+}
+
+.change-percent.negative {
+    color: var(--danger-color);
+}
+
+.alert-status {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.alert-status.active {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.alert-status.inactive {
+    background: var(--text-light);
+    color: var(--text-secondary);
+}
+
+.alert-status.triggered {
+    background: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.created-time {
+    display: block;
+    font-size: 0.9rem;
+}
+
+.triggered-time {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--warning-color);
+    margin-top: 0.25rem;
+}
+
+.alert-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.alert-actions .btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0.25rem 0.5rem;
+}
+
+.no-alerts {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.empty-state {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.empty-state i {
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .alerts-table {
+        font-size: 0.85rem;
+    }
+    
+    .alerts-table th,
+    .alerts-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .alert-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .alert-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+function toggleAlert(alertId) {
+    // Show loading state
+    const button = event.target.closest('button');
+    const originalContent = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
+    
+    // Simulate API call
+    fetch(`/api/alerts/${alertId}/toggle`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Refresh the alerts list
+            refreshAlerts();
+            showToast('预警状态已更新', 'success');
+        } else {
+            showToast('操作失败，请重试', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Toggle alert error:', error);
+        showToast('操作失败，请重试', 'error');
+    })
+    .finally(() => {
+        button.innerHTML = originalContent;
+        button.disabled = false;
+    });
+}
+
+function editAlert(alertId) {
+    showToast('编辑预警功能开发中...', 'info');
+}
+
+function deleteAlert(alertId) {
+    if (!confirm('确定要删除这个预警吗？')) {
+        return;
+    }
+    
+    fetch(`/api/alerts/${alertId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            refreshAlerts();
+            showToast('预警已删除', 'success');
+        } else {
+            showToast('删除失败，请重试', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Delete alert error:', error);
+        showToast('删除失败，请重试', 'error');
+    });
+}
+</script>

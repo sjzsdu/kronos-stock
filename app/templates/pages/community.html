@@ -1,0 +1,398 @@
+{% extends "layout.html" %}
+
+{% block title %}投资社区 - Kronos 智能投资平台{% endblock %}
+
+{% block page_title %}投资社区{% endblock %}
+{% block page_subtitle %}与投资者交流分享，发现投资机会{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary" onclick="showCreatePostModal()">
+    <i class="fas fa-plus"></i>
+    发布话题
+</button>
+<button class="btn btn-secondary">
+    <i class="fas fa-users"></i>
+    我的关注
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Community Stats -->
+<div class="stats-banner">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">12,489</div>
+            <div class="stat-label">社区成员</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="fas fa-comments"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">5,678</div>
+            <div class="stat-label">今日讨论</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">1,234</div>
+            <div class="stat-label">精华帖子</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon danger">
+            <i class="fas fa-fire"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">89</div>
+            <div class="stat-label">热门话题</div>
+        </div>
+    </div>
+</div>
+
+<!-- Community Content -->
+<div class="community-container">
+    <div class="content-grid">
+        <!-- Main Content -->
+        <div class="content-main">
+            <!-- Filter Tabs -->
+            <div class="filter-tabs mb-4">
+                <button class="filter-tab active">全部</button>
+                <button class="filter-tab">热门</button>
+                <button class="filter-tab">精华</button>
+                <button class="filter-tab">最新</button>
+                <button class="filter-tab">我的关注</button>
+            </div>
+
+            <!-- Posts List -->
+            <div class="posts-list">
+                <!-- Post Item -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="user-info">
+                            <div class="user-avatar bg-primary">张</div>
+                            <div class="user-details">
+                                <div class="username">张三</div>
+                                <div class="post-time">2小时前</div>
+                            </div>
+                        </div>
+                        <div class="post-tags">
+                            <span class="tag tag-success">热门</span>
+                            <span class="tag tag-warning">精华</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>如何看待当前新能源板块的投资机会？</h4>
+                        <p>最近新能源板块波动较大，大家怎么看？我觉得长期来看还是有机会的，特别是光伏和储能方向。有研究过相关公司的朋友可以分享一下看法吗？</p>
+                    </div>
+                    <div class="post-footer">
+                        <div class="post-stats">
+                            <button class="stat-btn">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>234</span>
+                            </button>
+                            <button class="stat-btn">
+                                <i class="fas fa-comment"></i>
+                                <span>56</span>
+                            </button>
+                            <button class="stat-btn">
+                                <i class="fas fa-share"></i>
+                                <span>12</span>
+                            </button>
+                        </div>
+                        <div class="post-actions">
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-star"></i>
+                                关注
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post Item -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="user-info">
+                            <div class="user-avatar bg-success">李</div>
+                            <div class="user-details">
+                                <div class="username">李四</div>
+                                <div class="post-time">4小时前</div>
+                            </div>
+                        </div>
+                        <div class="post-tags">
+                            <span class="tag tag-info">讨论</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>分享一个基于Kronos的量化策略</h4>
+                        <p>我用Kronos的预测结果做了一个简单的量化策略，回测结果显示年化收益率达到了15%，最大回撤控制在8%以内。有兴趣的朋友可以一起探讨优化方案。</p>
+                        <div class="code-block">
+                            <pre><code class="language-python"># 示例策略代码
+def quant_strategy(predictions):
+    if predictions['confidence'] > 80:
+        if predictions['is_bullish']:
+            return 'BUY'
+        else:
+            return 'SELL'
+    return 'HOLD'</code></pre>
+                        </div>
+                    </div>
+                    <div class="post-footer">
+                        <div class="post-stats">
+                            <button class="stat-btn">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>156</span>
+                            </button>
+                            <button class="stat-btn">
+                                <i class="fas fa-comment"></i>
+                                <span>34</span>
+                            </button>
+                            <button class="stat-btn">
+                                <i class="fas fa-share"></i>
+                                <span>8</span>
+                            </button>
+                        </div>
+                        <div class="post-actions">
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-star"></i>
+                                关注
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post Item -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="user-info">
+                            <div class="user-avatar bg-warning">王</div>
+                            <div class="user-details">
+                                <div class="username">王五</div>
+                                <div class="post-time">1天前</div>
+                            </div>
+                        </div>
+                        <div class="post-tags">
+                            <span class="tag tag-danger">分享</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h4>今日预测准确率最高的三只股票</h4>
+                        <p>根据昨天的预测结果，今天有三只股票的走势与预测完全一致，准确率达到了95%以上。分别是：
+                        <ul>
+                            <li>000001 平安银行 (+2.3%)</li>
+                            <li>600519 贵州茅台 (+0.9%)</li>
+                            <li>000858 五粮液 (-0.7%)</li>
+                        </ul>
+                        大家觉得这个准确率怎么样？欢迎在评论区讨论！
+                        </p>
+                    </div>
+                    <div class="post-footer">
+                        <div class="post-stats">
+                            <button class="stat-btn">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>89</span>
+                            </button>
+                            <button class="stat-btn">
+                                <i class="fas fa-comment"></i>
+                                <span>23</span>
+                            </button>
+                            <button class="stat-btn">
+                                <i class="fas fa-share"></i>
+                                <span>5</span>
+                            </button>
+                        </div>
+                        <div class="post-actions">
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-star"></i>
+                                关注
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-primary active">1</button>
+                <button class="btn btn-secondary">2</button>
+                <button class="btn btn-secondary">3</button>
+                <button class="btn btn-secondary">4</button>
+                <button class="btn btn-secondary">5</button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="content-sidebar">
+            <!-- Hot Topics -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-fire text-danger"></i>
+                        热门话题
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="topic-list">
+                        <div class="topic-item">
+                            <div class="topic-title">新能源板块投资策略讨论</div>
+                            <div class="topic-meta">
+                                <span class="text-muted">234讨论</span>
+                            </div>
+                        </div>
+                        <div class="topic-item">
+                            <div class="topic-title">Kronos模型预测准确率分析</div>
+                            <div class="topic-meta">
+                                <span class="text-muted">156讨论</span>
+                            </div>
+                        </div>
+                        <div class="topic-item">
+                            <div class="topic-title">量化交易策略分享</div>
+                            <div class="topic-meta">
+                                <span class="text-muted">89讨论</span>
+                            </div>
+                        </div>
+                        <div class="topic-item">
+                            <div class="topic-title">市场情绪与投资决策</div>
+                            <div class="topic-meta">
+                                <span class="text-muted">76讨论</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Users -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-crown text-warning"></i>
+                        活跃用户
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="user-list">
+                        <div class="user-item">
+                            <div class="user-avatar bg-primary">张</div>
+                            <div class="user-info">
+                                <div class="username">张三</div>
+                                <div class="user-stats">
+                                    <span class="text-muted">1246帖子</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-item">
+                            <div class="user-avatar bg-success">李</div>
+                            <div class="user-info">
+                                <div class="username">李四</div>
+                                <div class="user-stats">
+                                    <span class="text-muted">892帖子</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-item">
+                            <div class="user-avatar bg-warning">王</div>
+                            <div class="user-info">
+                                <div class="username">王五</div>
+                                <div class="user-stats">
+                                    <span class="text-muted">654帖子</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Community Rules -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-info-circle text-info"></i>
+                        社区规则
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <ul class="rules-list">
+                        <li>请保持友善，尊重他人观点</li>
+                        <li>禁止发布任何非法内容</li>
+                        <li>鼓励分享有价值的投资见解</li>
+                        <li>请勿发布广告或推广信息</li>
+                        <li>遵守相关法律法规</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Post Modal -->
+<div class="modal" id="createPostModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">发布新话题</h5>
+                <button type="button" class="close" onclick="hideCreatePostModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>标题</label>
+                        <input type="text" class="form-control" placeholder="请输入话题标题">
+                    </div>
+                    <div class="form-group">
+                        <label>内容</label>
+                        <textarea class="form-control" rows="6" placeholder="请输入话题内容"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>标签</label>
+                        <select class="form-control">
+                            <option>讨论</option>
+                            <option>分享</option>
+                            <option>提问</option>
+                            <option>精华</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCreatePostModal()">取消</button>
+                <button type="button" class="btn btn-primary">发布</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showCreatePostModal() {
+    document.getElementById('createPostModal').style.display = 'block';
+}
+
+function hideCreatePostModal() {
+    document.getElementById('createPostModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('createPostModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

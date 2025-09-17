@@ -1,0 +1,539 @@
+{% extends "layout.html" %}
+
+{% block title %}投资组合 - Kronos 智能投资平台{% endblock %}
+
+{% block head %}
+<!-- Chart.js for portfolio charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+{% endblock %}
+
+{% block page_title %}我的投资组合{% endblock %}
+{% block page_subtitle %}管理您的股票投资组合，跟踪收益和风险{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary" onclick="showAddStockModal()">
+    <i class="fas fa-plus"></i>
+    添加股票
+</button>
+<button class="btn btn-secondary">
+    <i class="fas fa-download"></i>
+    导出报表
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Portfolio Stats -->
+<div class="stats-banner">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">¥125,680</div>
+            <div class="stat-label">总资产</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="fas fa-arrow-up"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">+12,450</div>
+            <div class="stat-label">总收益</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="fas fa-percent"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">11.2%</div>
+            <div class="stat-label">总收益率</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon danger">
+            <i class="fas fa-chart-pie"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">8</div>
+            <div class="stat-label">持股数量</div>
+        </div>
+    </div>
+</div>
+
+<!-- Portfolio Content -->
+<div class="portfolio-container">
+    <div class="content-grid">
+        <!-- Main Content -->
+        <div class="content-main">
+            <!-- Portfolio Chart -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line text-primary"></i>
+                        投资组合表现
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="portfolioChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Holdings Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-list text-success"></i>
+                        持仓明细
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="holdings-table-container">
+                        <table class="holdings-table">
+                            <thead>
+                                <tr>
+                                    <th>股票代码</th>
+                                    <th>股票名称</th>
+                                    <th>持仓数量</th>
+                                    <th>成本价</th>
+                                    <th>当前价</th>
+                                    <th>市值</th>
+                                    <th>盈亏</th>
+                                    <th>收益率</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>000001</td>
+                                    <td>平安银行</td>
+                                    <td>1,000</td>
+                                    <td>¥11.50</td>
+                                    <td>¥12.75</td>
+                                    <td>¥12,750</td>
+                                    <td class="text-success">+¥1,250</td>
+                                    <td class="text-success">+10.87%</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="showTradeModal('000001')">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            交易
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>600519</td>
+                                    <td>贵州茅台</td>
+                                    <td>50</td>
+                                    <td>¥1,650.00</td>
+                                    <td>¥1,695.50</td>
+                                    <td>¥84,775</td>
+                                    <td class="text-success">+¥2,275</td>
+                                    <td class="text-success">+2.76%</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="showTradeModal('600519')">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            交易
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>000002</td>
+                                    <td>万科A</td>
+                                    <td>800</td>
+                                    <td>¥19.80</td>
+                                    <td>¥18.90</td>
+                                    <td>¥15,120</td>
+                                    <td class="text-danger">-¥720</td>
+                                    <td class="text-danger">-4.55%</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="showTradeModal('000002')">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            交易
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>600036</td>
+                                    <td>招商银行</td>
+                                    <td>500</td>
+                                    <td>¥34.20</td>
+                                    <td>¥35.20</td>
+                                    <td>¥17,600</td>
+                                    <td class="text-success">+¥500</td>
+                                    <td class="text-success">+2.92%</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="showTradeModal('600036')">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            交易
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>000858</td>
+                                    <td>五粮液</td>
+                                    <td>200</td>
+                                    <td>¥132.50</td>
+                                    <td>¥128.45</td>
+                                    <td>¥25,690</td>
+                                    <td class="text-danger">-¥810</td>
+                                    <td class="text-danger">-3.06%</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="showTradeModal('000858')">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            交易
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="content-sidebar">
+            <!-- Portfolio Allocation -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-pie-chart text-warning"></i>
+                        资产配置
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="allocation-chart">
+                        <canvas id="allocationChart" height="200"></canvas>
+                    </div>
+                    <div class="allocation-list">
+                        <div class="allocation-item">
+                            <div class="allocation-info">
+                                <span class="allocation-color" style="background-color: #2563eb;"></span>
+                                <span class="allocation-name">平安银行</span>
+                            </div>
+                            <div class="allocation-value">10.1%</div>
+                        </div>
+                        <div class="allocation-item">
+                            <div class="allocation-info">
+                                <span class="allocation-color" style="background-color: #10b981;"></span>
+                                <span class="allocation-name">贵州茅台</span>
+                            </div>
+                            <div class="allocation-value">67.4%</div>
+                        </div>
+                        <div class="allocation-item">
+                            <div class="allocation-info">
+                                <span class="allocation-color" style="background-color: #f59e0b;"></span>
+                                <span class="allocation-name">万科A</span>
+                            </div>
+                            <div class="allocation-value">12.0%</div>
+                        </div>
+                        <div class="allocation-item">
+                            <div class="allocation-info">
+                                <span class="allocation-color" style="background-color: #ef4444;"></span>
+                                <span class="allocation-name">招商银行</span>
+                            </div>
+                            <div class="allocation-value">14.0%</div>
+                        </div>
+                        <div class="allocation-item">
+                            <div class="allocation-info">
+                                <span class="allocation-color" style="background-color: #8b5cf6;"></span>
+                                <span class="allocation-name">五粮液</span>
+                            </div>
+                            <div class="allocation-value">20.4%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Industry Distribution -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-industry text-primary"></i>
+                        行业分布
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="industry-chart">
+                        <canvas id="industryChart" height="200"></canvas>
+                    </div>
+                    <div class="industry-list">
+                        <div class="industry-item">
+                            <div class="industry-info">
+                                <span class="industry-color" style="background-color: #2563eb;"></span>
+                                <span class="industry-name">银行业</span>
+                            </div>
+                            <div class="industry-value">24.1%</div>
+                        </div>
+                        <div class="industry-item">
+                            <div class="industry-info">
+                                <span class="industry-color" style="background-color: #10b981;"></span>
+                                <span class="industry-name">食品饮料</span>
+                            </div>
+                            <div class="industry-value">87.8%</div>
+                        </div>
+                        <div class="industry-item">
+                            <div class="industry-info">
+                                <span class="industry-color" style="background-color: #f59e0b;"></span>
+                                <span class="industry-name">房地产</span>
+                            </div>
+                            <div class="industry-value">12.0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Summary -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-tachometer-alt text-success"></i>
+                        表现摘要
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="performance-summary">
+                        <div class="performance-item">
+                            <div class="performance-label">最佳表现</div>
+                            <div class="performance-value text-success">平安银行 +10.87%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">最差表现</div>
+                            <div class="performance-value text-danger">五粮液 -3.06%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">日收益率</div>
+                            <div class="performance-value text-success">+0.45%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">周收益率</div>
+                            <div class="performance-value text-success">+2.34%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">月收益率</div>
+                            <div class="performance-value text-success">+5.67%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Stock Modal -->
+<div class="modal" id="addStockModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加股票到投资组合</h5>
+                <button type="button" class="close" onclick="hideAddStockModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>股票代码</label>
+                        <input type="text" class="form-control" placeholder="输入股票代码，如 000001">
+                    </div>
+                    <div class="form-group">
+                        <label>股票名称</label>
+                        <input type="text" class="form-control" placeholder="输入股票名称">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>持仓数量</label>
+                            <input type="number" class="form-control" placeholder="输入持仓数量">
+                        </div>
+                        <div class="form-group">
+                            <label>成本价</label>
+                            <input type="number" class="form-control" placeholder="输入成本价">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>买入日期</label>
+                        <input type="date" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideAddStockModal()">取消</button>
+                <button type="button" class="btn btn-primary">添加</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trade Modal -->
+<div class="modal" id="tradeModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">交易操作</h5>
+                <button type="button" class="close" onclick="hideTradeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>股票代码</label>
+                        <input type="text" class="form-control" id="tradeStockCode" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>交易类型</label>
+                        <select class="form-control">
+                            <option>买入</option>
+                            <option>卖出</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>交易数量</label>
+                            <input type="number" class="form-control" placeholder="输入交易数量">
+                        </div>
+                        <div class="form-group">
+                            <label>交易价格</label>
+                            <input type="number" class="form-control" placeholder="输入交易价格">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>交易日期</label>
+                        <input type="date" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideTradeModal()">取消</button>
+                <button type="button" class="btn btn-primary">执行交易</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showAddStockModal() {
+    document.getElementById('addStockModal').style.display = 'block';
+}
+
+function hideAddStockModal() {
+    document.getElementById('addStockModal').style.display = 'none';
+}
+
+function showTradeModal(stockCode) {
+    document.getElementById('tradeStockCode').value = stockCode;
+    document.getElementById('tradeModal').style.display = 'block';
+}
+
+function hideTradeModal() {
+    document.getElementById('tradeModal').style.display = 'none';
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const addStockModal = document.getElementById('addStockModal');
+    const tradeModal = document.getElementById('tradeModal');
+    
+    if (event.target == addStockModal) {
+        addStockModal.style.display = 'none';
+    }
+    
+    if (event.target == tradeModal) {
+        tradeModal.style.display = 'none';
+    }
+}
+
+// Initialize charts (mock data)
+document.addEventListener('DOMContentLoaded', function() {
+    // Portfolio performance chart
+    const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
+    const portfolioChart = new Chart(portfolioCtx, {
+        type: 'line',
+        data: {
+            labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月'],
+            datasets: [{
+                label: '投资组合价值',
+                data: [110000, 112000, 115000, 118000, 120000, 122000, 123000, 124000, 125000, 125680],
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+
+    // Allocation chart
+    const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+    const allocationChart = new Chart(allocationCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['平安银行', '贵州茅台', '万科A', '招商银行', '五粮液'],
+            datasets: [{
+                data: [10.1, 67.4, 12.0, 14.0, 20.4],
+                backgroundColor: [
+                    '#2563eb',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#8b5cf6'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Industry chart
+    const industryCtx = document.getElementById('industryChart').getContext('2d');
+    const industryChart = new Chart(industryCtx, {
+        type: 'pie',
+        data: {
+            labels: ['银行业', '食品饮料', '房地产'],
+            datasets: [{
+                data: [24.1, 87.8, 12.0],
+                backgroundColor: [
+                    '#2563eb',
+                    '#10b981',
+                    '#f59e0b'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

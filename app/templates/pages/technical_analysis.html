@@ -1,0 +1,529 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<!-- Chart.js for technical analysis charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+{% endblock %}
+
+{% block page_title %}技术分析{% endblock %}
+{% block page_subtitle %}专业的股票技术分析工具和指标{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <!-- Technical Analysis Tools -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-tools"></i> 分析工具</h4>
+        </div>
+        <div class="card-content">
+            <div class="analysis-tools">
+                <div class="tool-category">
+                    <h5>图表工具</h5>
+                    <div class="tool-buttons">
+                        <button class="btn btn-outline-primary" onclick="setChartTool('line')">
+                            <i class="fas fa-chart-line"></i> K线图
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="setChartTool('candlestick')">
+                            <i class="fas fa-chart-bar"></i> 蜡烛图
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="setChartTool('area')">
+                            <i class="fas fa-chart-area"></i> 面积图
+                        </button>
+                    </div>
+                </div>
+                <div class="tool-category">
+                    <h5>技术指标</h5>
+                    <div class="tool-buttons">
+                        <button class="btn btn-outline-success" onclick="addIndicator('ma')">
+                            <i class="fas fa-wave-square"></i> MA
+                        </button>
+                        <button class="btn btn-outline-success" onclick="addIndicator('ema')">
+                            <i class="fas fa-wave-square"></i> EMA
+                        </button>
+                        <button class="btn btn-outline-success" onclick="addIndicator('rsi')">
+                            <i class="fas fa-chart-line"></i> RSI
+                        </button>
+                        <button class="btn btn-outline-success" onclick="addIndicator('macd')">
+                            <i class="fas fa-chart-line"></i> MACD
+                        </button>
+                        <button class="btn btn-outline-success" onclick="addIndicator('bollinger')">
+                            <i class="fas fa-chart-line"></i> 布林带
+                        </button>
+                    </div>
+                </div>
+                <div class="tool-category">
+                    <h5>绘图工具</h5>
+                    <div class="tool-buttons">
+                        <button class="btn btn-outline-warning" onclick="setDrawingTool('line')">
+                            <i class="fas fa-minus"></i> 直线
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="setDrawingTool('trendline')">
+                            <i class="fas fa-chart-line"></i> 趋势线
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="setDrawingTool('fibonacci')">
+                            <i class="fas fa-percentage"></i> 斐波那契
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="setDrawingTool('support')">
+                            <i class="fas fa-grip-lines"></i> 支撑位
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="setDrawingTool('resistance')">
+                            <i class="fas fa-grip-lines"></i> 阻力位
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Selection -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-search"></i> 股票选择</h4>
+        </div>
+        <div class="card-content">
+            <div class="stock-selection">
+                <div class="form-group">
+                    <label>股票代码</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="stockSymbol" placeholder="输入股票代码，如：000001" oninput="searchStocks(this.value)">
+                        <button class="btn btn-primary" onclick="loadStockData()">
+                            <i class="fas fa-chart-line"></i> 加载数据
+                        </button>
+                    </div>
+                    <div class="suggestions" id="stockSuggestions"></div>
+                </div>
+                <div class="form-group">
+                    <label>时间范围</label>
+                    <select class="form-control" id="timeRange" onchange="changeTimeRange(this.value)">
+                        <option value="1d">1天</option>
+                        <option value="5d">5天</option>
+                        <option value="1mo">1个月</option>
+                        <option value="3mo" selected>3个月</option>
+                        <option value="6mo">6个月</option>
+                        <option value="1y">1年</option>
+                        <option value="2y">2年</option>
+                        <option value="5y">5年</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Container -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-chart-bar"></i> 技术分析图表</h4>
+            <div class="chart-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="zoomIn()">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-primary" onclick="zoomOut()">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-primary" onclick="resetZoom()">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-content">
+            <div class="chart-container">
+                <canvas id="technicalChart"></canvas>
+                <div id="chart-loading" class="htmx-indicator">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 加载图表数据...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Indicators Panel -->
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fas fa-calculator"></i> 技术指标</h4>
+        </div>
+        <div class="card-content">
+            <div class="indicators-grid">
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <h5>移动平均线 (MA)</h5>
+                    </div>
+                    <div class="indicator-content">
+                        <div class="indicator-value">
+                            <span class="label">5日:</span>
+                            <span class="value text-success">12.45</span>
+                        </div>
+                        <div class="indicator-value">
+                            <span class="label">10日:</span>
+                            <span class="value text-warning">12.38</span>
+                        </div>
+                        <div class="indicator-value">
+                            <span class="label">20日:</span>
+                            <span class="value text-danger">12.25</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <h5>相对强弱指数 (RSI)</h5>
+                    </div>
+                    <div class="indicator-content">
+                        <div class="indicator-value">
+                            <span class="label">当前值:</span>
+                            <span class="value text-warning">62.3</span>
+                        </div>
+                        <div class="indicator-status">
+                            <span class="status-neutral">中性</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <h5>MACD</h5>
+                    </div>
+                    <div class="indicator-content">
+                        <div class="indicator-value">
+                            <span class="label">MACD:</span>
+                            <span class="value text-success">0.45</span>
+                        </div>
+                        <div class="indicator-value">
+                            <span class="label">信号线:</span>
+                            <span class="value text-danger">0.32</span>
+                        </div>
+                        <div class="indicator-status">
+                            <span class="status-bullish">看涨</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="indicator-card">
+                    <div class="indicator-header">
+                        <h5>布林带</h5>
+                    </div>
+                    <div class="indicator-content">
+                        <div class="indicator-value">
+                            <span class="label">上轨:</span>
+                            <span class="value">12.85</span>
+                        </div>
+                        <div class="indicator-value">
+                            <span class="label">中轨:</span>
+                            <span class="value">12.45</span>
+                        </div>
+                        <div class="indicator-value">
+                            <span class="label">下轨:</span>
+                            <span class="value">12.05</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.analysis-tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.tool-category h5 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.tool-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tool-buttons .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stock-selection {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+@media (max-width: 768px) {
+    .stock-selection {
+        grid-template-columns: 1fr;
+    }
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.input-group .form-control {
+    flex: 1;
+}
+
+.suggestions {
+    position: absolute;
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.suggestion-item:hover {
+    background: var(--bg-secondary);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.chart-container {
+    position: relative;
+    height: 500px;
+    width: 100%;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chart-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.indicators-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.indicator-card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.indicator-header h5 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+}
+
+.indicator-value {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.indicator-value .label {
+    color: var(--text-secondary);
+}
+
+.indicator-value .value {
+    font-weight: 600;
+}
+
+.indicator-status {
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.status-bullish {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.status-bearish {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.status-neutral {
+    color: var(--warning-color);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 300px;
+    }
+    
+    .analysis-tools {
+        grid-template-columns: 1fr;
+    }
+    
+    .tool-buttons {
+        flex-direction: column;
+    }
+    
+    .tool-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+// Initialize chart when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeChart();
+});
+
+function initializeChart() {
+    const ctx = document.getElementById('technicalChart').getContext('2d');
+    
+    // Mock data for the chart
+    const labels = [];
+    const prices = [];
+    const volumes = [];
+    
+    // Generate mock data for 30 days
+    const today = new Date();
+    for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        labels.push(date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }));
+        
+        // Generate mock price data
+        const basePrice = 12.00;
+        const volatility = 0.5;
+        const price = basePrice + (Math.random() - 0.5) * volatility;
+        prices.push(price);
+        
+        // Generate mock volume data
+        const volume = Math.floor(Math.random() * 1000000) + 500000;
+        volumes.push(volume);
+    }
+    
+    // Create the chart
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '股价',
+                data: prices,
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `价格: ¥${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function searchStocks(query) {
+    if (query.length >= 2) {
+        // 模拟API调用获取股票建议
+        // 实际应该调用 /api/stocks/search?q=...
+        const suggestions = document.getElementById('stockSuggestions');
+        suggestions.innerHTML = `
+            <div class="suggestion-item" onclick="selectStock('000001', '平安银行')">000001 平安银行</div>
+            <div class="suggestion-item" onclick="selectStock('000002', '万科A')">000002 万科A</div>
+            <div class="suggestion-item" onclick="selectStock('600519', '贵州茅台')">600519 贵州茅台</div>
+        `;
+        suggestions.style.display = 'block';
+    } else {
+        document.getElementById('stockSuggestions').style.display = 'none';
+    }
+}
+
+function selectStock(symbol, name) {
+    document.getElementById('stockSymbol').value = symbol;
+    document.getElementById('stockSuggestions').style.display = 'none';
+    loadStockData();
+}
+
+function loadStockData() {
+    const symbol = document.getElementById('stockSymbol').value;
+    if (!symbol) {
+        showToast('请输入股票代码', 'warning');
+        return;
+    }
+    
+    document.getElementById('chart-loading').style.display = 'flex';
+    
+    // 模拟加载数据
+    setTimeout(() => {
+        document.getElementById('chart-loading').style.display = 'none';
+        showToast(`已加载 ${symbol} 的数据`, 'success');
+    }, 1000);
+}
+
+function changeTimeRange(range) {
+    showToast(`时间范围已切换到 ${range}`, 'info');
+}
+
+function setChartTool(tool) {
+    showToast(`已选择图表工具: ${tool}`, 'info');
+}
+
+function addIndicator(indicator) {
+    showToast(`已添加技术指标: ${indicator}`, 'success');
+}
+
+function setDrawingTool(tool) {
+    showToast(`已选择绘图工具: ${tool}`, 'info');
+}
+
+function zoomIn() {
+    showToast('图表放大', 'info');
+}
+
+function zoomOut() {
+    showToast('图表缩小', 'info');
+}
+
+function resetZoom() {
+    showToast('图表重置', 'info');
+}
+</script>
+{% endblock %}

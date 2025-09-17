@@ -7,3 +7,7 @@ api_bp = Blueprint('api', __name__)
 from . import model
 from . import stock
 from . import prediction
+from . import mock_routes
+from . import market_news
+from . import notifications
+from . import alerts

@@ -1,0 +1,563 @@
+{% extends "layout.html" %}
+
+{% block page_title %}我的关注{% endblock %}
+{% block page_subtitle %}管理您关注的股票和实时监控{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <!-- Watchlist Stats -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="totalWatchlist">0</div>
+                <div class="stat-label">关注股票</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value text-success" id="upCount">0</div>
+                <div class="stat-label">上涨股票</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon danger">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value text-danger" id="downCount">0</div>
+                <div class="stat-label">下跌股票</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="alertCount">0</div>
+                <div class="stat-label">价格预警</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watchlist Actions -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-bolt"></i> 快速操作</h4>
+        </div>
+        <div class="card-content">
+            <div class="quick-actions">
+                <button class="btn btn-primary" onclick="showAddToWatchlist()">
+                    <i class="fas fa-plus"></i> 添加关注
+                </button>
+                <button class="btn btn-secondary" onclick="refreshWatchlist()">
+                    <i class="fas fa-sync"></i> 刷新数据
+                </button>
+                <button class="btn btn-success" onclick="exportWatchlist()">
+                    <i class="fas fa-download"></i> 导出列表
+                </button>
+                <button class="btn btn-warning" onclick="setAlerts()">
+                    <i class="fas fa-bell"></i> 设置预警
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watchlist Content -->
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fas fa-list"></i> 关注列表</h4>
+            <div class="card-actions">
+                <div class="search-box">
+                    <input type="text" class="form-control" placeholder="搜索股票..." id="watchlistSearch">
+                    <i class="fas fa-search"></i>
+                </div>
+                <select class="form-control" id="sortWatchlist">
+                    <option value="symbol">按代码排序</option>
+                    <option value="name">按名称排序</option>
+                    <option value="price">按价格排序</option>
+                    <option value="change">按涨跌幅排序</option>
+                </select>
+            </div>
+        </div>
+        <div class="card-content">
+            <div id="watchlist-content" 
+                 hx-get="/api/watchlist" 
+                 hx-trigger="load"
+                 hx-indicator="#watchlist-loading">
+                <div id="watchlist-loading" class="htmx-indicator">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 加载中...
+                    </div>
+                </div>
+                <div class="loading-placeholder">
+                    <div class="skeleton-table"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add to Watchlist Modal -->
+<div class="modal" id="addToWatchlistModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-plus-circle"></i> 添加到关注列表</h3>
+            <button class="modal-close" onclick="closeModal('addToWatchlistModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>股票代码</label>
+                <input type="text" class="form-control" id="stockSymbol" placeholder="输入股票代码，如：000001">
+                <div class="suggestions" id="stockSuggestions"></div>
+            </div>
+            <div class="form-group">
+                <label>预警价格</label>
+                <div class="price-alerts">
+                    <div class="alert-setting">
+                        <input type="number" class="form-control" placeholder="上涨预警价格" id="alertHigh">
+                        <span class="alert-desc">当股价超过此价格时提醒</span>
+                    </div>
+                    <div class="alert-setting">
+                        <input type="number" class="form-control" placeholder="下跌预警价格" id="alertLow">
+                        <span class="alert-desc">当股价低于此价格时提醒</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('addToWatchlistModal')">取消</button>
+            <button class="btn btn-primary" onclick="addToWatchlist()">添加</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.2rem;
+}
+
+.stat-icon.primary {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.stat-icon.success {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.stat-icon.danger {
+    background: var(--danger-light);
+    color: var(--danger-color);
+}
+
+.stat-icon.warning {
+    background: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .quick-actions .btn {
+        width: 100%;
+    }
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .card-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .card-actions .search-box,
+    .card-actions select {
+        width: 100%;
+    }
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box .fas.fa-search {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.search-box input {
+    padding-left: 2.5rem;
+}
+
+.watchlist-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.watchlist-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.watchlist-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.watchlist-table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+.stock-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stock-symbol {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.stock-name {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.price-change {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.current-price {
+    font-weight: 600;
+}
+
+.change-percent {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.watchlist-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.skeleton-table {
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-primary) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.price-alerts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.alert-setting .alert-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.suggestions {
+    position: absolute;
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.suggestion-item:hover {
+    background: var(--bg-secondary);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .price-alerts {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+</style>
+
+<script>
+function showAddToWatchlist() {
+    document.getElementById('addToWatchlistModal').classList.add('show');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('show');
+}
+
+function addToWatchlist() {
+    const symbol = document.getElementById('stockSymbol').value;
+    const alertHigh = document.getElementById('alertHigh').value;
+    const alertLow = document.getElementById('alertLow').value;
+    
+    if (!symbol) {
+        alert('请输入股票代码');
+        return;
+    }
+    
+    // 这里应该调用API添加到关注列表
+    // 暂时使用localStorage模拟
+    let watchlist = JSON.parse(localStorage.getItem('stockWatchlist') || '[]');
+    
+    if (!watchlist.find(item => item.symbol === symbol)) {
+        watchlist.push({
+            symbol: symbol,
+            name: symbol, // 实际应该从API获取
+            alertHigh: alertHigh || null,
+            alertLow: alertLow || null
+        });
+        
+        localStorage.setItem('stockWatchlist', JSON.stringify(watchlist));
+        closeModal('addToWatchlistModal');
+        refreshWatchlist();
+        showToast('已添加到关注列表', 'success');
+    } else {
+        showToast('该股票已在关注列表中', 'info');
+    }
+}
+
+function refreshWatchlist() {
+    htmx.ajax('GET', '/api/watchlist', '#watchlist-content');
+}
+
+function exportWatchlist() {
+    showToast('导出功能开发中...', 'info');
+}
+
+function setAlerts() {
+    showToast('预警设置功能开发中...', 'info');
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
+}
+
+// Search functionality
+document.getElementById('watchlistSearch').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    // 这里应该过滤显示的股票
+    console.log('搜索:', searchTerm);
+});
+
+// Stock symbol search suggestions
+document.getElementById('stockSymbol').addEventListener('input', function(e) {
+    const query = e.target.value;
+    if (query.length >= 2) {
+        // 模拟API调用获取股票建议
+        // 实际应该调用 /api/stocks/search?q=...
+        const suggestions = document.getElementById('stockSuggestions');
+        suggestions.innerHTML = `
+            <div class="suggestion-item" onclick="selectStock('000001', '平安银行')">000001 平安银行</div>
+            <div class="suggestion-item" onclick="selectStock('000002', '万科A')">000002 万科A</div>
+            <div class="suggestion-item" onclick="selectStock('600519', '贵州茅台')">600519 贵州茅台</div>
+        `;
+        suggestions.style.display = 'block';
+    } else {
+        document.getElementById('stockSuggestions').style.display = 'none';
+    }
+});
+
+function selectStock(symbol, name) {
+    document.getElementById('stockSymbol').value = symbol;
+    document.getElementById('stockSuggestions').style.display = 'none';
+}
+
+// Sort functionality
+document.getElementById('sortWatchlist').addEventListener('change', function(e) {
+    const sortBy = e.target.value;
+    // 这里应该重新排序股票列表
+    console.log('排序方式:', sortBy);
+});
+</script>
+{% endblock %}

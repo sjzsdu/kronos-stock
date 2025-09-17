@@ -22,7 +22,7 @@
         <h2>🤖 模型状态</h2>
         <div id="model-status" 
              hx-get="{{ url_for('views.model_status_component') }}"
-             hx-trigger="load, model-loaded from:body"
+             hx-trigger="load"
              hx-on:htmx:responseError="handleComponentError">
             <div class="loading">正在检查模型状态...</div>
         </div>
@@ -106,11 +106,18 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Dashboard loaded with HTMX architecture');
     
     // Auto-refresh model status every 30 seconds
+document.addEventListener('DOMContentLoaded', function() {
     setInterval(function() {
-        htmx.ajax('GET', '{{ url_for("views.model_status_component") }}', {
-            target: '#model-status'
-        });
+        // Use the global model status updater to avoid infinite loops
+        if (window.modelStatusUpdater) {
+            window.modelStatusUpdater.updateModelStatus();
+        } else {
+            htmx.ajax('GET', '{{ url_for("views.model_status_component") }}', {
+                target: '#model-status'
+            });
+        }
     }, 30000);
+});
 });
 
 // Enhanced HTMX event handlers for dashboard
@@ -128,11 +135,6 @@ document.body.addEventListener('htmx:afterRequest', function(event) {
         if (event.detail.successful) {
             showNotification('预测完成！查看结果和图表', 'success');
         }
-    }
-    
-    if (event.detail.target.id === 'model-status') {
-        // Trigger model-loaded event for other components
-        document.body.dispatchEvent(new CustomEvent('model-loaded'));
     }
 });
 

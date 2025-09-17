@@ -221,12 +221,52 @@ class LayoutManager {
     }
     
     checkNotifications() {
-        // Implementation for checking notifications
-        // This would typically make an HTMX request to get new notifications
-        htmx.ajax('GET', '/api/notifications/check', {
-            target: '.notification-icon',
-            swap: 'none'
-        });
+        console.log('Checking notifications...');
+        // Check for new notifications
+        fetch('/api/notifications/check')
+            .then(response => {
+                console.log('Notification check response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Notification check data:', data);
+                if (data.success) {
+                    this.updateNotificationIcon(data.data.unread_count);
+                    
+                    // Show new notifications if any
+                    if (data.data.unread_count > 0) {
+                        const highPriorityNotifications = data.data.notifications.filter(
+                            n => !n.read && n.priority === 'high'
+                        );
+                        
+                        // Show toast for high priority notifications
+                        highPriorityNotifications.forEach(notification => {
+                            this.showNotification(notification.message, 'warning', 8000);
+                        });
+                    }
+                } else {
+                    console.error('Notification check failed:', data.error);
+                }
+            })
+            .catch(error => {
+                console.warn('Failed to check notifications:', error);
+            });
+    }
+    
+    updateNotificationIcon(unreadCount) {
+        const notificationIcon = document.querySelector('.notification-icon');
+        const notificationBadge = document.querySelector('.notification-badge');
+        
+        if (notificationIcon && notificationBadge) {
+            if (unreadCount > 0) {
+                notificationBadge.style.display = 'flex';
+                notificationBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                notificationIcon.classList.add('has-notifications');
+            } else {
+                notificationBadge.style.display = 'none';
+                notificationIcon.classList.remove('has-notifications');
+            }
+        }
     }
     
     showNotification(message, type = 'info', duration = 5000) {
@@ -549,3 +589,74 @@ window.utils = {
         };
     }
 };
+
+// Toast notification system
+function showToast(message, type = 'info', duration = 3000) {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    // Toast content
+    toast.innerHTML = `
+        <div class="toast-content">
+            <div class="toast-icon">
+                ${getToastIcon(type)}
+            </div>
+            <div class="toast-message">${message}</div>
+            <button class="toast-close" onclick="closeToast(this.parentElement.parentElement)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    // Add to container
+    toastContainer.appendChild(toast);
+    
+    // Show with animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+    
+    // Auto remove
+    setTimeout(() => {
+        closeToast(toast);
+    }, duration);
+    
+    return toast;
+}
+
+function closeToast(toast) {
+    if (toast && toast.parentElement) {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.parentElement.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+function getToastIcon(type) {
+    const icons = {
+        success: '<i class="fas fa-check-circle"></i>',
+        error: '<i class="fas fa-exclamation-circle"></i>',
+        warning: '<i class="fas fa-exclamation-triangle"></i>',
+        info: '<i class="fas fa-info-circle"></i>'
+    };
+    return icons[type] || icons.info;
+}
+
+// Initialize layout manager when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    window.layoutManager = new LayoutManager();
+    console.log('LayoutManager initialized');
+});

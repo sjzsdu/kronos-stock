@@ -1,0 +1,441 @@
+{% extends "layout.html" %}
+
+{% block title %}股票搜索 - Kronos 智能投资平台{% endblock %}
+
+{% block page_title %}股票搜索{% endblock %}
+{% block page_subtitle %}搜索并分析股票信息{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary" onclick="showAdvancedSearch()">
+    <i class="fas fa-sliders-h"></i>
+    高级筛选
+</button>
+<button class="btn btn-secondary">
+    <i class="fas fa-history"></i>
+    搜索历史
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Search Section -->
+<div class="search-container">
+    <div class="search-form-card">
+        <form class="search-form">
+            <div class="form-row">
+                <div class="form-group flex-1">
+                    <label for="search_query">搜索股票</label>
+                    <div class="input-group">
+                        <input type="text" 
+                               id="search_query" 
+                               class="form-control" 
+                               placeholder="输入股票代码或名称，如 000001 或 平安银行"
+                               autocomplete="off">
+                        <button type="button" class="btn-input-addon">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Search Results -->
+<div class="search-results-container">
+    <div class="content-grid">
+        <!-- Main Content -->
+        <div class="content-main">
+            <!-- Filter Tabs -->
+            <div class="filter-tabs mb-4">
+                <button class="filter-tab active">全部</button>
+                <button class="filter-tab">A股</button>
+                <button class="filter-tab">港股</button>
+                <button class="filter-tab">美股</button>
+                <button class="filter-tab">热门</button>
+            </div>
+
+            <!-- Stocks Table -->
+            <div class="stocks-table-container">
+                <table class="stocks-table">
+                    <thead>
+                        <tr>
+                            <th>股票代码</th>
+                            <th>股票名称</th>
+                            <th>当前价格</th>
+                            <th>涨跌幅</th>
+                            <th>成交量</th>
+                            <th>市值</th>
+                            <th>行业</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>000001</td>
+                            <td>平安银行</td>
+                            <td>¥12.75</td>
+                            <td class="text-success">+2.34%</td>
+                            <td>125.0万手</td>
+                            <td>2465.8亿</td>
+                            <td>银行业</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="predictStock('000001')">
+                                    <i class="fas fa-chart-line"></i>
+                                    预测
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>000002</td>
+                            <td>万科A</td>
+                            <td>¥18.90</td>
+                            <td class="text-danger">-1.56%</td>
+                            <td>98.0万手</td>
+                            <td>2089.4亿</td>
+                            <td>房地产</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="predictStock('000002')">
+                                    <i class="fas fa-chart-line"></i>
+                                    预测
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>600519</td>
+                            <td>贵州茅台</td>
+                            <td>¥1695.50</td>
+                            <td class="text-success">+0.89%</td>
+                            <td>4.5万手</td>
+                            <td>2.13万亿</td>
+                            <td>食品饮料</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="predictStock('600519')">
+                                    <i class="fas fa-chart-line"></i>
+                                    预测
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>600036</td>
+                            <td>招商银行</td>
+                            <td>¥35.20</td>
+                            <td class="text-success">+1.78%</td>
+                            <td>89.0万手</td>
+                            <td>9876.5亿</td>
+                            <td>银行业</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="predictStock('600036')">
+                                    <i class="fas fa-chart-line"></i>
+                                    预测
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>000858</td>
+                            <td>五粮液</td>
+                            <td>¥128.45</td>
+                            <td class="text-danger">-0.67%</td>
+                            <td>32.0万手</td>
+                            <td>4987.6亿</td>
+                            <td>食品饮料</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="predictStock('000858')">
+                                    <i class="fas fa-chart-line"></i>
+                                    预测
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>600031</td>
+                            <td>三一重工</td>
+                            <td>¥18.76</td>
+                            <td class="text-success">+3.45%</td>
+                            <td>75.0万手</td>
+                            <td>1543.2亿</td>
+                            <td>机械设备</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="predictStock('600031')">
+                                    <i class="fas fa-chart-line"></i>
+                                    预测
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>000063</td>
+                            <td>中兴通讯</td>
+                            <td>¥32.18</td>
+                            <td class="text-danger">-2.11%</td>
+                            <td>110.0万手</td>
+                            <td>1876.3亿</td>
+                            <td>通信设备</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="predictStock('000063')">
+                                    <i class="fas fa-chart-line"></i>
+                                    预测
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>002415</td>
+                            <td>海康威视</td>
+                            <td>¥45.67</td>
+                            <td class="text-success">+1.23%</td>
+                            <td>23.1万手</td>
+                            <td>4231.8亿</td>
+                            <td>电子设备</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="predictStock('002415')">
+                                    <i class="fas fa-chart-line"></i>
+                                    预测
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-primary active">1</button>
+                <button class="btn btn-secondary">2</button>
+                <button class="btn btn-secondary">3</button>
+                <button class="btn btn-secondary">4</button>
+                <button class="btn btn-secondary">5</button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="content-sidebar">
+            <!-- Industry Filter -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-filter text-primary"></i>
+                        行业筛选
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="industry-banking" checked>
+                            <label for="industry-banking">银行业 (12)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="industry-real-estate" checked>
+                            <label for="industry-real-estate">房地产 (8)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="industry-food" checked>
+                            <label for="industry-food">食品饮料 (6)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="industry-machinery" checked>
+                            <label for="industry-machinery">机械设备 (15)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="industry-electronics" checked>
+                            <label for="industry-electronics">电子设备 (22)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="industry-telecom" checked>
+                            <label for="industry-telecom">通信设备 (9)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="industry-energy" checked>
+                            <label for="industry-energy">能源 (18)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Range Filter -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-dollar-sign text-success"></i>
+                        价格区间
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="price-0-10" checked>
+                            <label for="price-0-10">0-10元 (25)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="price-10-50" checked>
+                            <label for="price-10-50">10-50元 (48)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="price-50-100" checked>
+                            <label for="price-50-100">50-100元 (12)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="price-100-500" checked>
+                            <label for="price-100-500">100-500元 (8)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="price-500+" checked>
+                            <label for="price-500+">500元以上 (3)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Market Cap Filter -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-coins text-warning"></i>
+                        市值筛选
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="cap-small" checked>
+                            <label for="cap-small">小盘股 (100亿以下) (32)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="cap-medium" checked>
+                            <label for="cap-medium">中盘股 (100-1000亿) (45)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="cap-large" checked>
+                            <label for="cap-large">大盘股 (1000亿以上) (28)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bolt text-danger"></i>
+                        快速操作
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="quick-actions">
+                        <button class="btn btn-primary btn-block">
+                            <i class="fas fa-download"></i>
+                            导出搜索结果
+                        </button>
+                        <button class="btn btn-secondary btn-block">
+                            <i class="fas fa-sync"></i>
+                            刷新数据
+                        </button>
+                        <button class="btn btn-success btn-block">
+                            <i class="fas fa-star"></i>
+                            添加到关注
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Advanced Search Modal -->
+<div class="modal" id="advancedSearchModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">高级筛选</h5>
+                <button type="button" class="close" onclick="hideAdvancedSearch()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>行业</label>
+                            <select class="form-control">
+                                <option>全部</option>
+                                <option>银行业</option>
+                                <option>房地产</option>
+                                <option>食品饮料</option>
+                                <option>机械设备</option>
+                                <option>电子设备</option>
+                                <option>通信设备</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>价格区间</label>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="最低价">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="最高价">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>涨跌幅范围</label>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="最小涨跌幅">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="最大涨跌幅">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>市值范围</label>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="最小市值(亿)">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="最大市值(亿)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideAdvancedSearch()">取消</button>
+                <button type="button" class="btn btn-primary">应用筛选</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showAdvancedSearch() {
+    document.getElementById('advancedSearchModal').style.display = 'block';
+}
+
+function hideAdvancedSearch() {
+    document.getElementById('advancedSearchModal').style.display = 'none';
+}
+
+function predictStock(stockCode) {
+    // 跳转到首页并预填股票代码
+    window.location.href = '/?stock=' + stockCode;
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('advancedSearchModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

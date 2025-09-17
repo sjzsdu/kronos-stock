@@ -1,0 +1,442 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<!-- Chart.js for model comparison charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+{% endblock %}
+
+{% block page_title %}AI模型对比{% endblock %}
+{% block page_subtitle %}对比不同AI模型的预测性能和准确率{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <!-- Model Comparison Stats -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="totalModels">3</div>
+                <div class="stat-label">模型总数</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value text-success" id="bestModel">Kronos Base</div>
+                <div class="stat-label">最佳模型</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value text-warning" id="avgAccuracy">85.2%</div>
+                <div class="stat-label">平均准确率</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon danger">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value text-danger" id="fastestModel">Kronos Mini</div>
+                <div class="stat-label">最快模型</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Comparison Actions -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-bolt"></i> 快速操作</h4>
+        </div>
+        <div class="card-content">
+            <div class="quick-actions">
+                <button class="btn btn-primary" onclick="runModelComparison()">
+                    <i class="fas fa-play"></i> 运行对比
+                </button>
+                <button class="btn btn-secondary" onclick="refreshComparison()">
+                    <i class="fas fa-sync"></i> 刷新数据
+                </button>
+                <button class="btn btn-success" onclick="exportComparison()">
+                    <i class="fas fa-download"></i> 导出报告
+                </button>
+                <button class="btn btn-warning" onclick="customizeComparison()">
+                    <i class="fas fa-cog"></i> 自定义对比
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Comparison Charts -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-chart-bar"></i> 模型性能对比</h4>
+        </div>
+        <div class="card-content">
+            <div class="chart-container">
+                <canvas id="modelPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Details -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-table"></i> 模型详细对比</h4>
+        </div>
+        <div class="card-content">
+            <div id="model-details" 
+                 hx-get="/api/model-comparison" 
+                 hx-trigger="load"
+                 hx-indicator="#model-details-loading">
+                <div id="model-details-loading" class="htmx-indicator">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 加载中...
+                    </div>
+                </div>
+                <div class="loading-placeholder">
+                    <div class="skeleton-table"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Recommendations -->
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fas fa-lightbulb"></i> 模型推荐</h4>
+        </div>
+        <div class="card-content">
+            <div class="recommendations">
+                <div class="recommendation-card">
+                    <div class="recommendation-header">
+                        <i class="fas fa-crown text-warning"></i>
+                        <h5>综合推荐</h5>
+                    </div>
+                    <div class="recommendation-content">
+                        <p><strong>Kronos Base</strong> 在准确率和稳定性方面表现最佳，适合长期投资决策。</p>
+                    </div>
+                </div>
+                <div class="recommendation-card">
+                    <div class="recommendation-header">
+                        <i class="fas fa-bolt text-primary"></i>
+                        <h5>快速推荐</h5>
+                    </div>
+                    <div class="recommendation-content">
+                        <p><strong>Kronos Mini</strong> 预测速度最快，适合需要快速响应的短线交易。</p>
+                    </div>
+                </div>
+                <div class="recommendation-card">
+                    <div class="recommendation-header">
+                        <i class="fas fa-balance-scale text-success"></i>
+                        <h5>平衡推荐</h5>
+                    </div>
+                    <div class="recommendation-content">
+                        <p><strong>Kronos Small</strong> 在准确率和速度之间取得良好平衡，适合大多数用户。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.2rem;
+}
+
+.stat-icon.primary {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.stat-icon.success {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.stat-icon.danger {
+    background: var(--danger-light);
+    color: var(--danger-color);
+}
+
+.stat-icon.warning {
+    background: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .quick-actions .btn {
+        width: 100%;
+    }
+}
+
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+.recommendations {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.recommendation-card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.recommendation-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.recommendation-header h5 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.recommendation-content p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.model-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.model-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.model-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.model-table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+.model-name {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.accuracy-bar {
+    width: 100%;
+    height: 20px;
+    background: var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.accuracy-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.accuracy-fill.excellent {
+    background: var(--success-color);
+}
+
+.accuracy-fill.good {
+    background: var(--warning-color);
+}
+
+.accuracy-fill.fair {
+    background: var(--danger-color);
+}
+
+.skeleton-table {
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-primary) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .chart-container {
+        height: 300px;
+    }
+}
+</style>
+
+<script>
+// Initialize charts when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+});
+
+function initializeCharts() {
+    const ctx = document.getElementById('modelPerformanceChart').getContext('2d');
+    
+    // Mock data for the chart
+    const chartData = {
+        labels: ['准确率', '速度', '稳定性', '资源消耗', '适应性'],
+        datasets: [
+            {
+                label: 'Kronos Base',
+                data: [92, 65, 88, 45, 82],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+            },
+            {
+                label: 'Kronos Small',
+                data: [85, 75, 78, 65, 75],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(75, 192, 192, 1)'
+            },
+            {
+                label: 'Kronos Mini',
+                data: [78, 95, 70, 85, 65],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(255, 99, 132, 1)'
+            }
+        ]
+    };
+    
+    // Create the radar chart
+    new Chart(ctx, {
+        type: 'radar',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: {
+                        display: true
+                    },
+                    suggestedMin: 50,
+                    suggestedMax: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function runModelComparison() {
+    showToast('正在运行模型对比...', 'info');
+    // 这里应该调用API运行模型对比
+    setTimeout(() => {
+        refreshComparison();
+        showToast('模型对比完成', 'success');
+    }, 2000);
+}
+
+function refreshComparison() {
+    htmx.ajax('GET', '/api/model-comparison', '#model-details');
+    initializeCharts();
+}
+
+function exportComparison() {
+    showToast('导出报告功能开发中...', 'info');
+}
+
+function customizeComparison() {
+    showToast('自定义对比功能开发中...', 'info');
+}
+</script>
+{% endblock %}

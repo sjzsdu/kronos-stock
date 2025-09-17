@@ -1,0 +1,741 @@
+{% extends "layout.html" %}
+
+{% block page_title %}个人资料{% endblock %}
+{% block page_subtitle %}管理您的账户信息和偏好设置{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="content-grid">
+        <!-- Profile Sidebar -->
+        <div class="content-sidebar">
+            <div class="card">
+                <div class="card-content">
+                    <div class="profile-header">
+                        <div class="avatar-container">
+                            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="用户头像" class="avatar">
+                            <button class="change-avatar-btn" onclick="changeAvatar()">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <h3 class="username">张三</h3>
+                        <p class="user-email">zhangsan@example.com</p>
+                        <div class="user-plan">
+                            <span class="plan-badge premium">高级版</span>
+                        </div>
+                    </div>
+                    
+                    <nav class="profile-nav">
+                        <a href="#profile-info" class="nav-item active" onclick="switchTab('profile-info')">
+                            <i class="fas fa-user"></i>
+                            基本信息
+                        </a>
+                        <a href="#security" class="nav-item" onclick="switchTab('security')">
+                            <i class="fas fa-shield-alt"></i>
+                            安全设置
+                        </a>
+                        <a href="#notifications" class="nav-item" onclick="switchTab('notifications')">
+                            <i class="fas fa-bell"></i>
+                            通知设置
+                        </a>
+                        <a href="#preferences" class="nav-item" onclick="switchTab('preferences')">
+                            <i class="fas fa-cog"></i>
+                            偏好设置
+                        </a>
+                        <a href="#subscription" class="nav-item" onclick="switchTab('subscription')">
+                            <i class="fas fa-credit-card"></i>
+                            订阅管理
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profile Content -->
+        <div class="content-main">
+            <!-- Profile Info Tab -->
+            <div class="card tab-content active" id="profile-info">
+                <div class="card-header">
+                    <h4><i class="fas fa-user"></i> 基本信息</h4>
+                </div>
+                <div class="card-content">
+                    <form id="profileForm" onsubmit="saveProfile(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="fullName">姓名</label>
+                                <input type="text" class="form-control" id="fullName" value="张三">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">邮箱</label>
+                                <input type="email" class="form-control" id="email" value="zhangsan@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">手机号</label>
+                                <input type="tel" class="form-control" id="phone" value="138****8888">
+                            </div>
+                            <div class="form-group">
+                                <label for="birthday">生日</label>
+                                <input type="date" class="form-control" id="birthday" value="1990-01-01">
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">性别</label>
+                                <select class="form-control" id="gender">
+                                    <option value="male" selected>男</option>
+                                    <option value="female">女</option>
+                                    <option value="other">其他</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="occupation">职业</label>
+                                <input type="text" class="form-control" id="occupation" value="金融分析师">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bio">个人简介</label>
+                            <textarea class="form-control" id="bio" rows="4">专注于股票投资分析，拥有5年投资经验，擅长技术分析和基本面研究。</textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> 保存信息
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Security Tab -->
+            <div class="card tab-content" id="security">
+                <div class="card-header">
+                    <h4><i class="fas fa-shield-alt"></i> 安全设置</h4>
+                </div>
+                <div class="card-content">
+                    <div class="security-section">
+                        <h5>密码设置</h5>
+                        <div class="form-group">
+                            <button class="btn btn-outline-primary" onclick="changePassword()">
+                                <i class="fas fa-key"></i> 修改密码
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="security-section">
+                        <h5>双重认证</h5>
+                        <div class="form-group">
+                            <label class="switch">
+                                <input type="checkbox" id="twoFactorAuth" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>启用双重认证</span>
+                        </div>
+                        <p class="form-help">启用双重认证可以提高账户安全性</p>
+                    </div>
+                    
+                    <div class="security-section">
+                        <h5>登录设备管理</h5>
+                        <div class="device-list">
+                            <div class="device-item">
+                                <div class="device-info">
+                                    <i class="fas fa-laptop"></i>
+                                    <div>
+                                        <div class="device-name">MacBook Pro</div>
+                                        <div class="device-details">Chrome 浏览器 • 北京 • 2023-10-15 14:30</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="logoutDevice('macbook')">
+                                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                                </button>
+                            </div>
+                            <div class="device-item">
+                                <div class="device-info">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <div>
+                                        <div class="device-name">iPhone 14</div>
+                                        <div class="device-details">Safari 浏览器 • 上海 • 2023-10-14 09:15</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="logoutDevice('iphone')">
+                                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notifications Tab -->
+            <div class="card tab-content" id="notifications">
+                <div class="card-header">
+                    <h4><i class="fas fa-bell"></i> 通知设置</h4>
+                </div>
+                <div class="card-content">
+                    <div class="notification-settings">
+                        <div class="setting-group">
+                            <h5>预测通知</h5>
+                            <div class="setting-item">
+                                <label>预测完成通知</label>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>预测结果更新</label>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <h5>价格预警</h5>
+                            <div class="setting-item">
+                                <label>价格达到预警线</label>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>价格大幅波动</label>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <h5>市场资讯</h5>
+                            <div class="setting-item">
+                                <label>重要市场新闻</label>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>行业研究报告</label>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <h5>通知方式</h5>
+                            <div class="setting-item">
+                                <label>邮件通知</label>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>短信通知</label>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>应用内通知</label>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Preferences Tab -->
+            <div class="card tab-content" id="preferences">
+                <div class="card-header">
+                    <h4><i class="fas fa-cog"></i> 偏好设置</h4>
+                </div>
+                <div class="card-content">
+                    <div class="preference-settings">
+                        <div class="setting-group">
+                            <h5>界面设置</h5>
+                            <div class="setting-item">
+                                <label>深色模式</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="darkMode">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>紧凑布局</label>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <h5>语言设置</h5>
+                            <div class="form-group">
+                                <select class="form-control" id="language">
+                                    <option value="zh-CN" selected>简体中文</option>
+                                    <option value="zh-TW">繁体中文</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <h5>默认设置</h5>
+                            <div class="form-group">
+                                <label>默认预测模型</label>
+                                <select class="form-control" id="defaultModel">
+                                    <option value="kronos-base" selected>Kronos Base</option>
+                                    <option value="kronos-small">Kronos Small</option>
+                                    <option value="kronos-mini">Kronos Mini</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>默认预测天数</label>
+                                <select class="form-control" id="defaultDays">
+                                    <option value="1">1天</option>
+                                    <option value="3">3天</option>
+                                    <option value="5" selected>5天</option>
+                                    <option value="10">10天</option>
+                                    <option value="30">30天</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Subscription Tab -->
+            <div class="card tab-content" id="subscription">
+                <div class="card-header">
+                    <h4><i class="fas fa-credit-card"></i> 订阅管理</h4>
+                </div>
+                <div class="card-content">
+                    <div class="subscription-info">
+                        <div class="current-plan">
+                            <div class="plan-header">
+                                <h3>高级版订阅</h3>
+                                <span class="plan-badge premium">当前计划</span>
+                            </div>
+                            <div class="plan-details">
+                                <p>到期时间：2024年10月15日</p>
+                                <p>剩余天数：365天</p>
+                            </div>
+                            <div class="plan-actions">
+                                <button class="btn btn-primary" onclick="renewSubscription()">
+                                    <i class="fas fa-redo"></i> 续费订阅
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="cancelSubscription()">
+                                    <i class="fas fa-times"></i> 取消订阅
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="plan-features">
+                            <h5>高级版功能</h5>
+                            <ul class="feature-list">
+                                <li><i class="fas fa-check text-success"></i> 无限制股票预测</li>
+                                <li><i class="fas fa-check text-success"></i> 多模型对比分析</li>
+                                <li><i class="fas fa-check text-success"></i> 实时价格预警</li>
+                                <li><i class="fas fa-check text-success"></i> 高级技术分析工具</li>
+                                <li><i class="fas fa-check text-success"></i> 专属投资策略报告</li>
+                                <li><i class="fas fa-check text-success"></i> 优先客服支持</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.content-grid {
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .content-sidebar {
+        order: -1;
+    }
+}
+
+/* Profile Sidebar */
+.profile-header {
+    text-align: center;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.avatar-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border-color);
+}
+
+.change-avatar-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.username {
+    margin: 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.user-email {
+    color: var(--text-secondary);
+    margin: 0.25rem 0 1rem 0;
+}
+
+.plan-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.plan-badge.premium {
+    background: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.profile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+}
+
+.nav-item:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Form Styles */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Security Settings */
+.security-section {
+    margin-bottom: 2rem;
+}
+
+.security-section h5 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.device-list {
+    margin-top: 1rem;
+}
+
+.device-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+
+.device-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.device-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.device-details {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Notification Settings */
+.notification-settings .setting-group {
+    margin-bottom: 2rem;
+}
+
+.notification-settings .setting-group h5 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+/* Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Preference Settings */
+.preference-settings .setting-group {
+    margin-bottom: 2rem;
+}
+
+.preference-settings .setting-group h5 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+/* Subscription */
+.subscription-info {
+    max-width: 600px;
+}
+
+.current-plan {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.plan-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.plan-details p {
+    margin: 0.25rem 0;
+    color: var(--text-secondary);
+}
+
+.plan-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.plan-features h5 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.feature-list li:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .device-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .plan-actions {
+        flex-direction: column;
+    }
+    
+    .plan-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+function switchTab(tabId) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabId).classList.add('active');
+    
+    // Update active nav item
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    event.target.classList.add('active');
+}
+
+function saveProfile(event) {
+    event.preventDefault();
+    showToast('个人资料已保存', 'success');
+}
+
+function changeAvatar() {
+    showToast('头像上传功能开发中...', 'info');
+}
+
+function changePassword() {
+    showToast('修改密码功能开发中...', 'info');
+}
+
+function logoutDevice(deviceId) {
+    showToast(`已退出 ${deviceId} 的登录`, 'success');
+}
+
+function renewSubscription() {
+    showToast('续费功能开发中...', 'info');
+}
+
+function cancelSubscription() {
+    if (confirm('确定要取消订阅吗？取消后将失去高级功能。')) {
+        showToast('订阅已取消', 'success');
+    }
+}
+</script>
+{% endblock %}

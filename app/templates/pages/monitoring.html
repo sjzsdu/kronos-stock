@@ -1,0 +1,579 @@
+{% extends "layout.html" %}
+
+{% block title %}股票监控 - Kronos 智能投资平台{% endblock %}
+
+{% block head %}
+<!-- Chart.js for monitoring charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+{% endblock %}
+
+{% block page_title %}股票监控{% endblock %}
+{% block page_subtitle %}实时监控股票价格变化，及时获取预警通知{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary" onclick="showAddMonitorModal()">
+    <i class="fas fa-plus"></i>
+    添加监控
+</button>
+<button class="btn btn-secondary">
+    <i class="fas fa-cog"></i>
+    监控设置
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Monitoring Stats -->
+<div class="stats-banner">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="fas fa-eye"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">24</div>
+            <div class="stat-label">监控股票</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="fas fa-bell"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">8</div>
+            <div class="stat-label">今日预警</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">3</div>
+            <div class="stat-label">触发条件</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon danger">
+            <i class="fas fa-bolt"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">156</div>
+            <div class="stat-label">总预警数</div>
+        </div>
+    </div>
+</div>
+
+<!-- Monitoring Content -->
+<div class="monitoring-container">
+    <div class="content-grid">
+        <!-- Main Content -->
+        <div class="content-main">
+            <!-- Filter Tabs -->
+            <div class="filter-tabs mb-4">
+                <button class="filter-tab active">全部监控</button>
+                <button class="filter-tab">已触发</button>
+                <button class="filter-tab">正常监控</button>
+                <button class="filter-tab">暂停监控</button>
+            </div>
+
+            <!-- Monitoring List -->
+            <div class="monitoring-list">
+                <!-- Monitor Item -->
+                <div class="monitor-card">
+                    <div class="monitor-header">
+                        <div class="stock-info">
+                            <h4>000001 平安银行</h4>
+                            <div class="stock-price">
+                                <span class="current-price">¥12.75</span>
+                                <span class="price-change text-success">+2.34%</span>
+                            </div>
+                        </div>
+                        <div class="monitor-status active">
+                            <i class="fas fa-circle"></i>
+                            监控中
+                        </div>
+                    </div>
+                    <div class="monitor-content">
+                        <div class="monitor-rules">
+                            <div class="rule-item">
+                                <div class="rule-condition">
+                                    <span class="rule-label">价格预警:</span>
+                                    <span class="rule-value">高于 ¥13.00 或低于 ¥12.00</span>
+                                </div>
+                                <div class="rule-status">
+                                    <span class="status-badge status-success">正常</span>
+                                </div>
+                            </div>
+                            <div class="rule-item">
+                                <div class="rule-condition">
+                                    <span class="rule-label">涨跌幅预警:</span>
+                                    <span class="rule-value">单日涨跌幅超过 ±3%</span>
+                                </div>
+                                <div class="rule-status">
+                                    <span class="status-badge status-warning">已触发</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="monitor-footer">
+                        <div class="monitor-meta">
+                            <span class="text-muted">创建时间: 2023-10-01</span>
+                            <span class="text-muted">最后更新: 2小时前</span>
+                        </div>
+                        <div class="monitor-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editMonitor('000001')">
+                                <i class="fas fa-edit"></i>
+                                编辑
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMonitor('000001')">
+                                <i class="fas fa-trash"></i>
+                                删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monitor Item -->
+                <div class="monitor-card">
+                    <div class="monitor-header">
+                        <div class="stock-info">
+                            <h4>600519 贵州茅台</h4>
+                            <div class="stock-price">
+                                <span class="current-price">¥1695.50</span>
+                                <span class="price-change text-success">+0.89%</span>
+                            </div>
+                        </div>
+                        <div class="monitor-status active">
+                            <i class="fas fa-circle"></i>
+                            监控中
+                        </div>
+                    </div>
+                    <div class="monitor-content">
+                        <div class="monitor-rules">
+                            <div class="rule-item">
+                                <div class="rule-condition">
+                                    <span class="rule-label">价格预警:</span>
+                                    <span class="rule-value">高于 ¥1750.00 或低于 ¥1600.00</span>
+                                </div>
+                                <div class="rule-status">
+                                    <span class="status-badge status-success">正常</span>
+                                </div>
+                            </div>
+                            <div class="rule-item">
+                                <div class="rule-condition">
+                                    <span class="rule-label">成交量预警:</span>
+                                    <span class="rule-value">日成交量超过 10万手</span>
+                                </div>
+                                <div class="rule-status">
+                                    <span class="status-badge status-success">正常</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="monitor-footer">
+                        <div class="monitor-meta">
+                            <span class="text-muted">创建时间: 2023-09-15</span>
+                            <span class="text-muted">最后更新: 1小时前</span>
+                        </div>
+                        <div class="monitor-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editMonitor('600519')">
+                                <i class="fas fa-edit"></i>
+                                编辑
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMonitor('600519')">
+                                <i class="fas fa-trash"></i>
+                                删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monitor Item -->
+                <div class="monitor-card">
+                    <div class="monitor-header">
+                        <div class="stock-info">
+                            <h4>000002 万科A</h4>
+                            <div class="stock-price">
+                                <span class="current-price">¥18.90</span>
+                                <span class="price-change text-danger">-1.56%</span>
+                            </div>
+                        </div>
+                        <div class="monitor-status paused">
+                            <i class="fas fa-pause-circle"></i>
+                            已暂停
+                        </div>
+                    </div>
+                    <div class="monitor-content">
+                        <div class="monitor-rules">
+                            <div class="rule-item">
+                                <div class="rule-condition">
+                                    <span class="rule-label">价格预警:</span>
+                                    <span class="rule-value">高于 ¥20.00 或低于 ¥17.00</span>
+                                </div>
+                                <div class="rule-status">
+                                    <span class="status-badge status-secondary">已暂停</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="monitor-footer">
+                        <div class="monitor-meta">
+                            <span class="text-muted">创建时间: 2023-08-20</span>
+                            <span class="text-muted">暂停时间: 3天前</span>
+                        </div>
+                        <div class="monitor-actions">
+                            <button class="btn btn-sm btn-outline-success" onclick="resumeMonitor('000002')">
+                                <i class="fas fa-play"></i>
+                                恢复
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editMonitor('000002')">
+                                <i class="fas fa-edit"></i>
+                                编辑
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMonitor('000002')">
+                                <i class="fas fa-trash"></i>
+                                删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monitor Item -->
+                <div class="monitor-card triggered">
+                    <div class="monitor-header">
+                        <div class="stock-info">
+                            <h4>000063 中兴通讯</h4>
+                            <div class="stock-price">
+                                <span class="current-price">¥32.18</span>
+                                <span class="price-change text-danger">-2.11%</span>
+                            </div>
+                        </div>
+                        <div class="monitor-status active">
+                            <i class="fas fa-circle"></i>
+                            监控中
+                        </div>
+                    </div>
+                    <div class="monitor-content">
+                        <div class="monitor-rules">
+                            <div class="rule-item">
+                                <div class="rule-condition">
+                                    <span class="rule-label">价格预警:</span>
+                                    <span class="rule-value">高于 ¥33.00 或低于 ¥31.00</span>
+                                </div>
+                                <div class="rule-status">
+                                    <span class="status-badge status-warning">已触发</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="trigger-alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>价格已低于预警线 ¥31.00，当前价格 ¥32.18</span>
+                        </div>
+                    </div>
+                    <div class="monitor-footer">
+                        <div class="monitor-meta">
+                            <span class="text-muted">创建时间: 2023-09-05</span>
+                            <span class="text-muted">触发时间: 15分钟前</span>
+                        </div>
+                        <div class="monitor-actions">
+                            <button class="btn btn-sm btn-outline-warning" onclick="acknowledgeAlert('000063')">
+                                <i class="fas fa-check"></i>
+                                确认
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editMonitor('000063')">
+                                <i class="fas fa-edit"></i>
+                                编辑
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMonitor('000063')">
+                                <i class="fas fa-trash"></i>
+                                删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-primary active">1</button>
+                <button class="btn btn-secondary">2</button>
+                <button class="btn btn-secondary">3</button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="content-sidebar">
+            <!-- Recent Alerts -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bell text-danger"></i>
+                        最近预警
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="alerts-list">
+                        <div class="alert-item">
+                            <div class="alert-icon text-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">中兴通讯价格预警</div>
+                                <div class="alert-desc">价格已低于预警线 ¥31.00</div>
+                                <div class="alert-time">15分钟前</div>
+                            </div>
+                        </div>
+                        <div class="alert-item">
+                            <div class="alert-icon text-warning">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">平安银行涨跌幅预警</div>
+                                <div class="alert-desc">单日涨幅超过 3%</div>
+                                <div class="alert-time">2小时前</div>
+                            </div>
+                        </div>
+                        <div class="alert-item">
+                            <div class="alert-icon text-success">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">五粮液目标价达成</div>
+                                <div class="alert-desc">价格达到预设目标价 ¥130.00</div>
+                                <div class="alert-time">1天前</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-cog text-primary"></i>
+                        通知设置
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="settings-options">
+                        <div class="setting-option">
+                            <div class="setting-label">邮件通知</div>
+                            <div class="setting-control">
+                                <input type="checkbox" id="email-notifications" checked>
+                                <label for="email-notifications"></label>
+                            </div>
+                        </div>
+                        <div class="setting-option">
+                            <div class="setting-label">短信通知</div>
+                            <div class="setting-control">
+                                <input type="checkbox" id="sms-notifications">
+                                <label for="sms-notifications"></label>
+                            </div>
+                        </div>
+                        <div class="setting-option">
+                            <div class="setting-label">微信通知</div>
+                            <div class="setting-control">
+                                <input type="checkbox" id="wechat-notifications" checked>
+                                <label for="wechat-notifications"></label>
+                            </div>
+                        </div>
+                        <div class="setting-option">
+                            <div class="setting-label">推送通知</div>
+                            <div class="setting-control">
+                                <input type="checkbox" id="push-notifications" checked>
+                                <label for="push-notifications"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-pie text-success"></i>
+                        监控统计
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="stats-chart">
+                        <canvas id="monitoringChart" height="200"></canvas>
+                    </div>
+                    <div class="stats-summary">
+                        <div class="stat-item">
+                            <span class="stat-label">有效监控</span>
+                            <span class="stat-value">21</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">暂停监控</span>
+                            <span class="stat-value">3</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">触发预警</span>
+                            <span class="stat-value">8</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Monitor Modal -->
+<div class="modal" id="addMonitorModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加股票监控</h5>
+                <button type="button" class="close" onclick="hideAddMonitorModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>股票代码</label>
+                        <input type="text" class="form-control" placeholder="输入股票代码，如 000001">
+                    </div>
+                    <div class="form-group">
+                        <label>股票名称</label>
+                        <input type="text" class="form-control" placeholder="输入股票名称">
+                    </div>
+                    <div class="form-section">
+                        <h6>预警条件</h6>
+                        <div class="form-group">
+                            <label>价格预警</label>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="最高价">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="最低价">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>涨跌幅预警</label>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="涨跌幅%" value="3">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>成交量预警</label>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="成交量(手)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h6>通知设置</h6>
+                        <div class="form-group">
+                            <label>通知方式</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="notify-email" checked>
+                                    <label for="notify-email">邮件</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="notify-sms">
+                                    <label for="notify-sms">短信</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="notify-wechat" checked>
+                                    <label for="notify-wechat">微信</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideAddMonitorModal()">取消</button>
+                <button type="button" class="btn btn-primary">添加监控</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showAddMonitorModal() {
+    document.getElementById('addMonitorModal').style.display = 'block';
+}
+
+function hideAddMonitorModal() {
+    document.getElementById('addMonitorModal').style.display = 'none';
+}
+
+function editMonitor(stockCode) {
+    // 编辑监控逻辑
+    console.log('编辑监控:', stockCode);
+}
+
+function deleteMonitor(stockCode) {
+    // 删除监控逻辑
+    if (confirm('确定要删除该监控吗？')) {
+        console.log('删除监控:', stockCode);
+    }
+}
+
+function resumeMonitor(stockCode) {
+    // 恢复监控逻辑
+    console.log('恢复监控:', stockCode);
+}
+
+function acknowledgeAlert(stockCode) {
+    // 确认预警逻辑
+    console.log('确认预警:', stockCode);
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('addMonitorModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Initialize chart (mock data)
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('monitoringChart').getContext('2d');
+    // Mock chart data
+    const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['有效监控', '暂停监控', '触发预警'],
+            datasets: [{
+                data: [21, 3, 8],
+                backgroundColor: [
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -72,7 +72,9 @@
     </div>
     
     <div class="prediction-form-card">
-        <form onsubmit="generatePrediction(event)">
+        <form hx-post="/components/mock-prediction-result"
+              hx-target="#prediction-results"
+              hx-indicator=".prediction-btn">
             <div class="form-row">
                 <div class="form-group">
                     <label for="stock_symbol">股票代码</label>
@@ -82,14 +84,20 @@
                                name="stock_symbol" 
                                class="form-control" 
                                placeholder="输入股票代码，如 000001"
-                               oninput="showStockSuggestions(this.value)"
+                               hx-get="/api/stocks/search"
+                               hx-trigger="input changed delay:500ms, search"
+                               hx-target="#suggestions"
+                               hx-include="[name='stock_symbol']"
                                autocomplete="off"
                                required>
                         <button type="button" class="btn-input-addon" onclick="showHotStocks()">
                             <i class="fas fa-fire"></i>
                         </button>
                     </div>
-                    <div id="suggestions" class="suggestions-dropdown" style="display: none;"></div>
+                    <div id="suggestions" class="suggestions-dropdown" style="display: none;"
+                         hx-target="this"
+                         hx-swap="innerHTML">
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -142,8 +150,14 @@
         <a href="/history" class="btn btn-secondary btn-sm">查看全部</a>
     </div>
     
-    <div class="predictions-grid" id="recent-predictions-grid">
-        <!-- Recent predictions loaded via JavaScript -->
+    <div class="predictions-grid" id="recent-predictions-grid"
+         hx-get="/components/recent-predictions"
+         hx-trigger="load">
+        <div class="loading-placeholder">
+            <div class="skeleton prediction-card"></div>
+            <div class="skeleton prediction-card"></div>
+            <div class="skeleton prediction-card"></div>
+        </div>
     </div>
 </div>
 
@@ -162,8 +176,15 @@
         </div>
     </div>
     
-    <div class="stocks-grid" id="popular-stocks-grid">
-        <!-- Popular stocks loaded via JavaScript -->
+    <div class="stocks-grid" id="popular-stocks-grid"
+         hx-get="/components/hot-stocks"
+         hx-trigger="load">
+        <div class="loading-placeholder">
+            <div class="skeleton stock-card"></div>
+            <div class="skeleton stock-card"></div>
+            <div class="skeleton stock-card"></div>
+            <div class="skeleton stock-card"></div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -217,8 +238,14 @@
         </h3>
     </div>
     <div class="card-content">
-        <div class="market-stats" id="market-stats">
-            <!-- Market stats loaded via JavaScript -->
+        <div class="market-stats" id="market-stats"
+             hx-get="/components/market-overview"
+             hx-trigger="load">
+            <div class="loading-placeholder">
+                <div class="skeleton stat-item" style="height: 20px; margin-bottom: 10px;"></div>
+                <div class="skeleton stat-item" style="height: 20px; margin-bottom: 10px;"></div>
+                <div class="skeleton stat-item" style="height: 20px; margin-bottom: 10px;"></div>
+            </div>
         </div>
         <div class="market-sentiment">
             <div class="sentiment-header">市场情绪</div>
@@ -332,48 +359,7 @@ const stocksData = [
 ];
 
 // 股票搜索功能
-function showStockSuggestions(query) {
-    const suggestions = document.getElementById('suggestions');
-    
-    if (!query || query.length < 1) {
-        suggestions.style.display = 'none';
-        return;
-    }
-    
-    const filteredStocks = stocksData.filter(stock => 
-        stock.symbol.toLowerCase().includes(query.toLowerCase()) ||
-        stock.name.toLowerCase().includes(query.toLowerCase())
-    );
-    
-    if (filteredStocks.length === 0) {
-        suggestions.innerHTML = '<div class="no-results">未找到相关股票</div>';
-        suggestions.style.display = 'block';
-        return;
-    }
-    
-    let html = '';
-    filteredStocks.slice(0, 5).forEach(stock => {
-        const changeClass = stock.change > 0 ? 'text-success' : 'text-danger';
-        const changeSign = stock.change > 0 ? '+' : '';
-        html += `
-            <div class="suggestion-item" onclick="selectStock('${stock.symbol}', '${stock.name}')">
-                <div class="stock-basic">
-                    <span class="stock-code">${stock.symbol}</span>
-                    <span class="stock-name">${stock.name}</span>
-                </div>
-                <div class="stock-price">
-                    <span class="price">¥${stock.price}</span>
-                    <span class="change ${changeClass}">
-                        ${changeSign}${stock.change.toFixed(2)}%
-                    </span>
-                </div>
-            </div>
-        `;
-    });
-    
-    suggestions.innerHTML = html;
-    suggestions.style.display = 'block';
-}
+// 我们现在使用HTMX来处理股票搜索，所以移除这个函数
 
 function selectStock(symbol, name) {
     document.getElementById('stock_symbol').value = symbol;
@@ -692,6 +678,83 @@ function scrollToHotStocks() {
     });
 }
 
+function selectStock(symbol, name) {
+    document.getElementById('stock_symbol').value = symbol;
+    document.getElementById('suggestions').style.display = 'none';
+    
+    // 显示选中动画
+    const input = document.getElementById('stock_symbol');
+    input.style.borderColor = '#28a745';
+    setTimeout(() => {
+        input.style.borderColor = '';
+    }, 1000);
+    
+    showToast(`已选择 ${symbol} ${name}`, 'success');
+}
+
+function quickPredict(symbol) {
+    document.getElementById('stock_symbol').value = symbol;
+    document.getElementById('prediction-area').scrollIntoView({ behavior: 'smooth' });
+    showToast(`已为 ${symbol} 预填写预测表单`, 'success');
+}
+
+function showChartPlaceholder(predictionId) {
+    const button = event.target;
+    const loading = document.getElementById(`chart-loading-${predictionId}`);
+    
+    // 显示加载状态
+    loading.classList.remove('d-none');
+    button.disabled = true;
+    
+    // 模拟加载时间
+    setTimeout(() => {
+        loading.classList.add('d-none');
+        button.disabled = false;
+        
+        // 显示图表
+        const chartContainer = document.getElementById(`chart-${predictionId}`);
+        chartContainer.innerHTML = `
+            <div class="chart-content">
+                <div class="chart-placeholder-content">
+                    <i class="fas fa-chart-line"></i>
+                    <p>图表功能演示</p>
+                    <small class="text-muted">在完整版本中将显示详细的K线图</small>
+                </div>
+            </div>
+        `;
+    }, 1500);
+}
+
+function sharePrediction(predictionId) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Kronos 预测结果',
+            text: '查看我的股票预测结果',
+            url: window.location.href + '#' + predictionId
+        });
+    } else {
+        const url = window.location.href + '#' + predictionId;
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('预测链接已复制到剪贴板', 'success');
+        });
+    }
+}
+
+function downloadReport(predictionId) {
+    showToast('报告下载功能开发中，敬请期待...', 'info');
+}
+
+function addToWatchlist(symbol) {
+    const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    if (!watchlist.includes(symbol)) {
+        watchlist.push(symbol);
+        localStorage.setItem('watchlist', JSON.stringify(watchlist));
+        showToast(`已将 ${symbol} 添加到关注列表`, 'success');
+    } else {
+        showToast(`${symbol} 已在关注列表中`, 'info');
+    }
+}
+
 // 点击外部关闭搜索建议
 document.addEventListener('click', function(e) {
     const suggestions = document.getElementById('suggestions');
@@ -879,6 +942,79 @@ function loadMarketOverview() {
     });
     
     container.innerHTML = html;
+}
+
+function filterStocks(filter) {
+    // 更新激活状态
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+    
+    // 重新加载股票数据
+    loadPopularStocks(filter);
+    
+    showToast(`已切换到${getFilterName(filter)}股票`, 'info');
+}
+
+function getFilterName(filter) {
+    const names = {
+        'all': '全部',
+        'tech': '科技',
+        'finance': '金融',
+        'energy': '能源'
+    };
+    return names[filter] || '全部';
+}
+
+function getTimeDifference(timestamp) {
+    const now = new Date();
+    const diff = Math.floor((now - timestamp) / (1000 * 60)); // minutes
+    
+    if (diff < 60) {
+        return `${diff}分钟前`;
+    } else if (diff < 1440) {
+        return `${Math.floor(diff / 60)}小时前`;
+    } else {
+        return `${Math.floor(diff / 1440)}天前`;
+    }
+}
+
+function viewPredictionDetail(predictionId) {
+    showToast('预测详情功能开发中...', 'info');
+}
+
+function updateStats() {
+    // 模拟统计数据更新
+    const statValues = document.querySelectorAll('.stat-value');
+    statValues.forEach(stat => {
+        const text = stat.textContent;
+        if (text.includes('%')) {
+            // 更新百分比
+            const num = parseFloat(text);
+            if (!isNaN(num)) {
+                const change = (Math.random() - 0.5) * 2;
+                const newNum = Math.max(0, Math.min(100, num + change));
+                stat.textContent = newNum.toFixed(1) + '%';
+            }
+        } else if (text.includes('¥')) {
+            // 更新金额
+            const num = parseFloat(text.replace(/[¥,M]/g, ''));
+            if (!isNaN(num)) {
+                const change = (Math.random() - 0.5) * 0.2;
+                const newNum = Math.max(0, num + change);
+                stat.textContent = '¥' + newNum.toFixed(1) + 'M';
+            }
+        } else {
+            // 更新数字
+            const num = parseInt(text.replace(/,/g, ''));
+            if (!isNaN(num)) {
+                const change = Math.floor((Math.random() - 0.5) * 20);
+                const newNum = Math.max(0, num + change);
+                stat.textContent = newNum.toLocaleString();
+            }
+        }
+    });
 }
 
 function filterStocks(filter) {

@@ -1,0 +1,636 @@
+{% extends "layout.html" %}
+
+{% block page_title %}订阅管理{% endblock %}
+{% block page_subtitle %}管理您的订阅计划和账单信息{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <!-- Subscription Overview -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">高级版</div>
+                <div class="stat-label">当前计划</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">2024-10-15</div>
+                <div class="stat-label">到期时间</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">¥299.00</div>
+                <div class="stat-label">年度费用</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon danger">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">365天</div>
+                <div class="stat-label">剩余时间</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Subscription -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-info-circle"></i> 当前订阅</h4>
+        </div>
+        <div class="card-content">
+            <div class="subscription-details">
+                <div class="plan-info">
+                    <div class="plan-header">
+                        <h3>高级版订阅</h3>
+                        <span class="plan-badge premium">当前计划</span>
+                    </div>
+                    <p class="plan-description">享受无限制的股票预测、多模型对比分析、实时价格预警等高级功能</p>
+                    
+                    <div class="plan-features">
+                        <h5>包含功能</h5>
+                        <ul class="feature-list">
+                            <li><i class="fas fa-check text-success"></i> 无限制股票预测</li>
+                            <li><i class="fas fa-check text-success"></i> 多模型对比分析</li>
+                            <li><i class="fas fa-check text-success"></i> 实时价格预警</li>
+                            <li><i class="fas fa-check text-success"></i> 高级技术分析工具</li>
+                            <li><i class="fas fa-check text-success"></i> 专属投资策略报告</li>
+                            <li><i class="fas fa-check text-success"></i> 优先客服支持</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="plan-actions">
+                    <button class="btn btn-primary btn-lg" onclick="renewSubscription()">
+                        <i class="fas fa-redo"></i> 续费订阅
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="cancelSubscription()">
+                        <i class="fas fa-times"></i> 取消订阅
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Plans -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-tags"></i> 可用计划</h4>
+        </div>
+        <div class="card-content">
+            <div class="plans-grid">
+                <!-- Free Plan -->
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h3>免费版</h3>
+                        <div class="plan-price">
+                            <span class="price">¥0</span>
+                            <span class="period">/月</span>
+                        </div>
+                    </div>
+                    <div class="plan-features">
+                        <ul class="feature-list">
+                            <li><i class="fas fa-check text-success"></i> 基础股票预测 (5次/天)</li>
+                            <li><i class="fas fa-check text-success"></i> 基础技术分析</li>
+                            <li><i class="fas fa-times text-danger"></i> 多模型对比</li>
+                            <li><i class="fas fa-times text-danger"></i> 实时价格预警</li>
+                            <li><i class="fas fa-times text-danger"></i> 高级分析工具</li>
+                            <li><i class="fas fa-times text-danger"></i> 专属报告</li>
+                        </ul>
+                    </div>
+                    <div class="plan-actions">
+                        <button class="btn btn-outline-primary" disabled>当前计划</button>
+                    </div>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="plan-card featured">
+                    <div class="plan-badge recommended">推荐</div>
+                    <div class="plan-header">
+                        <h3>专业版</h3>
+                        <div class="plan-price">
+                            <span class="price">¥99</span>
+                            <span class="period">/月</span>
+                        </div>
+                    </div>
+                    <div class="plan-features">
+                        <ul class="feature-list">
+                            <li><i class="fas fa-check text-success"></i> 无限制股票预测</li>
+                            <li><i class="fas fa-check text-success"></i> 多模型对比分析</li>
+                            <li><i class="fas fa-check text-success"></i> 实时价格预警 (5个)</li>
+                            <li><i class="fas fa-check text-success"></i> 高级技术分析工具</li>
+                            <li><i class="fas fa-times text-danger"></i> 专属投资策略报告</li>
+                            <li><i class="fas fa-check text-success"></i> 优先客服支持</li>
+                        </ul>
+                    </div>
+                    <div class="plan-actions">
+                        <button class="btn btn-primary" onclick="upgradePlan('pro')">升级到专业版</button>
+                    </div>
+                </div>
+                
+                <!-- Premium Plan -->
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h3>高级版</h3>
+                        <div class="plan-price">
+                            <span class="price">¥299</span>
+                            <span class="period">/年</span>
+                        </div>
+                    </div>
+                    <div class="plan-features">
+                        <ul class="feature-list">
+                            <li><i class="fas fa-check text-success"></i> 无限制股票预测</li>
+                            <li><i class="fas fa-check text-success"></i> 多模型对比分析</li>
+                            <li><i class="fas fa-check text-success"></i> 实时价格预警 (无限制)</li>
+                            <li><i class="fas fa-check text-success"></i> 高级技术分析工具</li>
+                            <li><i class="fas fa-check text-success"></i> 专属投资策略报告</li>
+                            <li><i class="fas fa-check text-success"></i> 优先客服支持</li>
+                        </ul>
+                    </div>
+                    <div class="plan-actions">
+                        <button class="btn btn-outline-primary" disabled>当前计划</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Billing History -->
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fas fa-receipt"></i> 账单历史</h4>
+        </div>
+        <div class="card-content">
+            <div class="billing-table">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>订单号</th>
+                            <th>计划</th>
+                            <th>金额</th>
+                            <th>支付方式</th>
+                            <th>日期</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#ORD-2023-001</td>
+                            <td>高级版年费</td>
+                            <td>¥299.00</td>
+                            <td>支付宝</td>
+                            <td>2023-10-15</td>
+                            <td><span class="status-badge success">已完成</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewInvoice('ORD-2023-001')">
+                                    <i class="fas fa-file-invoice"></i> 查看
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-2022-001</td>
+                            <td>高级版年费</td>
+                            <td>¥299.00</td>
+                            <td>微信支付</td>
+                            <td>2022-10-15</td>
+                            <td><span class="status-badge success">已完成</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewInvoice('ORD-2022-001')">
+                                    <i class="fas fa-file-invoice"></i> 查看
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>#ORD-2021-001</td>
+                            <td>专业版月费</td>
+                            <td>¥99.00</td>
+                            <td>银行卡</td>
+                            <td>2021-10-15</td>
+                            <td><span class="status-badge success">已完成</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewInvoice('ORD-2021-001')">
+                                    <i class="fas fa-file-invoice"></i> 查看
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal" id="paymentModal">
+    <div class="modal-content payment-modal">
+        <div class="modal-header">
+            <h3>选择支付方式</h3>
+            <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="payment-methods">
+                <div class="payment-method" onclick="selectPaymentMethod('alipay')">
+                    <i class="fab fa-alipay"></i>
+                    <span>支付宝</span>
+                </div>
+                <div class="payment-method" onclick="selectPaymentMethod('wechat')">
+                    <i class="fab fa-weixin"></i>
+                    <span>微信支付</span>
+                </div>
+                <div class="payment-method" onclick="selectPaymentMethod('card')">
+                    <i class="fas fa-credit-card"></i>
+                    <span>银行卡</span>
+                </div>
+            </div>
+            
+            <div class="payment-details">
+                <h4>订单详情</h4>
+                <div class="order-summary">
+                    <div class="summary-item">
+                        <span>计划</span>
+                        <span>高级版年费</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>价格</span>
+                        <span>¥299.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>优惠</span>
+                        <span>-¥0.00</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>总计</span>
+                        <span>¥299.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('paymentModal')">取消</button>
+            <button class="btn btn-primary" onclick="processPayment()">确认支付</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.2rem;
+}
+
+.stat-icon.primary {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.stat-icon.success {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.stat-icon.danger {
+    background: var(--danger-light);
+    color: var(--danger-color);
+}
+
+.stat-icon.warning {
+    background: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.subscription-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .subscription-details {
+        flex-direction: column;
+    }
+}
+
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.plan-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.plan-description {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.plan-features h5 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.feature-list li:last-child {
+    border-bottom: none;
+}
+
+.plan-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.plan-card {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    position: relative;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.plan-card.featured {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(86, 124, 255, 0.2);
+}
+
+.plan-badge.recommended {
+    position: absolute;
+    top: -10px;
+    right: 1.5rem;
+    background: var(--warning-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.plan-price {
+    margin: 1rem 0;
+}
+
+.price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.period {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.billing-table {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-badge.success {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+/* Modal Styles */
+.modal.payment-modal .modal-content {
+    max-width: 500px;
+    width: 90%;
+}
+
+.payment-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.payment-method {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 2px solid var(--border-color);
+}
+
+.payment-method:hover {
+    border-color: var(--primary-color);
+    background: var(--bg-primary);
+}
+
+.payment-method i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.order-summary {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-item.total {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .plans-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .payment-methods {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function renewSubscription() {
+    document.getElementById('paymentModal').classList.add('show');
+}
+
+function cancelSubscription() {
+    if (confirm('确定要取消订阅吗？取消后将失去高级功能。')) {
+        showToast('订阅已取消', 'success');
+    }
+}
+
+function upgradePlan(plan) {
+    if (plan === 'pro') {
+        document.getElementById('paymentModal').classList.add('show');
+    }
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('show');
+}
+
+function selectPaymentMethod(method) {
+    // Highlight selected payment method
+    document.querySelectorAll('.payment-method').forEach(methodEl => {
+        methodEl.style.borderColor = 'var(--border-color)';
+        methodEl.style.backgroundColor = 'var(--bg-secondary)';
+    });
+    
+    event.currentTarget.style.borderColor = 'var(--primary-color)';
+    event.currentTarget.style.backgroundColor = 'var(--bg-primary)';
+    
+    showToast(`已选择支付方式: ${method}`, 'info');
+}
+
+function processPayment() {
+    closeModal('paymentModal');
+    showToast('支付处理中...', 'info');
+    
+    // Simulate payment processing
+    setTimeout(() => {
+        showToast('支付成功！订阅已更新。', 'success');
+    }, 2000);
+}
+
+function viewInvoice(orderId) {
+    showToast(`查看发票: ${orderId}`, 'info');
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
+}
+</script>
+{% endblock %}
