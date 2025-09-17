@@ -4,6 +4,11 @@
 <div class="app-body">
     <!-- Admin Sidebar -->
     <aside class="app-sidebar admin-sidebar" id="sidebar">
+        <!-- Sidebar Edge Toggle Button -->
+        <div class="sidebar-edge-toggle" onclick="layoutManager.toggleSidebar()" title="切换侧边栏">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        
         <div class="sidebar-content">
             <div class="sidebar-section">
                 <h3 class="sidebar-title">
@@ -11,19 +16,19 @@
                     账户管理
                 </h3>
                 <div class="sidebar-items">
-                    <a href="{{ url_for('views.profile') }}" class="sidebar-item {% if request.endpoint == 'views.profile' %}active{% endif %}">
+                    <a href="{{ url_for('views.profile') }}" class="sidebar-item {% if request.endpoint == 'views.profile' %}active{% endif %}" title="个人资料">
                         <div class="sidebar-icon">
                             <i class="fas fa-user-circle"></i>
                         </div>
                         <span>个人资料</span>
                     </a>
-                    <a href="{{ url_for('views.settings') }}" class="sidebar-item {% if request.endpoint == 'views.settings' %}active{% endif %}">
+                    <a href="{{ url_for('views.settings') }}" class="sidebar-item {% if request.endpoint == 'views.settings' %}active{% endif %}" title="系统设置">
                         <div class="sidebar-icon">
                             <i class="fas fa-cog"></i>
                         </div>
                         <span>系统设置</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="安全设置">
                         <div class="sidebar-icon">
                             <i class="fas fa-shield-alt"></i>
                         </div>
@@ -35,19 +40,19 @@
             <div class="sidebar-section">
                 <h3 class="sidebar-subtitle">偏好设置</h3>
                 <div class="sidebar-items">
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="主题设置">
                         <div class="sidebar-icon">
                             <i class="fas fa-palette"></i>
                         </div>
                         <span>主题设置</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="通知设置">
                         <div class="sidebar-icon">
                             <i class="fas fa-bell"></i>
                         </div>
                         <span>通知设置</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="语言设置">
                         <div class="sidebar-icon">
                             <i class="fas fa-language"></i>
                         </div>
@@ -59,19 +64,19 @@
             <div class="sidebar-section">
                 <h3 class="sidebar-subtitle">数据管理</h3>
                 <div class="sidebar-items">
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="数据导出">
                         <div class="sidebar-icon">
                             <i class="fas fa-download"></i>
                         </div>
                         <span>数据导出</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="数据导入">
                         <div class="sidebar-icon">
                             <i class="fas fa-upload"></i>
                         </div>
                         <span>数据导入</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="清理数据">
                         <div class="sidebar-icon">
                             <i class="fas fa-trash"></i>
                         </div>
@@ -83,19 +88,19 @@
             <div class="sidebar-section">
                 <h3 class="sidebar-subtitle">系统工具</h3>
                 <div class="sidebar-items">
-                    <a href="{{ url_for('views.test') }}" class="sidebar-item {% if request.endpoint == 'views.test' %}active{% endif %}">
+                    <a href="{{ url_for('views.test') }}" class="sidebar-item {% if request.endpoint == 'views.test' %}active{% endif %}" title="系统测试">
                         <div class="sidebar-icon">
                             <i class="fas fa-flask"></i>
                         </div>
                         <span>系统测试</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="错误日志">
                         <div class="sidebar-icon">
                             <i class="fas fa-bug"></i>
                         </div>
                         <span>错误日志</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="系统信息">
                         <div class="sidebar-icon">
                             <i class="fas fa-info-circle"></i>
                         </div>
@@ -107,19 +112,19 @@
             <div class="sidebar-section">
                 <h3 class="sidebar-subtitle">帮助支持</h3>
                 <div class="sidebar-items">
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="帮助文档">
                         <div class="sidebar-icon">
                             <i class="fas fa-question-circle"></i>
                         </div>
                         <span>帮助文档</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="联系支持">
                         <div class="sidebar-icon">
                             <i class="fas fa-envelope"></i>
                         </div>
                         <span>联系支持</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="反馈建议">
                         <div class="sidebar-icon">
                             <i class="fas fa-heart"></i>
                         </div>

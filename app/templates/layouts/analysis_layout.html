@@ -4,6 +4,11 @@
 <div class="app-body">
     <!-- Analysis Sidebar -->
     <aside class="app-sidebar analysis-sidebar" id="sidebar">
+        <!-- Sidebar Edge Toggle Button -->
+        <div class="sidebar-edge-toggle" onclick="layoutManager.toggleSidebar()" title="切换侧边栏">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        
         <div class="sidebar-content">
             <div class="sidebar-section">
                 <h3 class="sidebar-title">
@@ -11,19 +16,19 @@
                     分析工具
                 </h3>
                 <div class="sidebar-items">
-                    <a href="{{ url_for('views.model_comparison') }}" class="sidebar-item {% if request.endpoint == 'views.model_comparison' %}active{% endif %}">
+                    <a href="{{ url_for('views.model_comparison') }}" class="sidebar-item {% if request.endpoint == 'views.model_comparison' %}active{% endif %}" title="模型对比">
                         <div class="sidebar-icon">
                             <i class="fas fa-balance-scale"></i>
                         </div>
                         <span>模型对比</span>
                     </a>
-                    <a href="{{ url_for('views.technical_analysis') }}" class="sidebar-item {% if request.endpoint == 'views.technical_analysis' %}active{% endif %}">
+                    <a href="{{ url_for('views.technical_analysis') }}" class="sidebar-item {% if request.endpoint == 'views.technical_analysis' %}active{% endif %}" title="技术分析">
                         <div class="sidebar-icon">
                             <i class="fas fa-chart-line"></i>
                         </div>
                         <span>技术分析</span>
                     </a>
-                    <a href="{{ url_for('views.prediction') }}" class="sidebar-item {% if request.endpoint == 'views.prediction' %}active{% endif %}">
+                    <a href="{{ url_for('views.prediction') }}" class="sidebar-item {% if request.endpoint == 'views.prediction' %}active{% endif %}" title="AI预测">
                         <div class="sidebar-icon">
                             <i class="fas fa-crystal-ball"></i>
                         </div>
@@ -35,19 +40,19 @@
             <div class="sidebar-section">
                 <h3 class="sidebar-subtitle">历史数据</h3>
                 <div class="sidebar-items">
-                    <a href="{{ url_for('views.history') }}" class="sidebar-item {% if request.endpoint == 'views.history' %}active{% endif %}">
+                    <a href="{{ url_for('views.history') }}" class="sidebar-item {% if request.endpoint == 'views.history' %}active{% endif %}" title="预测历史">
                         <div class="sidebar-icon">
                             <i class="fas fa-history"></i>
                         </div>
                         <span>预测历史</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="数据回测">
                         <div class="sidebar-icon">
                             <i class="fas fa-database"></i>
                         </div>
                         <span>数据回测</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="趋势分析">
                         <div class="sidebar-icon">
                             <i class="fas fa-chart-gantt"></i>
                         </div>
@@ -59,19 +64,19 @@
             <div class="sidebar-section">
                 <h3 class="sidebar-subtitle">专业工具</h3>
                 <div class="sidebar-items">
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="参数调优">
                         <div class="sidebar-icon">
                             <i class="fas fa-cogs"></i>
                         </div>
                         <span>参数调优</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="策略回测">
                         <div class="sidebar-icon">
                             <i class="fas fa-robot"></i>
                         </div>
                         <span>策略回测</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="相关性分析">
                         <div class="sidebar-icon">
                             <i class="fas fa-chart-network"></i>
                         </div>
@@ -83,19 +88,19 @@
             <div class="sidebar-section">
                 <h3 class="sidebar-subtitle">模型管理</h3>
                 <div class="sidebar-items">
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="模型训练">
                         <div class="sidebar-icon">
                             <i class="fas fa-microchip"></i>
                         </div>
                         <span>模型训练</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="模型性能">
                         <div class="sidebar-icon">
                             <i class="fas fa-chart-pie"></i>
                         </div>
                         <span>模型性能</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="模型导出">
                         <div class="sidebar-icon">
                             <i class="fas fa-download"></i>
                         </div>

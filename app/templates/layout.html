@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kronos 智能投资平台{% endblock %}</title>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    
+    <!-- Charts -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+    <!-- Alternative CDN as fallback -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css" crossorigin="anonymous" media="none" onload="if(media!='all')media='all'" onerror="this.onerror=null;this.media='all';">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <!-- Mobile Menu Toggle -->
+                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <!-- Logo -->
+                    <a href="{{ url_for('views.index') }}" class="logo">
+                        <div class="logo-icon">K</div>
+                        <span>Kronos</span>
+                    </a>
+                    
+                    <!-- Main Navigation -->
+                    <nav class="main-nav">
+                        <a href="{{ url_for('views.index') }}" class="nav-item {% if request.endpoint == 'views.index' %}active{% endif %}">
+                            <i class="fas fa-chart-line"></i>
+                            预测中心
+                        </a>
+                        <a href="{{ url_for('views.dashboard') }}" class="nav-item {% if request.endpoint == 'views.dashboard' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            投资仪表盘
+                        </a>
+                        <a href="{{ url_for('views.portfolio') }}" class="nav-item {% if request.endpoint == 'views.portfolio' %}active{% endif %}">
+                            <i class="fas fa-chart-pie"></i>
+                            投资组合
+                        </a>
+                        <a href="{{ url_for('views.market_news') }}" class="nav-item {% if request.endpoint == 'views.market_news' %}active{% endif %}">
+                            <i class="fas fa-newspaper"></i>
+                            市场资讯
+                        </a>
+                        <a href="{{ url_for('views.community') }}" class="nav-item {% if request.endpoint == 'views.community' %}active{% endif %}">
+                            <i class="fas fa-users"></i>
+                            投资社区
+                        </a>
+                        <a href="{{ url_for('views.learning') }}" class="nav-item {% if request.endpoint == 'views.learning' %}active{% endif %}">
+                            <i class="fas fa-graduation-cap"></i>
+                            学习中心
+                        </a>
+                    </nav>
+                </div>
+                
+                <div class="header-right">
+                    <!-- User Badge -->
+                    <div class="user-badge">
+                        <i class="fas fa-crown"></i>
+                        <span>{% block user_plan %}免费版{% endblock %}</span>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="notification-icon" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <div class="notification-badge">0</div>
+                    </div>
+                    
+                    <!-- User Menu -->
+                    <div class="user-menu" onclick="toggleUserDropdown()">
+                        <div class="user-avatar">
+                            {% block user_avatar %}U{% endblock %}
+                        </div>
+                        <span>{% block username %}游客用户{% endblock %}</span>
+                        <i class="fas fa-chevron-down"></i>
+                        
+                        <!-- User Dropdown Menu -->
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="dropdown-section">
+                                <div class="dropdown-title">账户管理</div>
+                                <a href="{{ url_for('views.profile') }}" class="dropdown-item">
+                                    <i class="fas fa-user-circle"></i>
+                                    个人资料
+                                </a>
+                                <a href="{{ url_for('views.subscription') }}" class="dropdown-item">
+                                    <i class="fas fa-credit-card"></i>
+                                    订阅管理
+                                </a>
+                                <a href="{{ url_for('views.settings') }}" class="dropdown-item">
+                                    <i class="fas fa-cog"></i>
+                                    系统设置
+                                </a>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-section">
+                                <a href="{{ url_for('views.history') }}" class="dropdown-item">
+                                    <i class="fas fa-history"></i>
+                                    预测历史
+                                </a>
+                                <a href="{{ url_for('views.alerts') }}" class="dropdown-item">
+                                    <i class="fas fa-bell"></i>
+                                    价格预警
+                                </a>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-section">
+                                <a href="#" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    退出登录
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="app-sidebar" id="sidebar">
+            <!-- Sidebar Toggle Button -->
+            <div class="sidebar-toggle" onclick="toggleSidebarCollapse()">
+                <i class="fas fa-chevron-left" id="sidebar-toggle-icon"></i>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Quick Actions -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">快速操作</div>
+                    <nav class="sidebar-nav">
+                        <a href="{{ url_for('views.index') }}" class="sidebar-item {% if request.endpoint == 'views.index' %}active{% endif %}" title="智能预测">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-magic"></i>
+                            </div>
+                            <span class="sidebar-text">智能预测</span>
+                        </a>
+                        <a href="{{ url_for('views.stock_search') }}" class="sidebar-item {% if request.endpoint == 'views.stock_search' %}active{% endif %}" title="股票搜索">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <span class="sidebar-text">股票搜索</span>
+                        </a>
+                        <a href="{{ url_for('views.monitoring') }}" class="sidebar-item {% if request.endpoint == 'views.monitoring' %}active{% endif %}" title="股票监控">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <span class="sidebar-text">股票监控</span>
+                        </a>
+                        <a href="{{ url_for('views.modern_index') }}" class="sidebar-item {% if request.endpoint == 'views.modern_index' %}active{% endif %}" title="现代版首页">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span class="sidebar-text">现代版首页</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- My Portfolio -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">我的投资</div>
+                    <nav class="sidebar-nav">
+                        <a href="{{ url_for('views.portfolio') }}" class="sidebar-item {% if request.endpoint == 'views.portfolio' %}active{% endif %}" title="投资组合">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <span class="sidebar-text">投资组合</span>
+                        </a>
+                        <a href="{{ url_for('views.history') }}" class="sidebar-item {% if request.endpoint == 'views.history' %}active{% endif %}" title="预测历史">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <span class="sidebar-text">预测历史</span>
+                        </a>
+                        <a href="{{ url_for('views.watchlist') }}" class="sidebar-item {% if request.endpoint == 'views.watchlist' %}active{% endif %}" title="我的关注">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="sidebar-text">我的关注</span>
+                        </a>
+                        <a href="{{ url_for('views.alerts') }}" class="sidebar-item {% if request.endpoint == 'views.alerts' %}active{% endif %}" title="价格预警">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <span class="sidebar-text">价格预警</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Tools -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">分析工具</div>
+                    <nav class="sidebar-nav">
+                        <a href="{{ url_for('views.model_comparison') }}" class="sidebar-item {% if request.endpoint == 'views.model_comparison' %}active{% endif %}" title="AI模型对比">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <span class="sidebar-text">AI模型对比</span>
+                        </a>
+                        <a href="{{ url_for('views.technical_analysis') }}" class="sidebar-item {% if request.endpoint == 'views.technical_analysis' %}active{% endif %}" title="技术分析">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <span class="sidebar-text">技术分析</span>
+                        </a>
+                        <a href="{{ url_for('views.market_news') }}" class="sidebar-item {% if request.endpoint == 'views.market_news' %}active{% endif %}" title="市场资讯">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
+                            <span class="sidebar-text">市场资讯</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Account -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">账户设置</div>
+                    <nav class="sidebar-nav">
+                        <a href="{{ url_for('views.profile') }}" class="sidebar-item {% if request.endpoint == 'views.profile' %}active{% endif %}" title="个人资料">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <span class="sidebar-text">个人资料</span>
+                        </a>
+                        <a href="{{ url_for('views.subscription') }}" class="sidebar-item {% if request.endpoint == 'views.subscription' %}active{% endif %}" title="订阅管理">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span class="sidebar-text">订阅管理</span>
+                        </a>
+                        <a href="{{ url_for('views.settings') }}" class="sidebar-item {% if request.endpoint == 'views.settings' %}active{% endif %}" title="系统设置">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span class="sidebar-text">系统设置</span>
+                        </a>
+                        <a href="{{ url_for('views.test') }}" class="sidebar-item {% if request.endpoint == 'views.test' %}active{% endif %}" title="系统测试">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-flask"></i>
+                            </div>
+                            <span class="sidebar-text">系统测试</span>
+                        </a>
+                    </nav>
+                </div>
+                
+                <!-- All Pages Quick Access -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">页面导航</div>
+                    <nav class="sidebar-nav">
+                        <div class="sidebar-subsection">
+                            <div class="sidebar-subtitle">主要功能</div>
+                            <a href="{{ url_for('views.index') }}" class="sidebar-item compact {% if request.endpoint == 'views.index' %}active{% endif %}" title="首页">
+                                <div class="sidebar-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <span class="sidebar-text">首页</span>
+                            </a>
+                            <a href="{{ url_for('views.dashboard') }}" class="sidebar-item compact {% if request.endpoint == 'views.dashboard' %}active{% endif %}" title="仪表盘">
+                                <div class="sidebar-icon">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </div>
+                                <span class="sidebar-text">仪表盘</span>
+                            </a>
+                            <a href="{{ url_for('views.stock_search') }}" class="sidebar-item compact {% if request.endpoint == 'views.stock_search' %}active{% endif %}" title="股票搜索">
+                                <div class="sidebar-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <span class="sidebar-text">股票搜索</span>
+                            </a>
+                        </div>
+                        
+                        <div class="sidebar-subsection">
+                            <div class="sidebar-subtitle">分析与工具</div>
+                            <a href="{{ url_for('views.technical_analysis') }}" class="sidebar-item compact {% if request.endpoint == 'views.technical_analysis' %}active{% endif %}" title="技术分析">
+                                <div class="sidebar-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <span class="sidebar-text">技术分析</span>
+                            </a>
+                            <a href="{{ url_for('views.model_comparison') }}" class="sidebar-item compact {% if request.endpoint == 'views.model_comparison' %}active{% endif %}" title="模型对比">
+                                <div class="sidebar-icon">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <span class="sidebar-text">模型对比</span>
+                            </a>
+                            <a href="{{ url_for('views.monitoring') }}" class="sidebar-item compact {% if request.endpoint == 'views.monitoring' %}active{% endif %}" title="监控">
+                                <div class="sidebar-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <span class="sidebar-text">监控</span>
+                            </a>
+                        </div>
+                        
+                        <div class="sidebar-subsection">
+                            <div class="sidebar-subtitle">社区与学习</div>
+                            <a href="{{ url_for('views.community') }}" class="sidebar-item compact {% if request.endpoint == 'views.community' %}active{% endif %}" title="社区">
+                                <div class="sidebar-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <span class="sidebar-text">社区</span>
+                            </a>
+                            <a href="{{ url_for('views.learning') }}" class="sidebar-item compact {% if request.endpoint == 'views.learning' %}active{% endif %}" title="学习中心">
+                                <div class="sidebar-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <span class="sidebar-text">学习中心</span>
+                            </a>
+                            <a href="{{ url_for('views.market_news') }}" class="sidebar-item compact {% if request.endpoint == 'views.market_news' %}active{% endif %}" title="市场资讯">
+                                <div class="sidebar-icon">
+                                    <i class="fas fa-newspaper"></i>
+                                </div>
+                                <span class="sidebar-text">市场资讯</span>
+                            </a>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <div class="main-content">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1 class="page-title">{% block page_title %}智能股票预测{% endblock %}</h1>
+                    <p class="page-subtitle">{% block page_subtitle %}基于先进AI模型的智能投资决策平台{% endblock %}</p>
+                    
+                    <div class="page-actions">
+                        {% block page_actions %}
+                        <button class="btn btn-primary">
+                            <i class="fas fa-magic"></i>
+                            开始预测
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-upload"></i>
+                            导入数据
+                        </button>
+                        {% endblock %}
+                    </div>
+                </div>
+
+                <!-- Content Grid -->
+                <div class="content-grid">
+                    <!-- Main Content Area -->
+                    <div class="content-main">
+                        {% block content %}{% endblock %}
+                    </div>
+
+                    <!-- Content Sidebar -->
+                    <div class="content-sidebar">
+                        {% block content_sidebar %}
+                        <!-- Market Overview Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-chart-line text-success"></i>
+                                    市场概览
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="market-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-label">上证指数</span>
+                                        <span class="stat-value text-success">3,247.32 (+1.2%)</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">深证成指</span>
+                                        <span class="stat-value text-danger">10,892.45 (-0.8%)</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">创业板指</span>
+                                        <span class="stat-value text-success">2,156.78 (+0.5%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hot Stocks Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-fire text-warning"></i>
+                                    热门股票
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="hot-stocks">
+                                    <div class="stock-item">
+                                        <span class="stock-name">贵州茅台</span>
+                                        <span class="stock-price text-success">1,680.00 (+2.1%)</span>
+                                    </div>
+                                    <div class="stock-item">
+                                        <span class="stock-name">比亚迪</span>
+                                        <span class="stock-price text-danger">245.60 (-1.5%)</span>
+                                    </div>
+                                    <div class="stock-item">
+                                        <span class="stock-name">宁德时代</span>
+                                        <span class="stock-price text-success">398.50 (+3.2%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Insights Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-brain text-primary"></i>
+                                    AI洞察
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="ai-insight">
+                                    <p class="text-muted">基于当前市场数据分析，AI模型识别出以下投资机会：</p>
+                                    <ul class="insight-list">
+                                        <li>新能源板块有望继续上涨</li>
+                                        <li>消费类股票短期调整后或迎来反弹</li>
+                                        <li>科技股整体处于震荡整理阶段</li>
+                                    </ul>
+                                    <button class="btn btn-primary btn-sm">
+                                        查看详细分析
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- HTMX Configuration -->
+    <script src="{{ url_for('static', filename='js/htmx-config.js') }}"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+    
+    <script>
+        // Toggle notifications
+        function toggleNotifications() {
+            // Implementation for notifications dropdown
+            console.log('Toggle notifications');
+            // This could open a notifications panel or navigate to notifications page
+        }
+        
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+        
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+        
+        // Toggle sidebar collapse (new function for the toggle button)
+        function toggleSidebarCollapse() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleIcon = document.getElementById('sidebar-toggle-icon');
+            
+            sidebar.classList.toggle('collapsed');
+            
+            // Update icon rotation (handled by CSS)
+            // Could add additional logic here if needed
+        }
+        
+        // Toggle user dropdown
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const userMenu = document.querySelector('.user-menu');
+                if (!userMenu.contains(event.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
+        
+        // Mobile responsiveness
+        function initMobileLayout() {
+            const sidebar = document.getElementById('sidebar');
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                sidebar.classList.add('collapsed');
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    const sidebar = document.getElementById('sidebar');
+                    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+                    
+                    if (!sidebar.contains(event.target) && !mobileToggle.contains(event.target)) {
+                        sidebar.classList.remove('mobile-open');
+                    }
+                });
+            }
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initMobileLayout();
+            checkFontAwesome();
+        });
+        
+        // Check if Font Awesome loaded successfully
+        function checkFontAwesome() {
+            const testElement = document.createElement('i');
+            testElement.className = 'fas fa-home';
+            testElement.style.display = 'none';
+            document.body.appendChild(testElement);
+            
+            const computedStyle = window.getComputedStyle(testElement, '::before');
+            const fontFamily = computedStyle.getPropertyValue('font-family');
+            
+            if (!fontFamily.includes('Font Awesome')) {
+                console.warn('Font Awesome failed to load, using fallback icons');
+                document.body.classList.add('fa-fallback');
+                
+                // Add fallback CSS
+                const fallbackCSS = `
+                    .fa-fallback .fas, .fa-fallback .far, .fa-fallback .fab {
+                        font-family: sans-serif !important;
+                        font-style: normal;
+                    }
+                    .fa-fallback .fa-bell:before { content: "🔔"; }
+                    .fa-fallback .fa-chart-line:before { content: "📈"; }
+                    .fa-fallback .fa-tachometer-alt:before { content: "📊"; }
+                    .fa-fallback .fa-chart-pie:before { content: "🥧"; }
+                    .fa-fallback .fa-newspaper:before { content: "📰"; }
+                    .fa-fallback .fa-users:before { content: "👥"; }
+                    .fa-fallback .fa-graduation-cap:before { content: "🎓"; }
+                    .fa-fallback .fa-crown:before { content: "👑"; }
+                    .fa-fallback .fa-chevron-down:before { content: "▼"; }
+                    .fa-fallback .fa-chevron-left:before { content: "◀"; }
+                    .fa-fallback .fa-bars:before { content: "☰"; }
+                    .fa-fallback .fa-magic:before { content: "✨"; }
+                    .fa-fallback .fa-search:before { content: "🔍"; }
+                    .fa-fallback .fa-eye:before { content: "👁"; }
+                    .fa-fallback .fa-home:before { content: "🏠"; }
+                    .fa-fallback .fa-history:before { content: "⏰"; }
+                    .fa-fallback .fa-star:before { content: "⭐"; }
+                    .fa-fallback .fa-brain:before { content: "🧠"; }
+                    .fa-fallback .fa-chart-bar:before { content: "📊"; }
+                    .fa-fallback .fa-user-circle:before { content: "👤"; }
+                    .fa-fallback .fa-credit-card:before { content: "💳"; }
+                    .fa-fallback .fa-cog:before { content: "⚙️"; }
+                    .fa-fallback .fa-times:before { content: "✕"; }
+                    .fa-fallback .fa-spinner:before { content: "⏳"; }
+                    .fa-fallback .fa-sync:before { content: "🔄"; }
+                    .fa-fallback .fa-fire:before { content: "🔥"; }
+                    .fa-fallback .fa-plus:before { content: "+"; }
+                    .fa-fallback .fa-upload:before { content: "⬆"; }
+                    .fa-fallback .fa-sign-out-alt:before { content: "🚪"; }
+                `;
+                
+                const style = document.createElement('style');
+                style.textContent = fallbackCSS;
+                document.head.appendChild(style);
+            }
+            
+            document.body.removeChild(testElement);
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            initMobileLayout();
+        });
+    </script>
+</body>
+</html>

@@ -160,6 +160,7 @@ body {
     gap: var(--space-lg);
 }
 
+/* Mobile Menu Toggle */
 .mobile-menu-toggle {
     display: none;
     background: none;
@@ -176,32 +177,7 @@ body {
     background: var(--bg-secondary);
 }
 
-@media (max-width: 768px) {
-    .mobile-menu-toggle {
-        display: block;
-    }
-    
-    .main-nav {
-        display: none;
-    }
-    
-    .app-sidebar {
-        transform: translateX(-100%);
-        transition: transform var(--transition-normal);
-        width: 280px;
-        z-index: 1001;
-    }
-    
-    .app-sidebar.mobile-open {
-        transform: translateX(0);
-    }
-    
-    .app-main {
-        margin-left: 0;
-    }
-}
-
-/* Sidebar Toggle Button - 移动到header区域 */
+/* Sidebar Toggle Button (Desktop) */
 .sidebar-toggle {
     width: 36px;
     height: 36px;
@@ -230,11 +206,36 @@ body {
     font-size: 1.125rem;
     color: var(--text-secondary);
     transition: all var(--transition-normal);
-    display: inline-block;
 }
 
-.app-sidebar.collapsed .sidebar-toggle i {
-    transform: rotate(180deg);
+/* Responsive behavior */
+@media (max-width: 768px) {
+    .sidebar-toggle {
+        display: none;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .main-nav {
+        display: none;
+    }
+    
+    .app-sidebar {
+        transform: translateX(-100%);
+        transition: transform var(--transition-normal);
+        width: 280px;
+        z-index: 1001;
+    }
+    
+    .app-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .app-main {
+        margin-left: 0;
+    }
 }
 
 .logo {
@@ -479,6 +480,65 @@ body {
     width: var(--sidebar-collapsed);
 }
 
+/* Sidebar Edge Toggle Button */
+.sidebar-edge-toggle {
+    position: absolute;
+    top: 24px;
+    right: -15px;
+    width: 30px;
+    height: 30px;
+    background: var(--primary-color);
+    border: 3px solid var(--bg-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    z-index: 10;
+}
+
+.sidebar-edge-toggle:hover {
+    background: var(--primary-dark);
+    transform: scale(1.15);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.sidebar-edge-toggle i {
+    font-size: 0.875rem;
+    color: white;
+    transition: transform var(--transition-normal);
+}
+
+/* Show toggle button on sidebar hover or when collapsed */
+.app-sidebar:hover .sidebar-edge-toggle,
+.app-sidebar.collapsed .sidebar-edge-toggle {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Collapsed state - icon rotated */
+.app-sidebar.collapsed .sidebar-edge-toggle i {
+    transform: rotate(180deg);
+}
+
+/* Pulse animation when sidebar is collapsed to draw attention */
+.app-sidebar.collapsed .sidebar-edge-toggle {
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(37, 99, 235, 0.6);
+    }
+}
+
 .sidebar-content {
     padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-sm);
 }
@@ -585,6 +645,7 @@ body {
     width: 48px;
     height: 48px;
     border-radius: 8px;
+    position: relative;
 }
 
 .app-sidebar.collapsed .sidebar-icon {
@@ -597,11 +658,7 @@ body {
     font-size: 1.125rem;
 }
 
-/* Tooltip for collapsed sidebar */
-.app-sidebar.collapsed .sidebar-item {
-    position: relative;
-}
-
+/* Tooltip for collapsed sidebar items */
 .app-sidebar.collapsed .sidebar-item:hover::after {
     content: attr(title);
     position: absolute;
@@ -816,6 +873,11 @@ body {
         display: none;
     }
     
+    /* Hide sidebar edge toggle on mobile */
+    .sidebar-edge-toggle {
+        display: none !important;
+    }
+    
     .header-content {
         padding: 0 var(--space-md);
     }
@@ -913,6 +975,18 @@ body {
 
 .app-sidebar.collapsed .sidebar-subtitle {
     display: none;
+}
+
+/* Hide all text content when collapsed */
+.app-sidebar.collapsed .sidebar-item span,
+.app-sidebar.collapsed .sidebar-title,
+.app-sidebar.collapsed .sidebar-section h3 {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: all var(--transition-normal);
 }
 
 /* Toast Notification System */

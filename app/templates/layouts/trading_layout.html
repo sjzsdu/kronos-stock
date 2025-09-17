@@ -4,6 +4,11 @@
 <div class="app-body">
     <!-- Trading Sidebar -->
     <aside class="app-sidebar trading-sidebar" id="sidebar">
+        <!-- Sidebar Edge Toggle Button -->
+        <div class="sidebar-edge-toggle" onclick="layoutManager.toggleSidebar()" title="切换侧边栏">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        
         <div class="sidebar-content">
             <div class="sidebar-section">
                 <h3 class="sidebar-title">
@@ -11,19 +16,19 @@
                     投资交易
                 </h3>
                 <div class="sidebar-items">
-                    <a href="{{ url_for('views.portfolio') }}" class="sidebar-item {% if request.endpoint == 'views.portfolio' %}active{% endif %}">
+                    <a href="{{ url_for('views.portfolio') }}" class="sidebar-item {% if request.endpoint == 'views.portfolio' %}active{% endif %}" title="投资组合">
                         <div class="sidebar-icon">
                             <i class="fas fa-chart-pie"></i>
                         </div>
                         <span>投资组合</span>
                     </a>
-                    <a href="{{ url_for('views.monitoring') }}" class="sidebar-item {% if request.endpoint == 'views.monitoring' %}active{% endif %}">
+                    <a href="{{ url_for('views.monitoring') }}" class="sidebar-item {% if request.endpoint == 'views.monitoring' %}active{% endif %}" title="实时监控">
                         <div class="sidebar-icon">
                             <i class="fas fa-monitor-waveform"></i>
                         </div>
                         <span>实时监控</span>
                     </a>
-                    <a href="{{ url_for('views.alerts') }}" class="sidebar-item {% if request.endpoint == 'views.alerts' %}active{% endif %}">
+                    <a href="{{ url_for('views.alerts') }}" class="sidebar-item {% if request.endpoint == 'views.alerts' %}active{% endif %}" title="价格预警">
                         <div class="sidebar-icon">
                             <i class="fas fa-bell"></i>
                         </div>
@@ -35,19 +40,19 @@
             <div class="sidebar-section">
                 <h3 class="sidebar-subtitle">股票研究</h3>
                 <div class="sidebar-items">
-                    <a href="{{ url_for('views.stock_search') }}" class="sidebar-item {% if request.endpoint == 'views.stock_search' %}active{% endif %}">
+                    <a href="{{ url_for('views.stock_search') }}" class="sidebar-item {% if request.endpoint == 'views.stock_search' %}active{% endif %}" title="股票搜索">
                         <div class="sidebar-icon">
                             <i class="fas fa-search"></i>
                         </div>
                         <span>股票搜索</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="自选股">
                         <div class="sidebar-icon">
                             <i class="fas fa-star"></i>
                         </div>
                         <span>自选股</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="关注列表">
                         <div class="sidebar-icon">
                             <i class="fas fa-eye"></i>
                         </div>
@@ -59,19 +64,19 @@
             <div class="sidebar-section">
                 <h3 class="sidebar-subtitle">交易工具</h3>
                 <div class="sidebar-items">
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="收益计算器">
                         <div class="sidebar-icon">
                             <i class="fas fa-calculator"></i>
                         </div>
                         <span>收益计算器</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="风险评估">
                         <div class="sidebar-icon">
                             <i class="fas fa-balance-scale"></i>
                         </div>
                         <span>风险评估</span>
                     </a>
-                    <a href="#" class="sidebar-item">
+                    <a href="#" class="sidebar-item" title="业绩分析">
                         <div class="sidebar-icon">
                             <i class="fas fa-chart-bar"></i>
                         </div>
