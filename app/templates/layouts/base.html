@@ -51,20 +51,22 @@
                             {% if menu_item.has_sidebar %}
                                 <!-- Theme with submenu -->
                                 <div class="nav-dropdown">
-                                    <span class="nav-item main-nav-item {% if current_theme == menu_item.key %}active{% endif %}">
+                                    <div class="nav-item main-nav-item {% if current_theme == menu_item.key %}active{% endif %}">
                                         <i class="{{ menu_item.icon }}"></i>
                                         {{ menu_item.title }}
                                         <i class="fas fa-chevron-down nav-arrow"></i>
-                                    </span>
-                                    {% if sidebar_menu and current_theme == menu_item.key %}
+                                    </div>
                                     <div class="nav-dropdown-content">
-                                        {% for section in sidebar_menu %}
+                                        {% set theme_sidebar = get_sidebar_menu_for_theme(menu_item.key) %}
+                                        {% for section in theme_sidebar %}
                                             {% for item in section['items'] %}
-                                            <a href="{{ url_for(item.endpoint) }}" class="dropdown-item">{{ item.title }}</a>
+                                            <a href="{{ url_for(item.endpoint) }}" class="dropdown-item">
+                                                <i class="{{ item.icon }}"></i>
+                                                {{ item.title }}
+                                            </a>
                                             {% endfor %}
                                         {% endfor %}
                                     </div>
-                                    {% endif %}
                                 </div>
                             {% else %}
                                 <!-- Simple link without submenu -->

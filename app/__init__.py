@@ -45,7 +45,9 @@ def create_app(config_name='default'):
             'current_theme': current_theme,
             'sidebar_menu': sidebar_menu,
             'should_use_sidebar': should_use_sidebar(current_endpoint),
-            'current_endpoint': current_endpoint
+            'current_endpoint': current_endpoint,
+            'get_sidebar_menu_for_theme': get_sidebar_menu_for_theme,
+            'get_theme_for_endpoint': get_theme_for_endpoint
         }
     
     # Register blueprints
