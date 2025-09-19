@@ -40,7 +40,7 @@
                     </button>
                     
                     <!-- Logo -->
-                    <a href="{{ url_for('views.index') }}" class="logo">
+                    <a href="{{ url_for('views.prediction') }}" class="logo">
                         <div class="logo-icon">K</div>
                         <span>Kronos</span>
                     </a>
@@ -109,14 +109,6 @@
                                 </div>
                             </div>
                             <div class="dropdown-content">
-                                <a href="{{ url_for('views.profile') }}" class="dropdown-item">
-                                    <i class="fas fa-user-circle"></i>
-                                    个人资料
-                                </a>
-                                <a href="{{ url_for('views.settings') }}" class="dropdown-item">
-                                    <i class="fas fa-cog"></i>
-                                    账户设置
-                                </a>
                                 <a href="{{ url_for('views.alerts') }}" class="dropdown-item">
                                     <i class="fas fa-bell"></i>
                                     预警设置

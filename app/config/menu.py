@@ -9,12 +9,6 @@ PRIMARY_MENU = [
         'title': '股票预测',
         'icon': 'fas fa-chart-line',
         'has_sidebar': True
-    },
-    {
-        'key': 'admin',
-        'title': '系统管理',
-        'icon': 'fas fa-user-cog',
-        'has_sidebar': True
     }
 ]
 
@@ -36,51 +30,6 @@ SIDEBAR_MENUS = {
                     'icon': 'fas fa-history',
                     'url': 'views.history',
                     'endpoint': 'views.history'
-                },
-                {
-                    'title': '股票搜索',
-                    'icon': 'fas fa-search',
-                    'url': 'views.stock_search',
-                    'endpoint': 'views.stock_search'
-                }
-            ]
-        },
-        {
-            'title': '控制台',
-            'icon': 'fas fa-tachometer-alt',
-            'items': [
-                {
-                    'title': '仪表盘',
-                    'icon': 'fas fa-chart-pie',
-                    'url': 'views.dashboard',
-                    'endpoint': 'views.dashboard'
-                },
-                {
-                    'title': '首页',
-                    'icon': 'fas fa-home',
-                    'url': 'views.index',
-                    'endpoint': 'views.index'
-                }
-            ]
-        }
-    ],
-    
-    'admin': [
-        {
-            'title': '用户管理',
-            'icon': 'fas fa-user-cog',
-            'items': [
-                {
-                    'title': '个人资料',
-                    'icon': 'fas fa-user',
-                    'url': 'views.profile',
-                    'endpoint': 'views.profile'
-                },
-                {
-                    'title': '系统设置',
-                    'icon': 'fas fa-cog',
-                    'url': 'views.settings',
-                    'endpoint': 'views.settings'
                 }
             ]
         },
@@ -88,6 +37,12 @@ SIDEBAR_MENUS = {
             'title': '系统工具',
             'icon': 'fas fa-tools',
             'items': [
+                {
+                    'title': '系统警报',
+                    'icon': 'fas fa-bell',
+                    'url': 'views.alerts',
+                    'endpoint': 'views.alerts'
+                },
                 {
                     'title': '系统测试',
                     'icon': 'fas fa-flask',
@@ -106,16 +61,10 @@ def get_theme_for_endpoint(endpoint):
     # Map endpoints to themes
     endpoint_theme_map = {
         # Prediction theme
-        'views.index': 'prediction',
         'views.prediction': 'prediction',
-        'views.stock_search': 'prediction', 
         'views.history': 'prediction',
-        'views.dashboard': 'prediction',
-        
-        # Admin theme
-        'views.profile': 'admin',
-        'views.settings': 'admin',
-        'views.test': 'admin'
+        'views.alerts': 'prediction',
+        'views.test': 'prediction'
     }
     
     return endpoint_theme_map.get(endpoint)

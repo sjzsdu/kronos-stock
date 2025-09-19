@@ -775,7 +775,7 @@ body {
 }
 
 .main-content {
-    padding: var(--space-xl);
+    padding: var(--space-lg);
     max-width: var(--content-max-width);
     margin: 0 auto;
     min-height: calc(100vh - var(--header-height) - 4rem);
