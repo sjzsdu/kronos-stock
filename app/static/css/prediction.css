@@ -1,0 +1,431 @@
+/* Prediction Page CSS Variables */
+:root {
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --success-color: #dc3545; /* 中国习惯：红色为涨 */
+    --danger-color: #28a745; /* 中国习惯：绿色为跌 */
+    --warning-color: #ffd700;
+    --gray-light: #f8f9fa;
+    --gray-medium: #6c757d;
+    --gray-dark: #333;
+    --white: #ffffff;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --border-radius: 8px;
+    --border-radius-large: 12px;
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --font-mono: 'Monaco', 'Menlo', 'Consolas', monospace;
+}
+
+/* Basic Layout */
+.prediction-page {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.prediction-form {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 20px;
+}
+
+.prediction-results {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: var(--shadow-light);
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: var(--gray-dark);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.btn-predict {
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.btn-predict:hover {
+    background: var(--primary-hover);
+}
+
+.prediction-chart {
+    height: 300px;
+    background: var(--gray-light);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-medium);
+    margin: 20px 0;
+}
+
+/* Enhanced Prediction Result Styles */
+.prediction-result-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.prediction-summary-card {
+    background: var(--gradient-primary);
+    color: var(--white);
+    border-radius: var(--border-radius-large);
+    padding: 24px;
+    box-shadow: var(--shadow-medium);
+}
+
+.summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.summary-header h4 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.trend-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.trend-bullish {
+    background: rgba(220, 53, 69, 0.9); /* 红色为涨 */
+    color: var(--white);
+}
+
+.trend-bearish {
+    background: rgba(40, 167, 69, 0.9); /* 绿色为跌 */
+    color: var(--white);
+}
+
+.summary-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    margin-bottom: 4px;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.target-price {
+    color: var(--warning-color);
+}
+
+.change-pct.positive {
+    color: var(--success-color); /* 红色为涨 */
+}
+
+.change-pct.negative {
+    color: var(--danger-color); /* 绿色为跌 */
+}
+
+/* Chart Container */
+.prediction-chart-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--shadow-light);
+}
+
+.prediction-chart-container h5 {
+    margin: 0 0 20px 0;
+    color: var(--gray-dark);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.prediction-chart-container canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+/* Data Table */
+.prediction-data-table {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--shadow-light);
+}
+
+.prediction-data-table h5 {
+    margin: 0 0 16px 0;
+    color: var(--gray-dark);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin-top: 16px;
+    border-radius: var(--border-radius);
+    border: 1px solid #dee2e6;
+}
+
+.prediction-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    background: var(--white);
+}
+
+.prediction-table th {
+    background: var(--gray-light);
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    color: var(--gray-dark);
+    white-space: nowrap;
+}
+
+.prediction-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #dee2e6;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.prediction-row:hover {
+    background: rgba(0, 123, 255, 0.05);
+}
+
+.date-cell {
+    min-width: 120px;
+    text-align: left !important;
+}
+
+.date-info .date {
+    display: block;
+    font-weight: 500;
+    color: var(--gray-dark);
+}
+
+.date-info .weekday {
+    color: var(--gray-medium);
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+.price-cell {
+    text-align: right !important;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    min-width: 80px;
+}
+
+.price-cell.high {
+    color: var(--success-color); /* 红色表示最高价 */
+}
+
+.price-cell.low {
+    color: var(--danger-color); /* 绿色表示最低价 */
+}
+
+.price-cell.close {
+    font-weight: 600;
+    color: var(--gray-dark);
+}
+
+.change-cell {
+    text-align: right !important;
+    min-width: 80px;
+}
+
+.change-value {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.change-value.positive {
+    color: var(--success-color); /* 红色为涨 */
+}
+
+.change-value.negative {
+    color: var(--danger-color); /* 绿色为跌 */
+}
+
+.volume-cell {
+    text-align: right !important;
+    font-family: var(--font-mono);
+    color: var(--gray-medium);
+    min-width: 100px;
+}
+
+/* Notes Section */
+.prediction-notes {
+    background: var(--gray-light);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.prediction-notes h5 {
+    margin: 0 0 12px 0;
+    color: var(--gray-dark);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.notes-content {
+    margin-top: 12px;
+}
+
+.note-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.875rem;
+    color: var(--gray-medium);
+}
+
+.note-item i {
+    margin-right: 8px;
+    width: 16px;
+    color: var(--primary-color);
+}
+
+/* Error Display */
+.prediction-error {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: var(--border-radius);
+    color: #721c24;
+}
+
+.error-icon {
+    font-size: 2rem;
+    color: var(--success-color);
+}
+
+.error-message h4 {
+    margin: 0 0 8px 0;
+    color: #721c24;
+}
+
+.error-message p {
+    margin: 0;
+}
+
+/* Loading Indicator */
+.htmx-indicator {
+    display: none;
+    color: var(--primary-color);
+    font-size: 0.875rem;
+}
+
+.htmx-request .htmx-indicator {
+    display: inline-block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .prediction-page {
+        padding: 10px;
+    }
+    
+    .summary-metrics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .metric {
+        padding: 8px;
+    }
+    
+    .metric-value {
+        font-size: 1.2rem;
+    }
+    
+    .prediction-table {
+        font-size: 0.75rem;
+    }
+    
+    .prediction-table th,
+    .prediction-table td {
+        padding: 8px 6px;
+    }
+    
+    .summary-header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .prediction-chart-container canvas {
+        height: 250px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .prediction-table th,
+    .prediction-table td {
+        padding: 6px 4px;
+    }
+    
+    .date-cell {
+        min-width: 100px;
+    }
+}

@@ -52,15 +52,17 @@ def predict():
         success, result = prediction_service.predict_stock(stock_code, lookback, pred_len, temperature)
         
         if success:
-            return jsonify({
-                'success': True,
-                'data': result
-            })
+            # Render the result as HTML for HTMX
+            from flask import render_template
+            html_content = render_template('components/prediction_result.html', 
+                                         success=True, 
+                                         data=result)
+            return html_content
         else:
-            return jsonify({
-                'success': False,
-                'error': result.get('error', 'Prediction failed')
-            }), 400
+            error_html = render_template('components/prediction_result.html', 
+                                       success=False, 
+                                       error=result.get('error', 'Prediction failed'))
+            return error_html
     except Exception as e:
         return jsonify({
             'success': False,
