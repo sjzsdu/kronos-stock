@@ -60,10 +60,19 @@ class ModelService:
             if not os.path.exists(model_path):
                 return False, f"Model path {model_path} does not exist"
             
-            # Load tokenizer and model
+            # Load tokenizer and model with CPU device
+            import torch
+            device = torch.device('cpu')  # Force CPU usage
+            
             self.tokenizer = KronosTokenizer.from_pretrained(model_path)
             self.model = Kronos.from_pretrained(model_path)
-            self.predictor = KronosPredictor(self.model, self.tokenizer)
+            
+            # Move model to CPU
+            self.model = self.model.to(device)
+            self.model.eval()  # Set to evaluation mode
+            
+            # Create predictor with CPU device
+            self.predictor = KronosPredictor(self.model, self.tokenizer, device="cpu")
             
             current_app.logger.info(f"Successfully loaded model: {model_name}")
             return True, f"Model {model_name} loaded successfully"

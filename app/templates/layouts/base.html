@@ -6,7 +6,8 @@
     <title>{% block title %}Kronos 智能投资平台{% endblock %}</title>
     
     <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/json-enc.js"></script>
     
     <!-- Charts -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
@@ -22,6 +23,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     
     {% block head %}{% endblock %}
+    {% block additional_css %}{% endblock %}
 </head>
 <body>
     <div class="app-layout">
@@ -154,5 +156,6 @@
     <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
     
     {% block scripts %}{% endblock %}
+    {% block additional_js %}{% endblock %}
 </body>
 </html>

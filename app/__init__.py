@@ -53,8 +53,23 @@ def create_app(config_name='default'):
     # Register blueprints
     from app.api import api_bp
     from app.views import views_bp
+    from app.api.prediction import prediction_api
     
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(views_bp)
+    app.register_blueprint(prediction_api, url_prefix='/api')
+    
+    # Initialize model service with default model
+    with app.app_context():
+        from app.services import model_service
+        try:
+            # Try to load default model (kronos-mini for faster startup)
+            success, message = model_service.load_model('kronos-mini')
+            if success:
+                app.logger.info(f"✅ Default model loaded: {message}")
+            else:
+                app.logger.warning(f"⚠️  Failed to load default model: {message}")
+        except Exception as e:
+            app.logger.error(f"❌ Model initialization error: {e}")
     
     return app

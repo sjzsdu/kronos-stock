@@ -1,9 +1,5 @@
 {% extends "layouts/dynamic_layout.html" %}
 
-{% block title %}股票预测 - Kronos{% endblock %}
-
-{% block page_title %}股票预测{% endblock %}
-
 {% block additional_css %}
 <style>
 .prediction-page {
@@ -76,7 +72,10 @@
 <div class="prediction-page">
     <div class="prediction-form">
         <h3>AI股票预测</h3>
-        <form hx-post="/api/predict" hx-target="#prediction-results" hx-indicator="#loading">
+        <form hx-post="/api/predict" 
+              hx-target="#prediction-results" 
+              hx-indicator="#loading"
+              hx-ext="json-enc">
             <div class="form-group">
                 <label for="stock_code">股票代码</label>
                 <input type="text" id="stock_code" name="stock_code" placeholder="如：000001" required>

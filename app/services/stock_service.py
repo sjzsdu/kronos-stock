@@ -14,16 +14,28 @@ class StockService:
         """Check if china_stock_data is available"""
         try:
             from china_stock_data import StockData
+            # Test if we can create an instance
+            test_instance = StockData('000001')
             return True
-        except ImportError:
-            current_app.logger.warning("china_stock_data not available, using simulated data")
+        except (ImportError, Exception) as e:
+            # Log warning if we have app context
+            try:
+                current_app.logger.warning(f"china_stock_data not available: {e}, using simulated data")
+            except RuntimeError:
+                # No app context available during init
+                pass
             return False
     
     def get_stock_data(self, stock_code: str, period: str = '1y') -> Tuple[bool, pd.DataFrame, str]:
         """Get stock data for given code and period"""
         try:
+            # Double-check availability at runtime
             if self._stock_data_available:
-                return self._get_real_stock_data(stock_code, period)
+                try:
+                    return self._get_real_stock_data(stock_code, period)
+                except Exception as e:
+                    current_app.logger.warning(f"Real stock data failed: {e}, falling back to simulated data")
+                    return self._get_simulated_stock_data(stock_code, period)
             else:
                 return self._get_simulated_stock_data(stock_code, period)
         except Exception as e:
@@ -35,8 +47,8 @@ class StockService:
         """Get real stock data using china_stock_data"""
         from china_stock_data import StockData
         
-        stock_data = StockData()
-        df = stock_data.get_stock_data(stock_code, period)
+        stock_data = StockData(stock_code)  # Pass stock_code as symbol parameter
+        df = stock_data.get_stock_data(period=period)  # Pass period as keyword argument
         
         if df.empty:
             return False, df, f"No data found for stock code: {stock_code}"
