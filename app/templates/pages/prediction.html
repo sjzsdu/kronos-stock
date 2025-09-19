@@ -1,63 +1,87 @@
-{% extends "layouts/dynamic_layout.html" %}
+{% extends "layouts/sidebar.html" %}
 
 {% block head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block content %}
-<div class="prediction-container">
+<div class="container p-6">
     <!-- 表单区域 -->
-    <div class="prediction-section">
-        <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-            <i class="fas fa-brain text-primary"></i>
+    <div class="bg-white rounded-xl shadow-prediction p-6 transition-all duration-300 hover:shadow-xl">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+            <i class="fas fa-brain text-primary text-lg"></i>
             AI股票预测
         </h3>
         <form hx-post="/api/predict"
                     hx-target="#prediction-results"
                     hx-indicator="#loading"
                     hx-ext="json-enc"
-                    class="prediction-form">
-            <div class="form-group">
-                <label for="stock_code">股票代码</label>
-                <input type="text" id="stock_code" name="stock_code" placeholder="如：000001" required>
+                    class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-2">
+                    <label for="stock_code" class="block text-sm font-medium text-gray-700">股票代码</label>
+                    <input 
+                        type="text" 
+                        id="stock_code" 
+                        name="stock_code" 
+                        placeholder="如：000001" 
+                        required 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                    >
+                </div>
+                <div class="space-y-2">
+                    <label for="prediction_days" class="block text-sm font-medium text-gray-700">预测天数</label>
+                    <select 
+                        id="prediction_days" 
+                        name="prediction_days" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white"
+                    >
+                        <option value="7">7天</option>
+                        <option value="15">15天</option>
+                        <option value="30">30天</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label for="model_type" class="block text-sm font-medium text-gray-700">预测模型</label>
+                    <select 
+                        id="model_type" 
+                        name="model_type" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white"
+                    >
+                        <option value="kronos-base">Kronos Base</option>
+                        <option value="kronos-small">Kronos Small</option>
+                        <option value="kronos-mini">Kronos Mini</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="prediction_days">预测天数</label>
-                <select id="prediction_days" name="prediction_days">
-                    <option value="7">7天</option>
-                    <option value="15">15天</option>
-                    <option value="30">30天</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="model_type">预测模型</label>
-                <select id="model_type" name="model_type">
-                    <option value="kronos-base">Kronos Base</option>
-                    <option value="kronos-small">Kronos Small</option>
-                    <option value="kronos-mini">Kronos Mini</option>
-                </select>
-            </div>
-            <div class="flex items-center">
-                <button type="submit" class="btn-predict">
+            <div class="flex items-center gap-4">
+                <button 
+                    type="submit" 
+                    class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-6 rounded-lg transition-all flex items-center gap-2 shadow-sm hover:shadow transform hover:-translate-y-0.5"
+                >
                     <i class="fas fa-magic"></i> 开始预测
                 </button>
-                <div id="loading" class="loading-indicator">
-                    <i class="fas fa-spinner fa-spin"></i> 预测中...
+                <div 
+                    id="loading" 
+                    class="hidden flex items-center gap-2 text-gray-600"
+                    hx-indicator="this"
+                >
+                    <i class="fas fa-spinner fa-spin text-primary"></i> 预测中...
                 </div>
             </div>
         </form>
     </div>
 
     <!-- 结果区域 -->
-    <div class="prediction-section prediction-results">
-        <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-            <i class="fas fa-chart-line text-primary"></i>
+    <div class="bg-white rounded-xl shadow-prediction p-6 transition-all duration-300 hover:shadow-xl">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+            <i class="fas fa-chart-line text-primary text-lg"></i>
             预测结果
         </h3>
         <div id="prediction-results" class="space-y-4">
-            <div class="prediction-chart-placeholder">
-                <i class="fas fa-chart-line fa-3x"></i>
-                <p class="ml-5 text-slate-500">请选择股票并点击预测按钮开始AI分析</p>
+            <div class="prediction-chart-placeholder flex flex-col items-center justify-center py-16 text-gray-400 space-y-4">
+                <i class="fas fa-chart-line fa-5x opacity-70"></i>
+                <p class="text-gray-500 text-lg">请选择股票并点击预测按钮开始AI分析</p>
             </div>
         </div>
     </div>

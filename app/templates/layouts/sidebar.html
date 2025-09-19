@@ -1,0 +1,61 @@
+{% extends "layouts/base.html" %}
+
+{% block body %}
+<div class="flex h-screen bg-gray-50 overflow-hidden">
+    <!-- Dynamic Sidebar -->
+    <aside id="sidebar" class="group relative w-64 bg-white border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out">
+
+        <!-- 折叠按钮：圆形 / 半悬浮 / 默认隐藏 -->
+        <button
+            id="sidebarToggle"
+            type="button"
+            aria-label="折叠侧边栏"
+            aria-expanded="true"
+            style="transform: translateX(50%);"
+            class="absolute top-3 right-0 translate-x-1/2 transform w-9 h-9 rounded-full
+                   flex items-center justify-center
+                   bg-white/90 backdrop-blur border border-slate-200 shadow-md
+                   text-slate-500 hover:text-primary hover:shadow-lg
+                   transition-all duration-200
+                   opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto
+                   focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+        >
+            <span class="icon-expanded"><i class="fas fa-chevron-left text-xs"></i></span>
+            <span class="icon-collapsed hidden"><i class="fas fa-chevron-right text-xs"></i></span>
+        </button>
+
+        <div class="py-4 h-full overflow-y-auto">
+            {% if sidebar_menu %}
+                {% for section in sidebar_menu %}
+                <div class="mb-6 px-4">
+                    <h3 class="sidebar-section-title flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                        <i class="{{ section.icon }} sidebar-menu-icon mr-2"></i>
+                        <span class="sidebar-label">{{ section.title }}</span>
+                    </h3>
+                    
+                    {% if section['items'] %}
+                    <div class="space-y-1 sidebar-menu">
+                        {% for item in section['items'] %}
+                        <a href="{{ url_for(item.endpoint) }}" 
+                           class="sidebar-menu-item flex items-center px-3 py-2 text-sm font-medium rounded-md {% if request.endpoint == item.endpoint %} bg-blue-50 text-blue-600 {% else %} text-gray-700 hover:bg-gray-50 {% endif %}" 
+                           title="{{ item.title }}">
+                            <div class="sidebar-menu-icon mr-3 text-gray-400">
+                                <i class="{{ item.icon }}"></i>
+                            </div>
+                            <span class="sidebar-label">{{ item.title }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}
