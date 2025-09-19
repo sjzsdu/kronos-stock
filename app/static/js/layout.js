@@ -94,9 +94,23 @@ class LayoutManager {
     }
     
     toggleUserDropdown() {
-        const dropdown = document.querySelector('.user-dropdown');
+        const dropdown = document.getElementById('userDropdown');
         if (dropdown) {
-            dropdown.classList.toggle('active');
+            dropdown.classList.toggle('hidden');
+        }
+    }
+    
+    toggleNotifications() {
+        const dropdown = document.getElementById('notificationDropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('hidden');
+        }
+    }
+    
+    toggleMobileMenu() {
+        const mobileMenu = document.querySelector('.mobile-nav');
+        if (mobileMenu) {
+            mobileMenu.classList.toggle('hidden');
         }
     }
     
@@ -653,6 +667,13 @@ function getToastIcon(type) {
         info: '<i class="fas fa-info-circle"></i>'
     };
     return icons[type] || icons.info;
+}
+
+// 登出功能
+function logout() {
+    console.log('用户登出');
+    // 实际项目中可以发送登出请求到服务器
+    window.location.href = '/';
 }
 
 // Initialize layout manager when DOM is ready

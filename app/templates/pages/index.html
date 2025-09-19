@@ -1,99 +1,110 @@
-{% extends "layouts/dynamic_layout.html" %}
+{% extends "layouts/base.html" %}
 
-{% block content %}
-<div class="dashboard-container">
-    <!-- 重定向到现代版本的提示 -->
-    <div class="alert alert-info">
-        <h4><i class="fas fa-rocket"></i> 推荐使用新版本</h4>
-        <p>体验全新的现代化界面和完善的功能。</p>
-        <a href="/" class="btn btn-primary">前往现代版本</a>
-    </div>
-    
-    <!-- Model Status Section -->
-    <section class="card model-section">
-        <h2>模型状态</h2>
-        <div id="model-status" 
-             hx-get="{{ url_for('views.model_status_component') }}"
-             hx-trigger="load"
-             hx-on:htmx:responseError="handleComponentError">
-            <div class="loading">加载中...</div>
-        </div>
-    </section>
+{% block body %}
+<div class="relative">
+	<!-- Hero Section -->
+	<section class="relative overflow-hidden">
+		<div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-primary/5 to-purple-500/10"></div>
+		<div class="max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-28 relative">
+			<div class="max-w-3xl">
+				<div class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/70 backdrop-blur px-3 py-1 text-xs font-medium text-primary shadow-sm mb-6">
+					<i class="fas fa-rocket"></i>
+					即将上线 · Kronos AI 投资引擎
+				</div>
+				<h1 class="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+					用 <span class="bg-gradient-to-r from-indigo-600 via-primary to-purple-600 bg-clip-text text-transparent">AI 驱动</span> 的洞察
+					打造你的下一步投资决策
+				</h1>
+				<p class="mt-6 text-lg md:text-xl text-slate-600 leading-relaxed">
+					Kronos 聚合多源市场数据、深度学习预测模型与智能事件分析，帮助你在复杂波动中快速形成结构化判断。
+				</p>
+				<div class="mt-8 flex flex-col sm:flex-row gap-4">
+					<a href="{{ url_for('views.prediction') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-primary text-white px-6 py-3 text-sm font-medium shadow-prediction-sm hover:bg-primary-dark transition">
+						立即体验预测
+						<i class="fas fa-arrow-right"></i>
+					</a>
+					<button class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+						加入内测名单
+						<i class="fas fa-envelope-open-text text-slate-500"></i>
+					</button>
+				</div>
+				<div class="mt-10 flex items-center gap-6 text-xs text-slate-500">
+					<div class="flex items-center gap-2"><i class="fas fa-shield-alt text-primary"></i> 数据本地化</div>
+					<div class="flex items-center gap-2"><i class="fas fa-lock text-primary"></i> 隐私安全</div>
+					<div class="flex items-center gap-2"><i class="fas fa-brain text-primary"></i> 模型持续迭代</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-    <!-- Prediction Form Section -->
-    <section class="card prediction-section">
-        <h2>股票预测</h2>
-        <div id="prediction-form"
-             hx-get="{{ url_for('views.prediction_form_component') }}"
-             hx-trigger="load"
-             hx-on:htmx:responseError="handleComponentError">
-            <div class="loading">加载中...</div>
-        </div>
-    </section>
+	<!-- Stats Section -->
+	<section class="max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-20">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+			{% set stats = [
+				{'icon':'fa-database','label':'历史数据点','value':'120M+'},
+				{'icon':'fa-microchip','label':'已训练模型版本','value':'36'},
+				{'icon':'fa-chart-line','label':'预测覆盖标的','value':'2800+'},
+				{'icon':'fa-clock','label':'平均响应毫秒','value':'<120ms'}
+			] %}
+			{% for s in stats %}
+			<div class="flex flex-col gap-2 rounded-lg bg-white p-5 shadow-prediction-sm border border-slate-200 hover:shadow-prediction transition">
+				<div class="flex items-center justify-between">
+					<span class="inline-grid h-10 w-10 place-items-center rounded-md bg-primary/10 text-primary"><i class="fas {{ s.icon }}"></i></span>
+					<i class="fas fa-signal text-slate-200"></i>
+				</div>
+				<div class="text-2xl font-bold tracking-tight text-slate-900">{{ s.value }}</div>
+				<div class="text-xs font-medium text-slate-500">{{ s.label }}</div>
+			</div>
+			{% endfor %}
+		</div>
+	</section>
 
-    <!-- Results Section -->
-    <section class="card results-section">
-        <h2>预测结果</h2>
-        <div id="prediction-results">
-            <div class="placeholder">
-                <p>请先选择股票代码并点击预测按钮</p>
-            </div>
-        </div>
-    </section>
+	<!-- Feature Grid -->
+	<section class="max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24 border-t border-slate-100">
+		<div class="max-w-3xl mb-12">
+			<h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-4">核心能力矩阵</h2>
+			<p class="text-slate-600 leading-relaxed">从数据采集、特征工程、模型预测到事件监控与结果解释，Kronos 提供端到端的 Alpha 发现与风险管理增强。</p>
+		</div>
+		<div class="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
+			{% set features = [
+				{'icon':'fa-brain','title':'多尺度预测引擎','desc':'融合序列建模与注意力结构，对短中期区间进行协同预测。','badge':'Model'},
+				{'icon':'fa-layer-group','title':'特征编排管线','desc':'自动衍生技术/资金/结构因子并监控漂移。','badge':'Data'},
+				{'icon':'fa-bolt','title':'事件脉冲检测','desc':'实时提取突发新闻与异动信号，量化市场冲击强度。','badge':'Signal'},
+				{'icon':'fa-magnifying-glass-chart','title':'可解释结果','desc':'生成驱动要素贡献度与置信区间。','badge':'Explain'},
+				{'icon':'fa-chart-pie','title':'风险分层监控','desc':'聚合波动率、相关性与尾部风险指标。','badge':'Risk'},
+				{'icon':'fa-plug','title':'开放式 API','desc':'标准化 REST / Webhook 接入，快速集成内部系统。','badge':'API'}
+			] %}
+			{% for f in features %}
+			<div class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-prediction-sm transition">
+				<div class="flex items-start justify-between mb-4">
+					<span class="inline-grid h-11 w-11 place-items-center rounded-lg bg-primary/10 text-primary group-hover:scale-105 transition"><i class="fas {{ f.icon }} text-lg"></i></span>
+					<span class="text-[10px] font-semibold tracking-wide uppercase bg-slate-100 text-slate-600 px-2 py-1 rounded-md">{{ f.badge }}</span>
+				</div>
+				<h3 class="text-base font-semibold text-slate-800 mb-2">{{ f.title }}</h3>
+				<p class="text-sm text-slate-600 leading-relaxed">{{ f.desc }}</p>
+				<div class="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 group-hover:scale-x-100 bg-gradient-to-r from-indigo-500 via-primary to-purple-600 transition-transform"></div>
+			</div>
+			{% endfor %}
+		</div>
+	</section>
 
-    <!-- Chart Section -->
-    <section class="card chart-section">
-        <h2>价格走势图</h2>
-        <div id="chart-container">
-            <div class="placeholder">
-                <p>图表将在预测完成后显示</p>
-            </div>
-        </div>
-    </section>
+	<!-- CTA -->
+	<section class="relative max-w-7xl mx-auto px-4 md:px-6 pb-24">
+		<div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-600 via-primary to-purple-600 p-8 md:p-14 shadow-prediction text-white">
+			<div class="max-w-2xl">
+				<h2 class="text-2xl md:text-4xl font-bold leading-tight mb-4">与 Kronos 一起，重新定义量化洞察</h2>
+				<p class="text-sm md:text-base text-white/90 leading-relaxed mb-8">立即加入内测，提前体验下一代 AI 驱动的投资研究工作流。</p>
+				<div class="flex flex-col sm:flex-row gap-4">
+					<a href="{{ url_for('views.prediction') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-white text-primary font-semibold px-6 py-3 text-sm shadow hover:shadow-md transition">
+						进入预测中心 <i class="fas fa-arrow-right"></i>
+					</a>
+					<button class="inline-flex items-center justify-center gap-2 rounded-md bg-primary/20 backdrop-blur px-6 py-3 text-sm font-medium text-white hover:bg-primary/30 transition border border-white/30">
+						预约演示 <i class="fas fa-calendar-alt"></i>
+					</button>
+				</div>
+			</div>
+			<div class="pointer-events-none absolute -right-10 -bottom-10 w-72 h-72 rounded-full bg-white/10 blur-3xl"></div>
+		</div>
+	</section>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-// HTMX event handlers
-document.body.addEventListener('htmx:afterRequest', function(event) {
-    if (event.detail.target.id === 'prediction-results') {
-        // Update chart after prediction
-        const stockCode = document.querySelector('input[name="stock_code"]')?.value;
-        if (stockCode) {
-            htmx.ajax('GET', '/components/chart-container?stock_code=' + stockCode, {
-                target: '#chart-container'
-            });
-        }
-    }
-});
-
-// Form validation
-document.body.addEventListener('htmx:configRequest', function(event) {
-    if (event.detail.path === '/components/prediction-result') {
-        const form = event.detail.elt;
-        const stockCode = form.querySelector('input[name="stock_code"]')?.value;
-        
-        if (!stockCode) {
-            event.preventDefault();
-            alert('请输入股票代码');
-            return false;
-        }
-    }
-});
-
-function handleComponentError(event) {
-    console.log('HTMX component error:', event);
-    const target = event.detail.target;
-    target.innerHTML = `
-        <div class="alert alert-warning">
-            <h6><i class="fas fa-exclamation-triangle"></i> 组件加载失败</h6>
-            <p>请尝试刷新页面，或者使用 <a href="/" class="alert-link">现代版本界面</a>。</p>
-            <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
-                <i class="fas fa-refresh"></i> 刷新页面
-            </button>
-        </div>
-    `;
-}
-</script>
 {% endblock %}

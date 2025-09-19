@@ -1,23 +1,26 @@
 {% extends "layouts/dynamic_layout.html" %}
 
-{% block additional_css %}
+{% block head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/prediction.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="prediction-page">
-    <div class="prediction-form">
-        <h3>AI股票预测</h3>
-        <form hx-post="/api/predict" 
-              hx-target="#prediction-results" 
-              hx-indicator="#loading"
-              hx-ext="json-enc">
+<div class="prediction-container">
+    <!-- 表单区域 -->
+    <div class="prediction-section">
+        <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+            <i class="fas fa-brain text-primary"></i>
+            AI股票预测
+        </h3>
+        <form hx-post="/api/predict"
+                    hx-target="#prediction-results"
+                    hx-indicator="#loading"
+                    hx-ext="json-enc"
+                    class="prediction-form">
             <div class="form-group">
                 <label for="stock_code">股票代码</label>
                 <input type="text" id="stock_code" name="stock_code" placeholder="如：000001" required>
             </div>
-            
             <div class="form-group">
                 <label for="prediction_days">预测天数</label>
                 <select id="prediction_days" name="prediction_days">
@@ -26,7 +29,6 @@
                     <option value="30">30天</option>
                 </select>
             </div>
-            
             <div class="form-group">
                 <label for="model_type">预测模型</label>
                 <select id="model_type" name="model_type">
@@ -35,23 +37,27 @@
                     <option value="kronos-mini">Kronos Mini</option>
                 </select>
             </div>
-            
-            <button type="submit" class="btn-predict">
-                <i class="fas fa-brain"></i> 开始预测
-            </button>
-            
-            <div id="loading" class="htmx-indicator" style="margin-left: 10px;">
-                <i class="fas fa-spinner fa-spin"></i> 预测中...
+            <div class="flex items-center">
+                <button type="submit" class="btn-predict">
+                    <i class="fas fa-magic"></i> 开始预测
+                </button>
+                <div id="loading" class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin"></i> 预测中...
+                </div>
             </div>
         </form>
     </div>
-    
-    <div class="prediction-results">
-        <h3>预测结果</h3>
-        <div id="prediction-results">
-            <div class="prediction-chart">
+
+    <!-- 结果区域 -->
+    <div class="prediction-section prediction-results">
+        <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+            <i class="fas fa-chart-line text-primary"></i>
+            预测结果
+        </h3>
+        <div id="prediction-results" class="space-y-4">
+            <div class="prediction-chart-placeholder">
                 <i class="fas fa-chart-line fa-3x"></i>
-                <p style="margin-left: 20px;">请选择股票并点击预测按钮开始AI分析</p>
+                <p class="ml-5 text-slate-500">请选择股票并点击预测按钮开始AI分析</p>
             </div>
         </div>
     </div>

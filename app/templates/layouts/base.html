@@ -16,54 +16,39 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
     <!-- Alternative CDN as fallback -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css" crossorigin="anonymous" media="none" onload="if(media!='all')media='all'" onerror="this.onerror=null;this.media='all';">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
-    
+    <!-- Tailwind build output -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tw.css') }}">
+
     {% block head %}{% endblock %}
-    {% block additional_css %}{% endblock %}
 </head>
-<body>
-    <div class="app-layout">
+<body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
+    <div class="flex flex-col min-h-screen">
         <!-- Header -->
-        <header class="app-header">
-            <div class="header-content">
-                <div class="header-left">
-                    <!-- Sidebar Toggle (Desktop) -->
-                    <button class="sidebar-toggle" onclick="layoutManager.toggleSidebar()" title="切换侧边栏">
+        <header class="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-6">
+                <div class="flex items-center gap-4 flex-1 min-w-0">
+                    <button class="mobile-menu-toggle p-2 rounded-md text-slate-600 hover:bg-slate-100 md:hidden" onclick="layoutManager.toggleMobileMenu()">
                         <i class="fas fa-bars"></i>
                     </button>
-                    
-                    <!-- Mobile Menu Toggle -->
-                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    
-                    <!-- Logo -->
-                    <a href="{{ url_for('views.prediction') }}" class="logo">
-                        <div class="logo-icon">K</div>
-                        <span>Kronos</span>
+                    <a href="{{ url_for('views.prediction') }}" class="flex items-center gap-2 font-semibold text-slate-800">
+                        <span class="grid h-9 w-9 place-items-center rounded-md bg-primary text-white text-lg font-bold shadow-prediction-sm">K</span>
+                        <span class="text-lg tracking-tight">Kronos</span>
                     </a>
-                    
-                    <!-- Main Navigation -->
-                    <nav class="main-nav">
+                    <nav class="hidden lg:flex items-center gap-1 ml-4">
                         {% for menu_item in primary_menu %}
                             {% if menu_item.has_sidebar %}
-                                <!-- Theme with submenu -->
-                                <div class="nav-dropdown">
-                                    <div class="nav-item main-nav-item {% if current_theme == menu_item.key %}active{% endif %}">
+                                <div class="relative group">
+                                    <button type="button" class="px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1 text-slate-600 hover:text-primary hover:bg-slate-100 transition {{ 'bg-slate-100 text-primary' if current_theme == menu_item.key }}">
                                         <i class="{{ menu_item.icon }}"></i>
                                         {{ menu_item.title }}
-                                        <i class="fas fa-chevron-down nav-arrow"></i>
-                                    </div>
-                                    <div class="nav-dropdown-content">
+                                        <i class="fas fa-chevron-down text-[10px]"></i>
+                                    </button>
+                                    <div class="absolute left-0 mt-2 w-56 rounded-md border border-slate-200 bg-white shadow-lg py-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition" role="menu">
                                         {% set theme_sidebar = get_sidebar_menu_for_theme(menu_item.key) %}
                                         {% for section in theme_sidebar %}
                                             {% for item in section['items'] %}
-                                            <a href="{{ url_for(item.endpoint) }}" class="dropdown-item">
-                                                <i class="{{ item.icon }}"></i>
+                                            <a href="{{ url_for(item.endpoint) }}" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900" role="menuitem">
+                                                <i class="{{ item.icon }} text-slate-500"></i>
                                                 {{ item.title }}
                                             </a>
                                             {% endfor %}
@@ -71,8 +56,7 @@
                                     </div>
                                 </div>
                             {% else %}
-                                <!-- Simple link without submenu -->
-                                <a href="{{ url_for(menu_item.url) }}" class="nav-item {% if current_endpoint == menu_item.url %}active{% endif %}">
+                                <a href="{{ url_for(menu_item.url) }}" class="px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2 text-slate-600 hover:text-primary hover:bg-slate-100 transition {{ 'bg-slate-100 text-primary' if current_endpoint == menu_item.url }}">
                                     <i class="{{ menu_item.icon }}"></i>
                                     {{ menu_item.title }}
                                 </a>
@@ -80,73 +64,51 @@
                         {% endfor %}
                     </nav>
                 </div>
-                
-                <div class="header-right">
-                    <!-- User Badge -->
-                    <div class="user-badge">
-                        <i class="fas fa-crown"></i>
+                <div class="flex items-center gap-5">
+                    <div class="hidden md:flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-medium px-3 py-1 shadow-prediction-sm">
+                        <i class="fas fa-crown text-[13px]"></i>
                         <span>{% block user_plan %}免费版{% endblock %}</span>
                     </div>
-                    
-                    <!-- Notifications -->
-                    <div class="notification-icon" onclick="toggleNotifications()">
+                    <button class="relative p-2 rounded-md text-slate-600 hover:bg-slate-100" onclick="layoutManager.toggleNotifications()">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-badge" id="notificationBadge">3</span>
-                    </div>
-                    
-                    <!-- User Menu -->
-                    <div class="user-menu" onclick="toggleUserDropdown()">
-                        <div class="user-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <span class="user-name">投资者</span>
-                        <i class="fas fa-chevron-down"></i>
-                        
-                        <!-- User Dropdown -->
-                        <div class="user-dropdown" id="userDropdown">
-                            <div class="dropdown-header">
-                                <div class="user-info">
-                                    <strong>投资者</strong>
-                                    <small>kronos@example.com</small>
-                                </div>
+                        <span id="notificationBadge" class="absolute -top-1 -right-1 bg-danger text-white text-[10px] font-semibold rounded-full px-1.5 py-[2px] leading-none shadow-sm">3</span>
+                    </button>
+                    <div class="relative">
+                        <button class="user-menu flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-100 text-slate-700 text-sm" onclick="layoutManager.toggleUserDropdown()" type="button">
+                            <span class="user-avatar grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-primary"><i class="fas fa-user text-sm"></i></span>
+                            <span class="user-name hidden md:inline">投资者</span>
+                            <i class="fas fa-chevron-down text-[10px]"></i>
+                        </button>
+                        <div id="userDropdown" class="user-dropdown absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-md shadow-lg py-2 hidden" role="menu">
+                            <div class="px-4 pb-2 border-b border-slate-100 mb-2">
+                                <div class="text-sm font-medium text-slate-800">投资者</div>
+                                <div class="text-[11px] text-slate-500">kronos@example.com</div>
                             </div>
-                            <div class="dropdown-content">
-                                <a href="{{ url_for('views.alerts') }}" class="dropdown-item">
-                                    <i class="fas fa-bell"></i>
-                                    预警设置
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a href="#" class="dropdown-item" onclick="logout()">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    退出登录
-                                </a>
-                            </div>
+                            <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900" role="menuitem">
+                                <i class="fas fa-bell text-slate-500"></i> 预警设置
+                            </a>
+                            <div class="my-2 h-px bg-slate-100"></div>
+                            <a href="#" onclick="logout()" class="flex items-center gap-2 px-4 py-2 text-sm text-danger hover:bg-danger/10" role="menuitem">
+                                <i class="fas fa-sign-out-alt"></i> 退出登录
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </header>
-
-        <!-- Body content will be defined by child layouts -->
-        {% block body %}{% endblock %}
+        <main class="flex-1" id="mainContent">
+            {% block body %}{% endblock %}
+        </main>
     </div>
 
-    <!-- Notification Dropdown -->
-    <div class="notification-dropdown" id="notificationDropdown">
-        <div class="notification-header">
-            <h4>消息通知</h4>
-            <button class="mark-all-read" onclick="markAllNotificationsRead()">
-                全部已读
-            </button>
+    <div id="notificationDropdown" class="hidden fixed top-16 right-4 w-80 bg-white border border-slate-200 rounded-lg shadow-xl z-50 flex flex-col max-h-[70vh]">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+            <h4 class="text-sm font-semibold text-slate-700">消息通知</h4>
+            <button onclick="markAllNotificationsRead()" class="text-xs font-medium text-primary hover:underline">全部已读</button>
         </div>
-        <div class="notification-content" 
-             hx-get="/api/notifications/check" 
-             hx-trigger="load"
-             hx-indicator="#notification-loading">
-            <div id="notification-loading" class="htmx-indicator">
-                <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i> 加载中...
-                </div>
+        <div class="overflow-y-auto p-3 space-y-2 text-sm" hx-get="/api/notifications/check" hx-trigger="load" hx-indicator="#notification-loading">
+            <div id="notification-loading" class="htmx-indicator text-primary flex items-center gap-2 text-xs px-2 py-1">
+                <i class="fas fa-spinner fa-spin"></i> 加载中...
             </div>
         </div>
     </div>
@@ -156,6 +118,5 @@
     <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
     
     {% block scripts %}{% endblock %}
-    {% block additional_js %}{% endblock %}
 </body>
 </html>

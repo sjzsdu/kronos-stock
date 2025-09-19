@@ -32,24 +32,6 @@ SIDEBAR_MENUS = {
                     'endpoint': 'views.history'
                 }
             ]
-        },
-        {
-            'title': '系统工具',
-            'icon': 'fas fa-tools',
-            'items': [
-                {
-                    'title': '系统警报',
-                    'icon': 'fas fa-bell',
-                    'url': 'views.alerts',
-                    'endpoint': 'views.alerts'
-                },
-                {
-                    'title': '系统测试',
-                    'icon': 'fas fa-flask',
-                    'url': 'views.test',
-                    'endpoint': 'views.test'
-                }
-            ]
         }
     ]
 }
@@ -63,8 +45,6 @@ def get_theme_for_endpoint(endpoint):
         # Prediction theme
         'views.prediction': 'prediction',
         'views.history': 'prediction',
-        'views.alerts': 'prediction',
-        'views.test': 'prediction'
     }
     
     return endpoint_theme_map.get(endpoint)
