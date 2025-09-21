@@ -22,13 +22,13 @@ module.exports = {
         },
         secondary: '#10b981',
         accent: '#f59e0b',
-        danger: '#ef4444',
+        danger: '#22c55e',
         warning: '#f97316',
         gold: '#ffd700',
-        success: '#22c55e',
+        success: '#ef4444',
         muted: '#64748b',
-        up: '#dc3545',
-        down: '#28a745'
+        up: '#22c55e',
+        down: '#dc3545'
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],

@@ -11,8 +11,8 @@ const ChartUtils = {
             low: data.map(d => d.low),
             close: data.map(d => d.close),
             type: 'candlestick',
-            increasing: {line: {color: '#26C281'}},
-            decreasing: {line: {color: '#E74C3C'}}
+            increasing: {line: {color: '#E74C3C'}},
+            decreasing: {line: {color: '#26C281'}}
         };
     },
     

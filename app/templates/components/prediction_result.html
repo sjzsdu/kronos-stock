@@ -37,9 +37,9 @@
                 <span class="text-gray-500 text-sm mb-1">预期涨幅</span>
                 <span class="text-2xl font-bold
                     {% if data.prediction_summary.total_change_pct > 0 %}
-                        text-green-600
-                    {% else %}
                         text-red-600
+                    {% else %}
+                        text-green-600
                     {% endif %}
                 ">
                     {{ "%.2f"|format(data.prediction_summary.total_change_pct) }}%
@@ -96,9 +96,9 @@
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
                             <span class="font-medium
                                 {% if item.change_pct > 0 %}
-                                    text-green-600
-                                {% else %}
                                     text-red-600
+                                {% else %}
+                                    text-green-600
                                 {% endif %}
                             ">
                                 {{ "%.2f"|format(item.change_pct) }}%
