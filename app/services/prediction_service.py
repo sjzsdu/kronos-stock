@@ -34,11 +34,17 @@ class PredictionService:
             
             # Prepare data for prediction
             x_df = df.iloc[-lookback:][['open', 'high', 'low', 'close', 'volume']].copy()
-            x_timestamp = df.iloc[-lookback:]['timestamps']
+            x_timestamp = pd.Series(df.iloc[-lookback:].index)  # Convert DatetimeIndex to Series
             
             # Generate future timestamps (trading days only)
+            last_timestamp = df.index[-1]
+            if hasattr(last_timestamp, 'date'):
+                last_date = last_timestamp.date()
+            else:
+                last_date = pd.to_datetime(last_timestamp).date()
+            
             future_dates = self._generate_future_trading_dates(
-                df['timestamps'].iloc[-1].date(), pred_len
+                last_date, pred_len
             )
             y_timestamp = pd.Series(future_dates)
             

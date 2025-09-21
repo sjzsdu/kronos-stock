@@ -20,7 +20,7 @@ class StockService:
         except (ImportError, Exception) as e:
             # Log warning if we have app context
             try:
-                current_app.logger.warning(f"china_stock_data not available: {e}, using simulated data")
+                current_app.logger.warning(f"china_stock_data not available: {e}")
             except RuntimeError:
                 # No app context available during init
                 pass
@@ -28,18 +28,15 @@ class StockService:
     
     def get_stock_data(self, stock_code: str, period: str = '1y') -> Tuple[bool, pd.DataFrame, str]:
         """Get stock data for given code and period"""
+        if not self._stock_data_available:
+            error_msg = "Stock data service is not available. Please install china_stock_data package."
+            current_app.logger.error(error_msg)
+            return False, pd.DataFrame(), error_msg
+        
         try:
-            # Double-check availability at runtime
-            if self._stock_data_available:
-                try:
-                    return self._get_real_stock_data(stock_code, period)
-                except Exception as e:
-                    current_app.logger.warning(f"Real stock data failed: {e}, falling back to simulated data")
-                    return self._get_simulated_stock_data(stock_code, period)
-            else:
-                return self._get_simulated_stock_data(stock_code, period)
+            return self._get_real_stock_data(stock_code, period)
         except Exception as e:
-            error_msg = f"Failed to get stock data: {str(e)}"
+            error_msg = f"Failed to get stock data for {stock_code}: {str(e)}"
             current_app.logger.error(error_msg)
             return False, pd.DataFrame(), error_msg
     
@@ -47,121 +44,146 @@ class StockService:
         """Get real stock data using china_stock_data"""
         from china_stock_data import StockData
         
-        stock_data = StockData(stock_code)  # Pass stock_code as symbol parameter
-        df = stock_data.get_stock_data(period=period)  # Pass period as keyword argument
-        
-        if df.empty:
-            return False, df, f"No data found for stock code: {stock_code}"
-        
-        # Ensure required columns exist
-        required_columns = ['open', 'high', 'low', 'close', 'volume']
-        missing_columns = [col for col in required_columns if col not in df.columns]
-        
-        if missing_columns:
-            return False, df, f"Missing columns: {missing_columns}"
-        
-        # Add timestamps if not present
-        if 'timestamps' not in df.columns:
-            df['timestamps'] = pd.to_datetime(df.index)
-        
-        return True, df, "Real stock data retrieved successfully"
+        try:
+            # Create StockData instance
+            stock_data = StockData(stock_code)
+            current_app.logger.debug(f"Getting data for stock: {stock_code}")
+            
+            # Get kline data
+            df = stock_data.get_data('kline')
+            
+            if df is None or df.empty:
+                return False, pd.DataFrame(), f"No data found for stock code: {stock_code}"
+            
+            current_app.logger.debug(f"Raw data shape: {df.shape}, columns: {df.columns.tolist()}")
+            
+            # Standardize column names
+            df_standard = self._standardize_dataframe(df)
+            
+            if df_standard.empty:
+                return False, pd.DataFrame(), f"Failed to process data for stock code: {stock_code}"
+            
+            return True, df_standard, f"Successfully retrieved data for {stock_code}"
+            
+        except Exception as e:
+            current_app.logger.error(f"Error getting real stock data: {e}")
+            return False, pd.DataFrame(), f"Error retrieving data: {str(e)}"
     
-    def _get_simulated_stock_data(self, stock_code: str, period: str) -> Tuple[bool, pd.DataFrame, str]:
-        """Generate simulated stock data for demo purposes"""
-        # Parse period to determine number of days
-        days_map = {'1y': 252, '6m': 126, '3m': 63, '1m': 21}
-        days = days_map.get(period, 252)
+    def _standardize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Standardize dataframe column names and format"""
+        # Column mapping from Chinese/various formats to standard English names
+        column_mapping = {
+            '开盘': 'open', 'open': 'open', '开盘价': 'open',
+            '最高': 'high', 'high': 'high', '最高价': 'high',
+            '最低': 'low', 'low': 'low', '最低价': 'low',
+            '收盘': 'close', 'close': 'close', '收盘价': 'close', '今收': 'close',
+            '成交量': 'volume', 'volume': 'volume', '量': 'volume',
+            '时间': 'timestamps', 'date': 'timestamps', 'datetime': 'timestamps', '日期': 'timestamps'
+        }
         
-        # Generate date range (trading days only)
-        end_date = datetime.datetime.now().date()
-        dates = []
-        current_date = end_date - datetime.timedelta(days=days * 2)  # Start earlier to account for weekends
+        # Find actual column mappings
+        actual_mapping = {}
+        for col in df.columns:
+            col_lower = col.lower().strip()
+            for key, value in column_mapping.items():
+                if key.lower() in col_lower or col_lower in key.lower():
+                    actual_mapping[value] = col
+                    break
         
-        while len(dates) < days:
-            if current_date.weekday() < 5:  # Monday to Friday
-                dates.append(current_date)
-            current_date += datetime.timedelta(days=1)
+        current_app.logger.debug(f"Column mapping found: {actual_mapping}")
         
-        # Generate realistic stock price data
-        np.random.seed(hash(stock_code) % 2**32)  # Consistent random data for same stock
+        # Check if we have minimum required columns
+        required_columns = ['open', 'high', 'low', 'close']
+        found_columns = [col for col in required_columns if col in actual_mapping]
         
-        base_price = 50 + (hash(stock_code) % 100)  # Base price between 50-150
-        returns = np.random.normal(0.001, 0.02, days)  # Daily returns with slight upward bias
+        if len(found_columns) < 4:
+            current_app.logger.warning(f"Missing required columns. Found: {found_columns}")
+            return pd.DataFrame()
         
-        prices = [base_price]
-        for ret in returns[1:]:
-            new_price = prices[-1] * (1 + ret)
-            prices.append(max(new_price, 1.0))  # Ensure price doesn't go below 1
+        # Create standardized DataFrame
+        df_standard = pd.DataFrame()
+        for std_col, orig_col in actual_mapping.items():
+            if std_col in ['open', 'high', 'low', 'close', 'volume']:
+                df_standard[std_col] = pd.to_numeric(df[orig_col], errors='coerce')
         
-        # Generate OHLCV data
-        data = []
-        for i, (date, close) in enumerate(zip(dates, prices)):
-            # Generate realistic OHLC based on close price
-            volatility = 0.02
-            high = close * (1 + np.random.uniform(0, volatility))
-            low = close * (1 - np.random.uniform(0, volatility))
-            
-            if i == 0:
-                open_price = close
-            else:
-                # Open near previous close with some gap
-                gap = np.random.normal(0, 0.005)
-                open_price = prices[i-1] * (1 + gap)
-            
-            # Ensure OHLC relationships are valid
-            high = max(high, open_price, close)
-            low = min(low, open_price, close)
-            
-            volume = np.random.randint(1000000, 10000000)  # Random volume
-            
-            data.append({
-                'timestamps': pd.Timestamp(date),
-                'open': round(open_price, 2),
-                'high': round(high, 2),
-                'low': round(low, 2),
-                'close': round(close, 2),
-                'volume': volume
-            })
+        # Handle timestamps
+        if 'timestamps' in actual_mapping:
+            df_standard['timestamps'] = pd.to_datetime(df[actual_mapping['timestamps']], errors='coerce')
+        elif hasattr(df, 'index') and hasattr(df.index, 'dtype') and 'datetime' in str(df.index.dtype):
+            df_standard['timestamps'] = pd.to_datetime(df.index)
+        else:
+            # Create default timestamp series
+            current_app.logger.warning("No timestamp column found, creating default timestamps")
+            df_standard['timestamps'] = pd.date_range(
+                end=datetime.datetime.now(), 
+                periods=len(df), 
+                freq='B'  # Business days
+            )
         
-        df = pd.DataFrame(data)
-        df.set_index('timestamps', inplace=True)
-        df['timestamps'] = df.index  # Keep timestamps as column too
+        # Set timestamps as index
+        df_standard.set_index('timestamps', inplace=True)
         
-        return True, df, f"Simulated stock data generated for {stock_code}"
+        # Add volume if missing
+        if 'volume' not in df_standard.columns:
+            df_standard['volume'] = 1000000  # Default volume
+        
+        # Remove any rows with NaN values in critical columns
+        df_standard.dropna(subset=['open', 'high', 'low', 'close'], inplace=True)
+        
+        return df_standard
     
     def validate_stock_code(self, stock_code: str) -> Tuple[bool, str]:
         """Validate stock code format"""
         if not stock_code:
             return False, "Stock code cannot be empty"
         
-        # Basic validation for Chinese stock codes
+        # Clean and standardize stock code
         stock_code = stock_code.strip().upper()
         
-        # Check for common patterns: 6-digit codes, codes with exchange prefix
+        # Standard 6-digit Chinese stock codes
         if stock_code.isdigit() and len(stock_code) == 6:
             return True, stock_code
         
-        # Allow codes with exchange prefix (SH.600000, SZ.000001, etc.)
+        # Codes with exchange prefix (SH.600000, SZ.000001)
         if '.' in stock_code:
             exchange, code = stock_code.split('.', 1)
             if exchange.upper() in ['SH', 'SZ'] and code.isdigit() and len(code) == 6:
                 return True, stock_code
         
-        # For demo purposes, accept any alphanumeric code
-        if stock_code.replace('.', '').replace('-', '').isalnum():
+        # Accept alphanumeric codes for flexibility
+        if stock_code.replace('.', '').replace('-', '').isalnum() and len(stock_code) >= 4:
             return True, stock_code
         
-        return False, "Invalid stock code format"
+        return False, "Invalid stock code format. Expected 6-digit code or format like SH.600000"
     
     def get_stock_info(self, stock_code: str) -> Dict[str, Any]:
         """Get basic stock information"""
-        # In a real implementation, this would fetch from a stock info API
+        # TODO: Integrate with real stock info API (e.g., tushare, baostock)
+        # For now, return basic info based on stock code pattern
+        
+        # Determine exchange based on stock code
+        exchange = 'SSE'  # Default to Shanghai Stock Exchange
+        market_name = '上海证券交易所'
+        
+        if stock_code.startswith(('00', '30')):
+            exchange = 'SZSE'
+            market_name = '深圳证券交易所'
+        elif stock_code.startswith('SZ.'):
+            exchange = 'SZSE'
+            market_name = '深圳证券交易所'
+        elif stock_code.startswith('SH.'):
+            exchange = 'SSE'
+            market_name = '上海证券交易所'
+        
         return {
             'code': stock_code,
-            'name': f"Stock {stock_code}",  # Placeholder name
-            'market': 'CN',  # Assume Chinese market
+            'name': f"{stock_code} 股票",  # Placeholder name
+            'market': 'CN',
+            'exchange': exchange,
+            'exchange_name': market_name,
             'currency': 'CNY',
-            'exchange': 'SSE' if stock_code.startswith('6') else 'SZSE'
+            'sector': '待获取',  # To be fetched from API
+            'industry': '待获取'  # To be fetched from API
         }
 
 # Global stock service instance

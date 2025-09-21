@@ -18,3 +18,33 @@
     @apply text-primary hover:text-primary-dark transition-colors;
   }
 }
+
+/* 工具类 */
+@layer utilities {
+  .hide-scrollbar {
+    /* 隐藏滚动条但保持滚动功能 */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+}
+
+/* 组件类 */
+@layer components {
+  /* 自定义选择框 - 统一的下拉箭头样式 */
+  .custom-select {
+    @apply appearance-none bg-white pr-10;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3e%3cpath d='M1.5 1.5L6 6L10.5 1.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 12px 8px;
+  }
+  
+  /* 聚焦时的箭头样式 */
+  .custom-select:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3e%3cpath d='M1.5 1.5L6 6L10.5 1.5' stroke='%233b82f6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+  }
+}

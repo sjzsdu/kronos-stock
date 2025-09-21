@@ -1,82 +1,114 @@
 {% if success %}
-<!-- Enhanced Prediction Result Component -->
-<div class="prediction-result-container">
+<div class="flex flex-col gap-4">
     <!-- Summary Card -->
-    <div class="prediction-summary-card">
-        <div class="summary-header">
-            <h4>
-                <i class="fas fa-chart-line"></i>
-                股票代码: {{ data.stock_code }}
-            </h4>
-            <div class="trend-badge trend-{{ data.prediction_summary.trend }}">
-                <i class="fas fa-{{ 'arrow-up' if data.prediction_summary.trend == 'bullish' else 'arrow-down' }}"></i>
-                {{ '看涨' if data.prediction_summary.trend == 'bullish' else '看跌' }}
+    <div class="bg-white rounded-xl shadow-prediction p-6 transition-all duration-300 hover:shadow-xl">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+            <i class="fas fa-chart-line text-primary text-lg"></i>
+            摘要信息
+        </h3>
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 md:p-6 rounded-lg mb-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <h4 class="text-lg font-bold text-gray-800 flex items-center mb-3 md:mb-0">
+                    股票代码: {{ data.stock_code }}
+                </h4>
+                <div class="flex items-center px-3 py-1.5 rounded-full text-sm font-medium
+                    {% if data.prediction_summary.trend == 'bullish' %}
+                        bg-green-100 text-green-700
+                    {% else %}
+                        bg-red-100 text-red-700
+                    {% endif %}
+                ">
+                    <i class="fas fa-{{ 'arrow-up' if data.prediction_summary.trend == 'bullish' else 'arrow-down' }} mr-1"></i>
+                    {{ '看涨' if data.prediction_summary.trend == 'bullish' else '看跌' }}
+                </div>
             </div>
         </div>
         
-        <div class="summary-metrics">
-            <div class="metric">
-                <span class="metric-label">当前价格</span>
-                <span class="metric-value">¥{{ "%.2f"|format(data.prediction_summary.current_price) }}</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="flex flex-col items-center text-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <span class="text-gray-500 text-sm mb-1">当前价格</span>
+                <span class="text-2xl font-bold text-gray-800">¥{{ "%.2f"|format(data.prediction_summary.current_price) }}</span>
             </div>
-            <div class="metric">
-                <span class="metric-label">预测价格</span>
-                <span class="metric-value target-price">¥{{ "%.2f"|format(data.prediction_summary.target_price) }}</span>
+            <div class="flex flex-col items-center text-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <span class="text-gray-500 text-sm mb-1">预测价格</span>
+                <span class="text-2xl font-bold text-blue-600">¥{{ "%.2f"|format(data.prediction_summary.target_price) }}</span>
             </div>
-            <div class="metric">
-                <span class="metric-label">预期涨幅</span>
-                <span class="metric-value change-pct {{ 'positive' if data.prediction_summary.total_change_pct > 0 else 'negative' }}">
+            <div class="flex flex-col items-center text-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <span class="text-gray-500 text-sm mb-1">预期涨幅</span>
+                <span class="text-2xl font-bold
+                    {% if data.prediction_summary.total_change_pct > 0 %}
+                        text-green-600
+                    {% else %}
+                        text-red-600
+                    {% endif %}
+                ">
                     {{ "%.2f"|format(data.prediction_summary.total_change_pct) }}%
                 </span>
             </div>
-            <div class="metric">
-                <span class="metric-label">预测周期</span>
-                <span class="metric-value">{{ data.prediction_summary.prediction_period }}</span>
+            <div class="flex flex-col items-center text-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <span class="text-gray-500 text-sm mb-1">预测周期</span>
+                <span class="text-2xl font-bold text-gray-800">{{ data.prediction_summary.prediction_period }}</span>
             </div>
         </div>
     </div>
 
     <!-- Chart Container -->
-    <div class="prediction-chart-container">
-        <h5><i class="fas fa-chart-area"></i> 价格走势预测</h5>
-        <div class="chart-wrapper">
-            <canvas id="predictionChart" width="800" height="300"></canvas>
+    <div class="bg-white rounded-xl shadow-prediction p-6 transition-all duration-300 hover:shadow-xl">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+            <i class="fas fa-chart-area text-primary text-lg"></i>
+            价格走势预测
+        </h3>
+        <div class="h-[300px] md:h-[350px] w-full">
+            <canvas id="predictionChart"></canvas>
         </div>
     </div>
 
     <!-- Prediction Data Table -->
-    <div class="prediction-data-table">
-        <h5><i class="fas fa-table"></i> 预测数据详情</h5>
-        <div class="table-container">
-            <table class="prediction-table">
-                <thead>
+    <div class="bg-white rounded-xl shadow-prediction p-6 transition-all duration-300 hover:shadow-xl">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+            <i class="fas fa-table text-primary text-lg"></i>
+            预测数据详情
+        </h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th class="date-column">日期</th>
-                        <th class="price-column">最高价</th>
-                        <th class="price-column">最低价</th>
-                        <th class="price-column">收盘价</th>
-                        <th class="change-column">涨跌幅</th>
-                        <th class="volume-column">成交量</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">日期</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">最高价</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">最低价</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">收盘价</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">涨跌幅</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">成交量</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white divide-y divide-gray-200">
                     {% for item in data.prediction_results %}
-                    <tr class="prediction-row">
-                        <td class="date-cell">
-                            <div class="date-info">
-                                <span class="date">{{ item.date }}</span>
-                                <span class="weekday">{{ item.weekday }}</span>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">
+                            <div>
+                                <span class="font-medium">{{ item.date }}</span>
+                                <span class="block text-xs text-gray-500">{{ item.weekday }}</span>
                             </div>
                         </td>
-                        <td class="price-cell price-high">¥{{ "%.2f"|format(item.high) }}</td>
-                        <td class="price-cell price-low">¥{{ "%.2f"|format(item.low) }}</td>
-                        <td class="price-cell price-close">¥{{ "%.2f"|format(item.close) }}</td>
-                        <td class="change-cell">
-                            <span class="change-value {{ 'positive' if item.change_pct > 0 else 'negative' }}">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right font-medium">¥{{ "%.2f"|format(item.high) }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">¥{{ "%.2f"|format(item.low) }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right font-medium">¥{{ "%.2f"|format(item.close) }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
+                            <span class="font-medium
+                                {% if item.change_pct > 0 %}
+                                    text-green-600
+                                {% else %}
+                                    text-red-600
+                                {% endif %}
+                            ">
                                 {{ "%.2f"|format(item.change_pct) }}%
                             </span>
                         </td>
-                        <td class="volume-cell">{{ "{:,}".format(item.volume|int) }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs text-gray-600 bg-gray-100">
+                                {{ "{:,}".format(item.volume|int) }}
+                            </span>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -85,25 +117,28 @@
     </div>
 
     <!-- Analysis Notes -->
-    <div class="prediction-notes">
-        <h5><i class="fas fa-info-circle"></i> 预测说明</h5>
-        <div class="notes-content">
-            <div class="note-item">
-                <i class="fas fa-clock"></i>
-                <span>预测基于最近{{ data.prediction_summary.actual_lookback }}个交易日的历史数据</span>
+    <div class="bg-white rounded-xl shadow-prediction p-6 transition-all duration-300 hover:shadow-xl">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+            <i class="fas fa-info-circle text-primary text-lg"></i>
+            预测说明
+        </h3>
+        <div class="space-y-3">
+            <div class="flex items-start">
+                <i class="fas fa-clock mt-0.5 mr-2 text-blue-500"></i>
+                <span class="text-gray-700">预测基于最近{{ data.prediction_summary.actual_lookback }}个交易日的历史数据</span>
             </div>
-            <div class="note-item">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>此预测仅供参考，投资有风险，请谨慎决策</span>
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle mt-0.5 mr-2 text-amber-500"></i>
+                <span class="text-gray-700">此预测仅供参考，投资有风险，请谨慎决策</span>
             </div>
-            <div class="note-item">
-                <i class="fas fa-save"></i>
-                <span>预测结果已保存至: {{ data.saved_file }}</span>
+            <div class="flex items-start">
+                <i class="fas fa-save mt-0.5 mr-2 text-green-500"></i>
+                <span class="text-gray-700">预测结果已保存至: {{ data.saved_file }}</span>
             </div>
         </div>
     </div>
-</div>
 
+</div>
 <!-- Data for Chart -->
 <script type="application/json" id="chartData">
 {
@@ -115,7 +150,7 @@
 
 <script>
 // Chart.js visualization with Chinese financial color conventions
-document.addEventListener('DOMContentLoaded', function() {
+function initPredictionChart() {
     const ctx = document.getElementById('predictionChart');
     if (ctx && typeof Chart !== 'undefined') {
         // Get data from JSON script tag
@@ -156,21 +191,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     datasets: [{
                         label: '历史价格',
                         data: historicalPrices,
-                        borderColor: 'var(--chart-historical-color)',
-                        backgroundColor: 'var(--chart-historical-bg)',
+                        borderColor: '#64748b',
+                        backgroundColor: 'rgba(100, 116, 139, 0.1)',
                         borderWidth: 2,
                         fill: false,
                         tension: 0.1
                     }, {
                         label: '预测价格',
                         data: predictionPrices,
-                        borderColor: 'var(--primary-color)',
-                        backgroundColor: 'var(--chart-prediction-bg)',
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         borderWidth: 3,
                         borderDash: [5, 5],
                         fill: false,
                         tension: 0.1,
-                        pointBackgroundColor: 'var(--primary-color)',
+                        pointBackgroundColor: '#3b82f6',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 4
@@ -193,13 +228,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                     size: 14,
                                     weight: 'bold'
                                 },
-                                color: 'var(--text-secondary)'
+                                color: '#64748b'
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: '#e2e8f0'
                             },
                             ticks: {
-                                color: 'var(--text-secondary)'
+                                color: '#64748b'
                             }
                         },
                         x: {
@@ -210,13 +245,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                     size: 14,
                                     weight: 'bold'
                                 },
-                                color: 'var(--text-secondary)'
+                                color: '#64748b'
                             },
                             grid: {
-                                color: 'var(--border-color)'
+                                color: '#e2e8f0'
                             },
                             ticks: {
-                                color: 'var(--text-secondary)'
+                                color: '#64748b'
                             }
                         }
                     },
@@ -229,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     size: 12
                                 },
                                 usePointStyle: true,
-                                color: 'var(--text-primary)'
+                                color: '#1e293b'
                             }
                         },
                         tooltip: {
@@ -254,25 +289,41 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error initializing chart:', error);
             // Show fallback message
-            ctx.parentElement.innerHTML = '<div class="chart-error">图表加载失败，请刷新页面重试</div>';
+            ctx.parentElement.innerHTML = '<div class="h-full flex items-center justify-center text-red-500">图表加载失败，请刷新页面重试</div>';
         }
     } else {
         console.error('Chart.js not loaded or canvas element not found');
         if (ctx) {
-            ctx.parentElement.innerHTML = '<div class="chart-error">图表库未加载，请检查网络连接</div>';
+            ctx.parentElement.innerHTML = '<div class="h-full flex items-center justify-center text-red-500">图表库未加载，请检查网络连接</div>';
         }
     }
-});
-</script>
+}
+
+// 同时支持DOMContentLoaded和htmx动态加载场景
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPredictionChart);
+} else {
+    // 页面已加载完成，直接执行图表初始化
+    initPredictionChart();
+}
+
+// 为htmx添加事件监听器，确保组件动态加载后也能渲染图表
+document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.target.id === 'prediction-results' || evt.target.querySelector('#predictionChart')) {
+        initPredictionChart();
+    }
+});</script>
 {% else %}
-<!-- Error Display -->
-<div class="prediction-error">
-    <div class="error-icon">
-        <i class="fas fa-exclamation-triangle"></i>
-    </div>
-    <div class="error-message">
-        <h4>预测失败</h4>
-        <p>{{ error }}</p>
+<!-- Error Display with Tailwind CSS -->
+<div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
+    <div class="flex flex-col items-center text-center">
+        <div class="text-amber-500 mb-4">
+            <i class="fas fa-exclamation-triangle text-4xl"></i>
+        </div>
+        <div>
+            <h4 class="text-xl font-bold text-gray-800 mb-2">预测失败</h4>
+            <p class="text-gray-600 bg-red-50 p-3 rounded-lg border border-red-100">{{ error }}</p>
+        </div>
     </div>
 </div>
 {% endif %}

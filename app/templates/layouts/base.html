@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css" crossorigin="anonymous" media="none" onload="if(media!='all')media='all'" onerror="this.onerror=null;this.media='all';">
     <!-- Tailwind build output -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tw.css') }}">
-
+    
     {% block head %}{% endblock %}
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
@@ -34,78 +34,20 @@
                         <span class="grid h-9 w-9 place-items-center rounded-md bg-primary text-white text-lg font-bold shadow-prediction-sm">K</span>
                         <span class="text-lg tracking-tight">Kronos</span>
                     </a>
-                    <nav class="hidden lg:flex items-center gap-1 ml-4">
-                        {% for menu_item in primary_menu %}
-                            {% if menu_item.has_sidebar %}
-                                <div class="relative dropdown-container">
-                                    {% set theme_sidebar = get_sidebar_menu_for_theme(menu_item.key) %}
-                                    {% set first_item = None %}
-                                    {% for section in theme_sidebar %}
-                                        {% if section['items'] and not first_item %}
-                                            {% set first_item = section['items'][0] %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    
-                                    <div class="flex items-center">
-                                        <a href="{{ url_for(first_item.endpoint) if first_item else '#' }}" class="px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1 text-slate-600 hover:text-primary hover:bg-slate-100 transition {{ 'bg-slate-100 text-primary' if current_theme == menu_item.key }}">
-                                            <i class="{{ menu_item.icon }}"></i>
-                                            {{ menu_item.title }}
-                                        </a>
-                                        <button type="button" class="dropdown-toggle ml-1 flex items-center text-slate-600 hover:text-primary">
-                                            <i class="fas fa-chevron-down text-[10px]"></i>
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="dropdown-menu absolute left-0 mt-2 w-56 rounded-md border border-slate-200 bg-white shadow-lg py-2 hidden" role="menu">
-                                        {% set theme_sidebar = get_sidebar_menu_for_theme(menu_item.key) %}
-                                        {% for section in theme_sidebar %}
-                                            {% for item in section['items'] %}
-                                            <a href="{{ url_for(item.endpoint) }}" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900" role="menuitem">
-                                                <i class="{{ item.icon }} text-slate-500"></i>
-                                                {{ item.title }}
-                                            </a>
-                                            {% endfor %}
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% else %}
-                                <a href="{{ url_for(menu_item.url) }}" class="px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2 text-slate-600 hover:text-primary hover:bg-slate-100 transition {{ 'bg-slate-100 text-primary' if current_endpoint == menu_item.url }}">
-                                    <i class="{{ menu_item.icon }}"></i>
-                                    {{ menu_item.title }}
-                                </a>
-                            {% endif %}
-                        {% endfor %}
+                    <nav class="flex items-center gap-1 ml-4">
+                        <a href="{{ url_for('views.prediction') }}" 
+                           class="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 
+                                  transition-all duration-200 ease-in-out
+                                hover:bg-indigo-100 hover:shadow-sm ">
+                            <i class="fas fa-chart-line"></i>
+                            <span>股票预测</span>
+                        </a>
                     </nav>
                 </div>
                 <div class="flex items-center gap-5">
-                    <div class="hidden md:flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-medium px-3 py-1 shadow-prediction-sm">
-                        <i class="fas fa-crown text-[13px]"></i>
-                        <span>{% block user_plan %}免费版{% endblock %}</span>
-                    </div>
-                    <button class="relative p-2 rounded-md text-slate-600 hover:bg-slate-100" onclick="layoutManager.toggleNotifications()">
-                        <i class="fas fa-bell"></i>
-                        <span id="notificationBadge" class="absolute -top-1 -right-1 bg-danger text-white text-[10px] font-semibold rounded-full px-1.5 py-[2px] leading-none shadow-sm">3</span>
-                    </button>
-                    <div class="relative">
-                        <button class="user-menu flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-100 text-slate-700 text-sm" onclick="layoutManager.toggleUserDropdown()" type="button">
-                            <span class="user-avatar grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-primary"><i class="fas fa-user text-sm"></i></span>
-                            <span class="user-name hidden md:inline">投资者</span>
-                            <i class="fas fa-chevron-down text-[10px]"></i>
-                        </button>
-                        <div id="userDropdown" class="user-dropdown absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-md shadow-lg py-2 hidden" role="menu">
-                            <div class="px-4 pb-2 border-b border-slate-100 mb-2">
-                                <div class="text-sm font-medium text-slate-800">投资者</div>
-                                <div class="text-[11px] text-slate-500">kronos@example.com</div>
-                            </div>
-                            <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900" role="menuitem">
-                                <i class="fas fa-bell text-slate-500"></i> 预警设置
-                            </a>
-                            <div class="my-2 h-px bg-slate-100"></div>
-                            <a href="#" onclick="logout()" class="flex items-center gap-2 px-4 py-2 text-sm text-danger hover:bg-danger/10" role="menuitem">
-                                <i class="fas fa-sign-out-alt"></i> 退出登录
-                            </a>
-                        </div>
-                    </div>
+                    <a href="https://github.com/sjzsdu/kronos-stock" target="_blank" rel="noopener noreferrer" class="p-2 rounded-md text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition" title="查看项目源码">
+                        <i class="fab fa-github text-lg"></i>
+                    </a>
                 </div>
             </div>
         </header>
@@ -129,55 +71,7 @@
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/htmx-config.js') }}"></script>
     <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
-    
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 处理顶部导航的下拉菜单
-        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-        
-        dropdownToggles.forEach(toggle => {
-            toggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // 获取当前下拉菜单容器
-                const container = this.closest('.dropdown-container');
-                const menu = container.querySelector('.dropdown-menu');
-                
-                // 关闭所有其他菜单
-                document.querySelectorAll('.dropdown-menu').forEach(m => {
-                    if (m !== menu) m.classList.add('hidden');
-                });
-                
-                // 切换当前菜单
-                menu.classList.toggle('hidden');
-            });
-        });
-        
-        // 点击页面其他位置关闭下拉菜单
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.dropdown-container')) {
-                document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                    menu.classList.add('hidden');
-                });
-            }
-        });
-        
-        // 鼠标悬停也可以打开菜单（可选）
-        const dropdownContainers = document.querySelectorAll('.dropdown-container');
-        dropdownContainers.forEach(container => {
-            container.addEventListener('mouseenter', function() {
-                this.querySelector('.dropdown-menu').classList.remove('hidden');
-            });
-            
-            // 移除下面这行，以便点击后菜单保持显示
-            // container.addEventListener('mouseleave', function() {
-            //     this.querySelector('.dropdown-menu').classList.add('hidden');
-            // });
-        });
-    });
-    </script>
-    
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

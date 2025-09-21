@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from app.services import model_service
 from app.services.prediction_service import prediction_service
 
@@ -12,8 +12,8 @@ def predict():
         
         # Extract parameters from frontend form
         stock_code = data.get('stock_code')
-        prediction_days = data.get('prediction_days', 7)  # Frontend parameter
-        model_type = data.get('model_type', 'kronos-base')  # Frontend parameter
+        prediction_days = data.get('prediction_days', 7)
+        model_type = data.get('model_type', 'kronos-mini')
         
         # Map to backend parameters
         lookback = 30  # Default lookback period
@@ -53,7 +53,6 @@ def predict():
         
         if success:
             # Render the result as HTML for HTMX
-            from flask import render_template
             html_content = render_template('components/prediction_result.html', 
                                          success=True, 
                                          data=result)
