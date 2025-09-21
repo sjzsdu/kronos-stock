@@ -80,7 +80,7 @@ jobs:
         docker pull "${FULL_TEST_IMAGE}" || echo "Image already local"
         docker run --rm -d --name test-container -p 5002:5001 "${FULL_TEST_IMAGE}"
         for i in $(seq 1 30); do
-          if curl -sf http://localhost:5002/api/models >/dev/null; then
+          if curl -sf http://localhost:5002/api/health >/dev/null; then
             echo "Health check passed"
             break
           fi

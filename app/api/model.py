@@ -2,6 +2,22 @@ from flask import jsonify, request
 from . import api_bp
 from app.services import model_service
 
+@api_bp.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    try:
+        # Basic health check - ensure the service is running
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': __import__('datetime').datetime.now().isoformat(),
+            'service': 'kronos-stock-prediction'
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e)
+        }), 500
+
 @api_bp.route('/models', methods=['GET'])
 def get_models():
     """Get available models"""
