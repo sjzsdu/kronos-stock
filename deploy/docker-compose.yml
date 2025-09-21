@@ -6,13 +6,18 @@ services:
     image: sjzsdu/kronos-china-stock-prediction:latest
     container_name: kronos-csweb
     environment:
+      - FLASK_CONFIG=production
       - FLASK_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key-in-production}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
     ports:
       - "5001:5001"
     volumes:
       - ./models:/app/models
       - ./cache:/app/cache
       - ./prediction_results:/app/prediction_results
+      - ./logs:/app/logs
     networks:
       - traefik-public
     labels:

@@ -5,6 +5,10 @@ class Config:
     """Base configuration"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
+    # Database configuration
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///kronos_stock.db'
+    
     # Model configurations
     MODEL_DIR = os.path.join(os.path.dirname(__file__), 'models')
     EMBEDDED_MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model')
@@ -52,11 +56,19 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
+    # Production uses MySQL by default
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        f"mysql+pymysql://{os.environ.get('DB_USER', 'root')}:" \
+        f"{os.environ.get('DB_PASSWORD', 'password')}@" \
+        f"{os.environ.get('DB_HOST', 'localhost')}:" \
+        f"{os.environ.get('DB_PORT', '3306')}/" \
+        f"{os.environ.get('DB_NAME', 'kronos_stock')}"
 
 class TestingConfig(Config):
     """Testing configuration"""
     TESTING = True
     DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 config = {
     'development': DevelopmentConfig,

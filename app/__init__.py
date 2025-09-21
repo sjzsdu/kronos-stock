@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_migrate import Migrate
 from config import config
 from datetime import datetime
 
@@ -8,6 +9,13 @@ def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
+    
+    # Initialize database
+    from app.models import db
+    db.init_app(app)
+    
+    # Initialize Flask-Migrate
+    migrate = Migrate(app, db)
     
     # Initialize extensions
     CORS(app, origins=app.config['CORS_ORIGINS'])

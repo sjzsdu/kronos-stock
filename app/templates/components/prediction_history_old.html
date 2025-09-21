@@ -103,77 +103,56 @@
                 </tbody>
             </table>
         </div>
-        
-        <!-- Pagination -->
-        {% if pagination.pages > 1 %}
-        <div class="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
-            <div class="flex items-center text-sm text-gray-700">
-                显示第 {{ (pagination.page - 1) * pagination.per_page + 1 }} - 
-                {{ pagination.page * pagination.per_page if pagination.page * pagination.per_page < pagination.total else pagination.total }} 
-                条，共 {{ pagination.total }} 条记录
-            </div>
-            
-            <div class="flex items-center space-x-2">
-                <!-- Previous Page -->
-                {% if pagination.has_prev %}
-                <button 
-                    class="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                    onclick="loadPredictionHistory({{ pagination.page - 1 }})"
-                >
-                    <i class="fas fa-chevron-left"></i> 上一页
-                </button>
-                {% endif %}
-                
-                <!-- Page Numbers -->
-                {% set start_page = pagination.page - 2 if pagination.page > 3 else 1 %}
-                {% set end_page = start_page + 4 if start_page + 4 <= pagination.pages else pagination.pages %}
-                {% set start_page = end_page - 4 if end_page - 4 > 0 else 1 %}
-                
-                {% for page_num in range(start_page, end_page + 1) %}
-                <button 
-                    class="px-3 py-1 text-sm rounded-md transition-colors
-                        {% if page_num == pagination.page %}bg-primary text-white
-                        {% else %}bg-white border border-gray-300 hover:bg-gray-50{% endif %}"
-                    onclick="loadPredictionHistory({{ page_num }})"
-                >
-                    {{ page_num }}
-                </button>
+                                <div class="confidence-fill" style="width: {{ prediction.confidence }}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ prediction.created_at.split('T')[0] }}</td>
+                    <td>
+                        {% if prediction.status == 'verified' %}
+                            <span class="status-badge status-verified">已验证</span>
+                        {% elif prediction.status == 'expired' %}
+                            <span class="status-badge status-expired">已过期</span>
+                        {% else %}
+                            <span class="status-badge status-active">进行中</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewPredictionDetail('{{ prediction.id }}')">
+                            <i class="fas fa-eye"></i> 查看
+                        </button>
+                    </td>
+                </tr>
                 {% endfor %}
-                
-                <!-- Next Page -->
-                {% if pagination.has_next %}
-                <button 
-                    class="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                    onclick="loadPredictionHistory({{ pagination.page + 1 }})"
-                >
-                    下一页 <i class="fas fa-chevron-right"></i>
-                </button>
-                {% endif %}
-            </div>
-        </div>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination-container">
+        {% if has_prev %}
+        <button class="btn btn-secondary" onclick="loadPredictionHistory({{ current_page - 1 }})">
+            <i class="fas fa-chevron-left"></i> 上一页
+        </button>
         {% endif %}
         
-    {% else %}
-        <!-- Empty State -->
-        <div class="text-center py-12">
-            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-history text-3xl text-gray-400"></i>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">暂无预测记录</h3>
-            <p class="text-gray-500 mb-6">开始第一次预测吧！</p>
-            <a 
-                href="/prediction" 
-                class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-            >
-                <i class="fas fa-plus mr-2"></i> 创建预测
-            </a>
+        <div class="pagination-info">
+            第 {{ current_page }} 页，共 {{ pages }} 页
         </div>
+        
+        {% if has_next %}
+        <button class="btn btn-secondary" onclick="loadPredictionHistory({{ current_page + 1 }})">
+            下一页 <i class="fas fa-chevron-right"></i>
+        </button>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="no-history">
+        <i class="fas fa-history fa-3x"></i>
+        <p>暂无预测历史记录</p>
+        <a href="{{ url_for('views.index') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> 开始首次预测
+        </a>
+    </div>
     {% endif %}
 </div>
-
-<script>
-// Show error message in a modal or alert
-function showError(errorMessage) {
-    alert('错误信息：\n' + errorMessage);
-}
-</script>

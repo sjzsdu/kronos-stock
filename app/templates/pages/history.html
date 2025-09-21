@@ -40,9 +40,9 @@
                     id="statusFilter"
                 >
                     <option value="">全部状态</option>
-                    <option value="active">进行中</option>
-                    <option value="verified">已验证</option>
-                    <option value="expired">已过期</option>
+                    <option value="completed">已完成</option>
+                    <option value="failed">失败</option>
+                    <option value="processing">处理中</option>
                 </select>
             </div>
             
@@ -107,8 +107,82 @@ function loadPredictionHistory(page) {
 }
 
 function viewPredictionDetail(predictionId) {
-    // 这里可以实现查看预测详情的逻辑
-    alert(`查看预测详情: ${predictionId}`);
+    // 获取预测详情并显示
+    fetch(`/api/history/${predictionId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showPredictionModal(data.data);
+            } else {
+                alert(`无法获取预测详情: ${data.error}`);
+            }
+        })
+        .catch(error => {
+            alert(`获取预测详情失败: ${error.message}`);
+        });
+}
+
+function showPredictionModal(record) {
+    const modalContent = `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick="closePredictionModal()">
+            <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto" onclick="event.stopPropagation()">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">预测详情 #${record.id}</h3>
+                    <button onclick="closePredictionModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">股票代码</label>
+                        <p class="text-sm text-gray-900">${record.stock_code}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">模型类型</label>
+                        <p class="text-sm text-gray-900">${record.model_type}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">预测天数</label>
+                        <p class="text-sm text-gray-900">${record.prediction_days} 天</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">执行时间</label>
+                        <p class="text-sm text-gray-900">${record.execution_time ? record.execution_time.toFixed(2) + 's' : '-'}</p>
+                    </div>
+                </div>
+                
+                ${record.prediction_data ? `
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">预测结果</label>
+                        <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto">${JSON.stringify(record.prediction_data, null, 2)}</pre>
+                    </div>
+                ` : ''}
+                
+                ${record.error_message ? `
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-red-700 mb-2">错误信息</label>
+                        <p class="text-sm text-red-900 bg-red-50 p-3 rounded">${record.error_message}</p>
+                    </div>
+                ` : ''}
+                
+                <div class="flex justify-end">
+                    <button onclick="closePredictionModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalContent);
+}
+
+function closePredictionModal() {
+    const modal = document.querySelector('.fixed.inset-0');
+    if (modal) {
+        modal.remove();
+    }
 }
 
 function applyFilters() {
@@ -120,8 +194,8 @@ function applyFilters() {
     
     // 构建查询参数
     const params = new URLSearchParams();
-    if (stockFilter) params.append('stock', stockFilter);
-    if (modelFilter) params.append('model', modelFilter);
+    if (stockFilter) params.append('stock_code', stockFilter);
+    if (modelFilter) params.append('model_type', modelFilter);
     if (statusFilter) params.append('status', statusFilter);
     if (timeFilter) params.append('days', timeFilter);
     
