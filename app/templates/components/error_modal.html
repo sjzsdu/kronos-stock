@@ -1,0 +1,31 @@
+<!-- Error Modal -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="this.remove()">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full" onclick="event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-red-500 text-white rounded-t-xl">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-white bg-opacity-20 rounded-lg">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold">错误信息</h3>
+            </div>
+            <button onclick="this.closest('.fixed').remove()" class="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="p-6">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p class="text-red-800">{{ error_message }}</p>
+            </div>
+            
+            <div class="mt-6 text-right">
+                <button onclick="this.closest('.fixed').remove()" 
+                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

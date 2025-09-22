@@ -199,9 +199,6 @@ class LayoutManager {
         
         // Initialize loading states
         this.initLoadingStates();
-        
-        // Initialize notifications
-        this.initNotifications();
     }
     
     initTooltips() {
@@ -271,46 +268,6 @@ class LayoutManager {
         if (spinner) {
             spinner.remove();
         }
-    }
-    
-    initNotifications() {
-        // Check for new notifications periodically
-        setInterval(() => {
-            this.checkNotifications();
-        }, 30000); // Check every 30 seconds
-    }
-    
-    checkNotifications() {
-        console.log('Checking notifications...');
-        // Check for new notifications
-        fetch('/api/notifications/check')
-            .then(response => {
-                console.log('Notification check response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('Notification check data:', data);
-                if (data.success) {
-                    this.updateNotificationIcon(data.data.unread_count);
-                    
-                    // Show new notifications if any
-                    if (data.data.unread_count > 0) {
-                        const highPriorityNotifications = data.data.notifications.filter(
-                            n => !n.read && n.priority === 'high'
-                        );
-                        
-                        // Show toast for high priority notifications
-                        highPriorityNotifications.forEach(notification => {
-                            this.showNotification(notification.message, 'warning', 8000);
-                        });
-                    }
-                } else {
-                    console.error('Notification check failed:', data.error);
-                }
-            })
-            .catch(error => {
-                console.warn('Failed to check notifications:', error);
-            });
     }
     
     updateNotificationIcon(unreadCount) {
@@ -450,16 +407,12 @@ class StockManager {
             
             this.watchlist.push(stock);
             this.saveWatchlist();
-            
-            layoutManager.showNotification(`${symbol} 已添加到关注列表`, 'success');
         }
     }
     
     removeFromWatchlist(symbol) {
         this.watchlist = this.watchlist.filter(stock => stock.symbol !== symbol);
         this.saveWatchlist();
-        
-        layoutManager.showNotification(`${symbol} 已从关注列表移除`, 'info');
     }
     
     loadWatchlist() {
@@ -563,7 +516,6 @@ class HTMXEnhancements {
     
     handleError(e) {
         console.error('HTMX Error:', e.detail);
-        layoutManager.showNotification('请求失败，请稍后重试', 'danger');
     }
     
     setupAutoRefresh() {

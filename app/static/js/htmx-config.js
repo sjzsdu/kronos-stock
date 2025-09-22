@@ -20,31 +20,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Global HTMX Event Handlers
 document.body.addEventListener('htmx:beforeRequest', function(event) {
-    // Show global loading indicator
     showGlobalLoading();
     
-    // Add custom headers if needed
     const xhr = event.detail.xhr;
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    
-    console.log('HTMX Request started:', event.detail.requestConfig.path);
 });
 
 document.body.addEventListener('htmx:afterRequest', function(event) {
-    // Hide global loading indicator
     hideGlobalLoading();
     
     const xhr = event.detail.xhr;
-    console.log('HTMX Request completed:', event.detail.requestConfig.path, 'Status:', xhr.status);
     
-    // Handle different response statuses
     if (xhr.status >= 400) {
         handleHTMXError(event);
     }
 });
 
 document.body.addEventListener('htmx:responseError', function(event) {
-    console.error('HTMX Response Error:', event.detail);
     handleHTMXError(event);
 });
 

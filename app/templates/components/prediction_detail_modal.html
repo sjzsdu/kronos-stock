@@ -1,0 +1,244 @@
+<!-- Enhanced Prediction Detail Modal -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="closePredictionModal()">
+    <div class="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-primary to-primary-dark text-white">
+            <div class="flex items-center gap-4">
+                <div class="p-2 bg-white bg-opacity-20 rounded-lg">
+                    <i class="fas fa-chart-line text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold">预测详情分析</h3>
+                    <p class="text-sm opacity-90">预测记录 #{{ record.id }} - {{ record.stock_code }}</p>
+                </div>
+            </div>
+            <button onclick="closePredictionModal()" class="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="overflow-y-auto max-h-[calc(90vh-80px)]">
+            <!-- Stock Info Section -->
+            <div class="p-6 border-b border-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Stock Basic Info Card -->
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-building text-blue-600"></i>
+                            股票信息
+                        </h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">股票代码:</span>
+                                <span class="font-medium">{{ record.stock_code }}</span>
+                            </div>
+                            {% if record.stock_basic_info and not record.stock_basic_info.error %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">股票名称:</span>
+                                <span class="font-medium">{{ record.stock_basic_info.name or '暂无' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">行业:</span>
+                                <span class="font-medium">{{ record.stock_basic_info.industry or '暂无' }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Current Price Card -->
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-dollar-sign text-green-600"></i>
+                            当前价格
+                        </h4>
+                        {% if record.current_stock_info and not record.current_stock_info.error %}
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">现价:</span>
+                                <span class="font-bold text-lg">¥{{ "%.2f"|format(record.current_stock_info.current_price) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">涨跌:</span>
+                                <span class="font-medium {% if record.current_stock_info.price_change >= 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                                    {% if record.current_stock_info.price_change >= 0 %}+{% endif %}{{ "%.2f"|format(record.current_stock_info.price_change) }}
+                                    ({{ "%.2f"|format(record.current_stock_info.price_change_percent) }}%)
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">成交量:</span>
+                                <span class="font-medium">{{ "{:,}".format(record.current_stock_info.volume) }}</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-red-500 text-sm">{{ record.current_stock_info.error or '获取数据失败' }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Prediction Info Card -->
+                    <div class="bg-gradient-to-br from-purple-50 to-violet-100 rounded-xl p-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-robot text-purple-600"></i>
+                            预测信息
+                        </h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">模型:</span>
+                                <span class="font-medium">{{ record.model_type }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">预测天数:</span>
+                                <span class="font-medium">{{ record.prediction_days }} 天</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">执行时间:</span>
+                                <span class="font-medium">{{ "%.2f"|format(record.execution_time) }}s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">状态:</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                    {% if record.status == 'completed' %}bg-green-100 text-green-800
+                                    {% elif record.status == 'failed' %}bg-red-100 text-red-800
+                                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                    {{ record.status }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prediction Results Section -->
+            {% if record.status == 'completed' and record.prediction_data %}
+            <div class="p-6 border-b border-gray-100">
+                <h4 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-area text-primary"></i>
+                    预测结果与分析
+                </h4>
+                
+                <!-- Chart Container -->
+                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                    <div id="prediction-chart" style="height: 400px;" class="w-full">
+                        <!-- Chart will be rendered here by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Accuracy Analysis -->
+                {% if record.accuracy_analysis %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    {% if record.accuracy_analysis.status == 'completed' %}
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h5 class="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                            <i class="fas fa-bullseye"></i>
+                            预测准确率
+                        </h5>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">价格误差 (MAPE):</span>
+                                <span class="font-bold text-blue-700">{{ "%.2f"|format(record.accuracy_analysis.mape) }}%</span>
+                            </div>
+                            {% if record.accuracy_analysis.directional_accuracy %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">方向准确率:</span>
+                                <span class="font-bold text-blue-700">{{ "%.1f"|format(record.accuracy_analysis.directional_accuracy) }}%</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% elif record.accuracy_analysis.status == 'insufficient_data' %}
+                    <div class="bg-yellow-50 rounded-lg p-4">
+                        <h5 class="font-semibold text-yellow-800 mb-2 flex items-center gap-2">
+                            <i class="fas fa-clock"></i>
+                            等待验证
+                        </h5>
+                        <p class="text-yellow-700 text-sm">{{ record.accuracy_analysis.message }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Prediction Summary -->
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h5 class="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                            <i class="fas fa-chart-line"></i>
+                            预测摘要
+                        </h5>
+                        {% set pred_data = record.prediction_data %}
+                        {% if pred_data.predictions %}
+                        {% set first_price = pred_data.predictions[0] %}
+                        {% set last_price = pred_data.predictions[-1] %}
+                        {% set price_change = last_price - first_price %}
+                        {% set price_change_percent = (price_change / first_price * 100) %}
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">预测趋势:</span>
+                                <span class="font-bold {% if price_change >= 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                                    {% if price_change >= 0 %}上涨{% else %}下跌{% endif %}
+                                    {{ "%.2f"|format(price_change_percent|abs) }}%
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">目标价位:</span>
+                                <span class="font-bold text-green-700">¥{{ "%.2f"|format(last_price) }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Error Information -->
+            {% if record.error_message %}
+            <div class="p-6 border-b border-gray-100">
+                <h4 class="text-xl font-semibold text-red-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    错误信息
+                </h4>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p class="text-red-800">{{ record.error_message }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="p-6 bg-gray-50 flex flex-wrap gap-3 justify-end">
+                <button onclick="sharePrediction({{ record.id }})" 
+                        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
+                    <i class="fas fa-share-alt"></i> 分享
+                </button>
+                
+                <button onclick="exportPrediction({{ record.id }})" 
+                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2">
+                    <i class="fas fa-download"></i> 导出
+                </button>
+                
+                <button onclick="createSimilarPrediction('{{ record.stock_code }}', '{{ record.model_type }}', {{ record.prediction_days }})" 
+                        class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center gap-2">
+                    <i class="fas fa-redo"></i> 重新预测
+                </button>
+                
+                <button onclick="closePredictionModal()" 
+                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
+                    <i class="fas fa-times"></i> 关闭
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize chart when modal is shown
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Plotly !== 'undefined' && document.getElementById('prediction-chart')) {
+        initializePredictionChart();
+    }
+});
+
+function initializePredictionChart() {
+    // Chart initialization will be handled by the parent page
+    const event = new CustomEvent('initPredictionChart', {
+        detail: { recordId: {{ record.id }} }
+    });
+    window.dispatchEvent(event);
+}
+</script>

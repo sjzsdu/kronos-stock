@@ -12,6 +12,7 @@ torch>=2.1.0,<2.3.0
 einops>=0.6.0
 china_stock_data==0.2.1
 safetensors>=0.3.0
+reportlab>=4.0.0
 
 # Optional (uncomment only if needed):
 # plotly==5.17.0

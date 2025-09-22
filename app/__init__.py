@@ -63,9 +63,9 @@ def create_app(config_name='default'):
     from app.views import views_bp
     from app.api.prediction import prediction_api
     
-    app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(views_bp)
     app.register_blueprint(prediction_api, url_prefix='/api')
+    app.register_blueprint(api_bp, url_prefix='/api')
     
     # Initialize model service with default model
     with app.app_context():

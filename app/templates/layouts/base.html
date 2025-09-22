@@ -56,21 +56,10 @@
         </main>
     </div>
 
-    <div id="notificationDropdown" class="hidden fixed top-16 right-4 w-80 bg-white border border-slate-200 rounded-lg shadow-xl z-50 flex flex-col max-h-[70vh]">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-            <h4 class="text-sm font-semibold text-slate-700">消息通知</h4>
-            <button onclick="markAllNotificationsRead()" class="text-xs font-medium text-primary hover:underline">全部已读</button>
-        </div>
-        <div class="overflow-y-auto p-3 space-y-2 text-sm" hx-get="/api/notifications/check" hx-trigger="load" hx-indicator="#notification-loading">
-            <div id="notification-loading" class="htmx-indicator text-primary flex items-center gap-2 text-xs px-2 py-1">
-                <i class="fas fa-spinner fa-spin"></i> 加载中...
-            </div>
-        </div>
-    </div>
-
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/htmx-config.js') }}"></script>
     <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/prediction-detail.js') }}"></script>
 
     {% block scripts %}{% endblock %}
 </body>

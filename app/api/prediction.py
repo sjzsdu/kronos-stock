@@ -1,13 +1,20 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, render_template, make_response
 import time
 import traceback
+import json
+import logging
+import numpy as np
+from datetime import datetime, timedelta
 from app.services import model_service
 from app.services.prediction_service import prediction_service
 from app.models import db, PredictionRecord
 
+# Set up logger
+logger = logging.getLogger(__name__)
+
 prediction_api = Blueprint('prediction_api', __name__)
 
-@prediction_api.route('/predict', methods=['POST'])
+@prediction_api.route('/predictions', methods=['POST'])
 def predict():
     """Predict stock prices"""
     start_time = time.time()
@@ -187,8 +194,7 @@ def model_status():
             'error': str(e)
         }), 500
 
-@prediction_api.route('/history', methods=['GET'])
-@prediction_api.route('/predictions', methods=['GET'])  # Alias for frontend compatibility
+@prediction_api.route('/predictions', methods=['GET'])
 def get_prediction_history():
     """Get prediction history"""
     try:
@@ -263,15 +269,482 @@ def get_prediction_history():
 
 @prediction_api.route('/history/<int:record_id>', methods=['GET'])
 def get_prediction_record(record_id):
-    """Get specific prediction record"""
+    """Get specific prediction record with enhanced details"""
     try:
         record = PredictionRecord.query.get_or_404(record_id)
+        
+        # Get basic record data
+        record_data = record.to_dict()
+        
+        # Get current stock data for comparison
+        from app.services import stock_service
+        try:
+            success, current_df, message = stock_service.get_stock_data(record.stock_code, '1y')
+            if success and not current_df.empty:
+                # Get latest price
+                latest_data = current_df.iloc[-1]
+                record_data['current_stock_info'] = {
+                    'current_price': float(latest_data['close']),
+                    'price_change': float(latest_data['close'] - current_df.iloc[-2]['close']) if len(current_df) > 1 else 0,
+                    'price_change_percent': float((latest_data['close'] - current_df.iloc[-2]['close']) / current_df.iloc[-2]['close'] * 100) if len(current_df) > 1 else 0,
+                    'volume': int(latest_data['volume']) if 'volume' in latest_data else 0,
+                    'high': float(latest_data['high']),
+                    'low': float(latest_data['low']),
+                    'last_updated': latest_data.name.strftime('%Y-%m-%d %H:%M:%S') if hasattr(latest_data.name, 'strftime') else str(latest_data.name)
+                }
+                
+                # Calculate prediction accuracy if prediction is completed and time has passed
+                if record.status == 'completed' and record.prediction_data:
+                    record_data['accuracy_analysis'] = calculate_prediction_accuracy(record, current_df)
+                    
+            else:
+                record_data['current_stock_info'] = {'error': message}
+                
+        except Exception as e:
+            record_data['current_stock_info'] = {'error': f'获取股票数据失败: {str(e)}'}
+        
+        # Get stock basic info
+        try:
+            stock_info = stock_service.get_stock_info(record.stock_code)
+            record_data['stock_basic_info'] = stock_info
+        except Exception as e:
+            record_data['stock_basic_info'] = {'error': f'获取股票基本信息失败: {str(e)}'}
+        
         return jsonify({
             'success': True,
-            'data': record.to_dict()
+            'data': record_data
         })
     except Exception as e:
         return jsonify({
             'success': False,
             'error': str(e)
         }), 500
+
+def calculate_prediction_accuracy(record, current_df):
+    """Calculate prediction accuracy compared to actual prices"""
+    try:
+        prediction_data = record.get_prediction_data()
+        if not prediction_data or 'predictions' not in prediction_data:
+            return {'error': '无预测数据可供分析'}
+        
+        # Get prediction start date
+        prediction_start = record.created_at
+        
+        # Get actual prices after prediction date
+        actual_data = current_df[current_df.index >= prediction_start]
+        
+        if len(actual_data) < record.prediction_days:
+            return {
+                'status': 'insufficient_data',
+                'message': f'预测期为{record.prediction_days}天，但目前只有{len(actual_data)}天的实际数据',
+                'available_days': len(actual_data)
+            }
+        
+        # Calculate accuracy metrics
+        predictions = prediction_data['predictions'][:len(actual_data)]
+        actual_prices = actual_data['close'].values[:len(predictions)]
+        
+        # Calculate MAPE (Mean Absolute Percentage Error)
+        mape = np.mean(np.abs((actual_prices - predictions) / actual_prices)) * 100
+        
+        # Calculate directional accuracy
+        if len(predictions) > 1:
+            pred_direction = np.diff(predictions) > 0
+            actual_direction = np.diff(actual_prices) > 0
+            directional_accuracy = np.mean(pred_direction == actual_direction) * 100
+        else:
+            directional_accuracy = None
+        
+        return {
+            'status': 'completed',
+            'mape': float(mape),
+            'directional_accuracy': float(directional_accuracy) if directional_accuracy is not None else None,
+            'predictions': predictions.tolist() if hasattr(predictions, 'tolist') else predictions,
+            'actual_prices': actual_prices.tolist(),
+            'dates': [date.strftime('%Y-%m-%d') for date in actual_data.index[:len(predictions)]]
+        }
+        
+    except Exception as e:
+        return {'error': f'准确率计算失败: {str(e)}'}
+
+@prediction_api.route('/predictions/<int:record_id>')
+def get_prediction_detailed_analysis(record_id):
+    """Get detailed analysis view for a prediction record"""
+    try:
+        record = PredictionRecord.query.get_or_404(record_id)
+        
+        # Get basic record data
+        record_data = record.to_dict()
+        
+        # Get current stock data for comparison
+        from app.services import stock_service
+        try:
+            success, current_df, message = stock_service.get_stock_data(record.stock_code, '1y')
+            if success and not current_df.empty:
+                # Get latest price
+                latest_data = current_df.iloc[-1]
+                record_data['current_stock_info'] = {
+                    'current_price': float(latest_data['close']),
+                    'price_change': float(latest_data['close'] - current_df.iloc[-2]['close']) if len(current_df) > 1 else 0,
+                    'price_change_percent': float((latest_data['close'] - current_df.iloc[-2]['close']) / current_df.iloc[-2]['close'] * 100) if len(current_df) > 1 else 0,
+                    'volume': int(latest_data['volume']) if 'volume' in latest_data else 0,
+                    'high': float(latest_data['high']),
+                    'low': float(latest_data['low']),
+                    'last_updated': latest_data.name.strftime('%Y-%m-%d %H:%M:%S') if hasattr(latest_data.name, 'strftime') else str(latest_data.name)
+                }
+                
+                # Calculate prediction accuracy if prediction is completed and time has passed
+                if record.status == 'completed' and record.prediction_data:
+                    record_data['accuracy_analysis'] = calculate_prediction_accuracy(record, current_df)
+                    
+            else:
+                record_data['current_stock_info'] = {'error': message}
+                
+        except Exception as e:
+            record_data['current_stock_info'] = {'error': f'获取股票数据失败: {str(e)}'}
+        
+        # Get stock basic info
+        try:
+            stock_info = stock_service.get_stock_info(record.stock_code)
+            record_data['stock_basic_info'] = stock_info
+        except Exception as e:
+            record_data['stock_basic_info'] = {'error': f'获取股票基本信息失败: {str(e)}'}
+        
+        if request.headers.get('Accept') == 'application/json':
+            return jsonify({
+                'success': True,
+                'data': record_data
+            })
+        else:
+            # Render modal template
+            return render_template('components/prediction_detail_modal.html', 
+                                 record=type('obj', (object,), record_data)())
+    
+    except Exception as e:
+        logger.error(f"Error getting detailed analysis for record {record_id}: {str(e)}")
+        if request.headers.get('Accept') == 'application/json':
+            return jsonify({'error': str(e)}), 500
+        else:
+            return render_template('components/error_modal.html', 
+                                 error_message=str(e)), 500
+
+
+@prediction_api.route('/predictions/<int:record_id>/chart-data')
+def get_prediction_chart_data(record_id):
+    """Get chart data for prediction visualization"""
+    try:
+        record = PredictionRecord.query.get_or_404(record_id)
+        
+        if record.status != 'completed' or not record.prediction_data:
+            return jsonify({'error': 'Prediction not completed or no data available'}), 400
+        
+        prediction_data = record.get_prediction_data()
+        
+        # Prepare chart data structure
+        chart_data = {
+            'stock_code': record.stock_code,
+            'prediction_data': [],
+            'historical_data': [],
+            'actual_data': [],
+            'confidence_interval': None
+        }
+        
+        # Get base date from record creation
+        base_date = record.created_at.date()
+        
+        # Add prediction data points
+        if 'predictions' in prediction_data:
+            for i, price in enumerate(prediction_data['predictions']):
+                prediction_date = base_date + timedelta(days=i + 1)
+                chart_data['prediction_data'].append({
+                    'date': prediction_date.isoformat(),
+                    'predicted_price': float(price)
+                })
+        
+        # Get historical data for context (last 30 days before prediction)
+        try:
+            from app.services.stock_service import StockService
+            stock_service = StockService()
+            
+            # Calculate date range for historical data
+            end_date = base_date
+            start_date = end_date - timedelta(days=30)
+            
+            historical_data = stock_service.get_historical_data(
+                record.stock_code, 
+                start_date.strftime('%Y%m%d'),
+                end_date.strftime('%Y%m%d')
+            )
+            
+            if historical_data and not historical_data.get('error'):
+                for data_point in historical_data.get('data', []):
+                    chart_data['historical_data'].append({
+                        'date': data_point['date'],
+                        'price': float(data_point['close'])
+                    })
+        except Exception as e:
+            logger.warning(f"Could not fetch historical data for chart: {str(e)}")
+        
+        # Get actual data for comparison (if prediction period has passed)
+        try:
+            current_date = datetime.now().date()
+            prediction_end_date = base_date + timedelta(days=record.prediction_days)
+            
+            if current_date > base_date:
+                # Get actual data for the prediction period
+                actual_end_date = min(current_date, prediction_end_date)
+                actual_data = stock_service.get_historical_data(
+                    record.stock_code,
+                    base_date.strftime('%Y%m%d'),
+                    actual_end_date.strftime('%Y%m%d')
+                )
+                
+                if actual_data and not actual_data.get('error'):
+                    for data_point in actual_data.get('data', []):
+                        chart_data['actual_data'].append({
+                            'date': data_point['date'],
+                            'actual_price': float(data_point['close'])
+                        })
+        except Exception as e:
+            logger.warning(f"Could not fetch actual data for comparison: {str(e)}")
+        
+        # Add confidence intervals if available
+        if 'confidence_intervals' in prediction_data:
+            intervals = prediction_data['confidence_intervals']
+            chart_data['confidence_interval'] = {
+                'upper': [float(x) for x in intervals.get('upper', [])],
+                'lower': [float(x) for x in intervals.get('lower', [])]
+            }
+        
+        return jsonify(chart_data)
+    
+    except Exception as e:
+        logger.error(f"Error getting chart data for record {record_id}: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@prediction_api.route('/predictions/<int:record_id>/export')
+def export_prediction(record_id):
+    """Export prediction data in various formats"""
+    try:
+        record = PredictionRecord.query.get_or_404(record_id)
+        format_type = request.args.get('format', 'json').lower()
+        
+        if record.status != 'completed' or not record.prediction_data:
+            return jsonify({'error': 'Prediction not completed or no data available'}), 400
+        
+        # Get comprehensive record data
+        record_data = get_prediction_record(record_id)
+        
+        if format_type == 'json':
+            return export_as_json(record_data)
+        elif format_type == 'csv':
+            return export_as_csv(record_data)
+        elif format_type == 'pdf':
+            return export_as_pdf(record_data)
+        else:
+            return jsonify({'error': 'Unsupported format'}), 400
+    
+    except Exception as e:
+        logger.error(f"Error exporting prediction {record_id}: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+def export_as_json(record_data):
+    """Export prediction data as JSON"""
+    response = make_response(json.dumps(record_data, indent=2, ensure_ascii=False))
+    response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    response.headers['Content-Disposition'] = f'attachment; filename=prediction_{record_data["id"]}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+    return response
+
+
+def export_as_csv(record_data):
+    """Export prediction data as CSV"""
+    import io
+    import csv
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header information
+    writer.writerow(['Prediction Export Report'])
+    writer.writerow(['Generated at:', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+    writer.writerow([])
+    
+    # Basic information
+    writer.writerow(['Basic Information'])
+    writer.writerow(['Record ID', record_data['id']])
+    writer.writerow(['Stock Code', record_data['stock_code']])
+    writer.writerow(['Model Type', record_data['model_type']])
+    writer.writerow(['Prediction Days', record_data['prediction_days']])
+    writer.writerow(['Status', record_data['status']])
+    writer.writerow(['Created At', record_data['created_at']])
+    writer.writerow(['Execution Time (s)', record_data['execution_time']])
+    writer.writerow([])
+    
+    # Prediction data
+    if record_data.get('prediction_data') and record_data['prediction_data'].get('predictions'):
+        writer.writerow(['Prediction Results'])
+        writer.writerow(['Day', 'Predicted Price'])
+        
+        for i, price in enumerate(record_data['prediction_data']['predictions']):
+            writer.writerow([i + 1, f'{price:.2f}'])
+        writer.writerow([])
+    
+    # Accuracy analysis
+    if record_data.get('accuracy_analysis') and record_data['accuracy_analysis'].get('status') == 'completed':
+        writer.writerow(['Accuracy Analysis'])
+        accuracy = record_data['accuracy_analysis']
+        writer.writerow(['MAPE (%)', f'{accuracy.get("mape", 0):.2f}'])
+        if 'directional_accuracy' in accuracy:
+            writer.writerow(['Directional Accuracy (%)', f'{accuracy["directional_accuracy"]:.1f}'])
+        writer.writerow([])
+    
+    # Current stock info
+    if record_data.get('current_stock_info') and not record_data['current_stock_info'].get('error'):
+        writer.writerow(['Current Stock Information'])
+        stock_info = record_data['current_stock_info']
+        writer.writerow(['Current Price', f'{stock_info.get("current_price", 0):.2f}'])
+        writer.writerow(['Price Change', f'{stock_info.get("price_change", 0):.2f}'])
+        writer.writerow(['Price Change (%)', f'{stock_info.get("price_change_percent", 0):.2f}'])
+        writer.writerow(['Volume', stock_info.get('volume', 0)])
+    
+    response = make_response(output.getvalue())
+    response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+    response.headers['Content-Disposition'] = f'attachment; filename=prediction_{record_data["id"]}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+    return response
+
+
+def export_as_pdf(record_data):
+    """Export prediction data as PDF report"""
+    try:
+        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import inch
+        from reportlab.lib import colors
+        import io
+        
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            spaceAfter=30,
+            textColor=colors.darkblue
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Heading2'],
+            fontSize=14,
+            spaceAfter=12,
+            textColor=colors.darkblue
+        )
+        
+        story = []
+        
+        # Title
+        title = Paragraph("股价预测分析报告", title_style)
+        story.append(title)
+        story.append(Spacer(1, 20))
+        
+        # Basic information table
+        basic_info = [
+            ['记录ID', str(record_data['id'])],
+            ['股票代码', record_data['stock_code']],
+            ['模型类型', record_data['model_type']],
+            ['预测天数', str(record_data['prediction_days'])],
+            ['状态', record_data['status']],
+            ['创建时间', record_data['created_at']],
+            ['执行时间', f"{record_data['execution_time']:.2f}秒"]
+        ]
+        
+        story.append(Paragraph("基本信息", subtitle_style))
+        basic_table = Table(basic_info, colWidths=[2*inch, 3*inch])
+        basic_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        story.append(basic_table)
+        story.append(Spacer(1, 20))
+        
+        # Prediction results
+        if record_data.get('prediction_data') and record_data['prediction_data'].get('predictions'):
+            story.append(Paragraph("预测结果", subtitle_style))
+            predictions = record_data['prediction_data']['predictions']
+            
+            pred_data = [['天数', '预测价格']]
+            for i, price in enumerate(predictions[:10]):  # Show first 10 days
+                pred_data.append([f'第{i+1}天', f'¥{price:.2f}'])
+            
+            if len(predictions) > 10:
+                pred_data.append(['...', '...'])
+                pred_data.append([f'第{len(predictions)}天', f'¥{predictions[-1]:.2f}'])
+            
+            pred_table = Table(pred_data, colWidths=[1.5*inch, 2*inch])
+            pred_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            story.append(pred_table)
+            story.append(Spacer(1, 20))
+        
+        # Accuracy analysis
+        if record_data.get('accuracy_analysis') and record_data['accuracy_analysis'].get('status') == 'completed':
+            story.append(Paragraph("准确率分析", subtitle_style))
+            accuracy = record_data['accuracy_analysis']
+            
+            accuracy_data = [
+                ['指标', '数值'],
+                ['平均绝对百分比误差 (MAPE)', f"{accuracy.get('mape', 0):.2f}%"]
+            ]
+            
+            if 'directional_accuracy' in accuracy:
+                accuracy_data.append(['方向准确率', f"{accuracy['directional_accuracy']:.1f}%"])
+            
+            accuracy_table = Table(accuracy_data, colWidths=[3*inch, 2*inch])
+            accuracy_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            story.append(accuracy_table)
+        
+        # Build PDF
+        doc.build(story)
+        buffer.seek(0)
+        
+        response = make_response(buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=prediction_{record_data["id"]}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+        buffer.close()
+        return response
+        
+    except ImportError:
+        # Fallback if reportlab is not available
+        return jsonify({'error': 'PDF export not available. Please install reportlab.'}), 500
+    except Exception as e:
+        logger.error(f"Error generating PDF: {str(e)}")
+        return jsonify({'error': f'PDF generation failed: {str(e)}'}), 500
