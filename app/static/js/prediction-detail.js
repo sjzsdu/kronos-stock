@@ -12,7 +12,16 @@ function openPredictionDetail(recordId) {
             'Accept': 'text/html'
         }
     }).then(() => {
-        setTimeout(() => initializePredictionChart(recordId), 100);
+        // Chart will be initialized automatically by the modal's own script
+        showNotification('预测详情加载完成', 'success');
+        
+        // Also try to trigger chart initialization manually if needed
+        setTimeout(() => {
+            if (window.initPredictionModalChart) {
+                console.log('手动触发图表初始化');
+                window.initPredictionModalChart();
+            }
+        }, 200);
     }).catch(error => {
         showNotification('加载预测详情失败', 'error');
     });
@@ -25,23 +34,6 @@ function closePredictionModal() {
         modal.remove();
         currentPredictionModal = null;
     }
-}
-
-// Initialize prediction chart
-function initializePredictionChart(recordId) {
-    fetch(`/api/predictions/${recordId}/chart-data`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showChartError(data.error);
-                return;
-            }
-            
-            renderPredictionChart(data);
-        })
-        .catch(error => {
-            showChartError('获取图表数据失败');
-        });
 }
 
 // Render prediction chart using Plotly.js
@@ -297,13 +289,6 @@ function createSimilarPrediction(stockCode, modelType, predictionDays) {
         window.location.href = predictionUrl;
     }
 }
-
-// Global event listeners for prediction modal
-window.addEventListener('initPredictionChart', function(event) {
-    if (event.detail && event.detail.recordId) {
-        initializePredictionChart(event.detail.recordId);
-    }
-});
 
 // Close modal on escape key
 document.addEventListener('keydown', function(event) {

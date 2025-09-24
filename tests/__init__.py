@@ -1,0 +1,1 @@
+# Tests package for kronos-stock project

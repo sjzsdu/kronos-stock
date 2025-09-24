@@ -1,0 +1,12 @@
+# Testing dependencies
+pytest>=7.0.0
+pytest-flask>=1.2.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+pytest-html>=3.1.0
+factory-boy>=3.2.1
+faker>=18.0.0
+
+# For mocking external dependencies
+responses>=0.23.0
+requests-mock>=1.10.0

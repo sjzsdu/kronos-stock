@@ -276,55 +276,129 @@ def get_prediction_record(record_id):
         # Get basic record data
         record_data = record.to_dict()
         
-        # Get current stock data for comparison
-        from app.services import stock_service
+        # Get current stock price info using new service method
+        from app.services.stock_service import stock_service
         try:
-            success, current_df, message = stock_service.get_stock_data(record.stock_code, '1y')
-            if success and not current_df.empty:
-                # Get latest price
-                latest_data = current_df.iloc[-1]
-                record_data['current_stock_info'] = {
-                    'current_price': float(latest_data['close']),
-                    'price_change': float(latest_data['close'] - current_df.iloc[-2]['close']) if len(current_df) > 1 else 0,
-                    'price_change_percent': float((latest_data['close'] - current_df.iloc[-2]['close']) / current_df.iloc[-2]['close'] * 100) if len(current_df) > 1 else 0,
-                    'volume': int(latest_data['volume']) if 'volume' in latest_data else 0,
-                    'high': float(latest_data['high']),
-                    'low': float(latest_data['low']),
-                    'last_updated': latest_data.name.strftime('%Y-%m-%d %H:%M:%S') if hasattr(latest_data.name, 'strftime') else str(latest_data.name)
-                }
-                
-                # Calculate prediction accuracy if prediction is completed and time has passed
-                if record.status == 'completed' and record.prediction_data:
-                    record_data['accuracy_analysis'] = calculate_prediction_accuracy(record, current_df)
-                    
-            else:
-                record_data['current_stock_info'] = {'error': message}
-                
+            current_price_info = stock_service.get_current_price(record.stock_code)
+            record_data['current_stock_info'] = current_price_info
         except Exception as e:
-            record_data['current_stock_info'] = {'error': f'获取股票数据失败: {str(e)}'}
+            record_data['current_stock_info'] = {'error': f'获取当前价格失败: {str(e)}'}
         
-        # Get stock basic info
+        # Get stock basic info using new service method
         try:
             stock_info = stock_service.get_stock_info(record.stock_code)
             record_data['stock_basic_info'] = stock_info
         except Exception as e:
             record_data['stock_basic_info'] = {'error': f'获取股票基本信息失败: {str(e)}'}
         
+        # Calculate prediction accuracy if possible
+        if record.status == 'completed' and record.prediction_data:
+            try:
+                accuracy_analysis = calculate_prediction_accuracy_with_service(record, stock_service)
+                record_data['accuracy_analysis'] = accuracy_analysis
+            except Exception as e:
+                logger.warning(f"Failed to calculate accuracy for record {record_id}: {e}")
+                record_data['accuracy_analysis'] = {'error': f'准确率计算失败: {str(e)}'}
+        
         return jsonify({
             'success': True,
             'data': record_data
         })
     except Exception as e:
+        logger.error(f"Error getting prediction record {record_id}: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
         }), 500
 
-def calculate_prediction_accuracy(record, current_df):
-    """Calculate prediction accuracy compared to actual prices"""
+def calculate_prediction_accuracy_with_service(record, stock_service):
+    """Calculate prediction accuracy using stock service"""
     try:
         prediction_data = record.get_prediction_data()
-        if not prediction_data or 'predictions' not in prediction_data:
+        if not prediction_data or 'prediction_results' not in prediction_data:
+            return {'error': '无预测数据可供分析'}
+        
+        # Get historical data from prediction date to now
+        from datetime import datetime, timedelta
+        
+        prediction_start = record.created_at.date()
+        prediction_end = prediction_start + timedelta(days=record.prediction_days)
+        current_date = datetime.now().date()
+        
+        # Check if enough time has passed for accuracy calculation
+        if current_date < prediction_end:
+            days_passed = (current_date - prediction_start).days
+            return {
+                'status': 'insufficient_data',
+                'message': f'预测期为{record.prediction_days}天，目前已过{days_passed}天，需要更多时间验证准确性',
+                'days_passed': days_passed,
+                'total_days': record.prediction_days
+            }
+        
+        # Get actual historical data for the prediction period
+        start_date_str = prediction_start.strftime('%Y%m%d')
+        end_date_str = min(prediction_end, current_date).strftime('%Y%m%d')
+        
+        historical_result = stock_service.get_historical_data(
+            record.stock_code, 
+            start_date_str, 
+            end_date_str
+        )
+        
+        if 'error' in historical_result:
+            return {'error': f'获取历史数据失败: {historical_result["error"]}'}
+        
+        if not historical_result.get('data'):
+            return {'error': '没有可用的历史数据进行准确率计算'}
+        
+        # Extract actual prices
+        actual_data = historical_result['data']
+        if len(actual_data) < record.prediction_days:
+            return {
+                'status': 'insufficient_data',
+                'message': f'预测期为{record.prediction_days}天，但只获取到{len(actual_data)}天的实际数据',
+                'available_days': len(actual_data)
+            }
+        
+        # Calculate accuracy metrics
+        prediction_results = prediction_data['prediction_results'][:len(actual_data)]
+        predictions = [float(result['close']) for result in prediction_results]
+        actual_prices = [float(day['close']) for day in actual_data[:len(predictions)]]
+        
+        if len(predictions) != len(actual_prices):
+            return {'error': '预测数据与实际数据长度不匹配'}
+        
+        # Calculate MAPE (Mean Absolute Percentage Error)
+        import numpy as np
+        mape = np.mean([abs((actual - pred) / actual) for actual, pred in zip(actual_prices, predictions) if actual != 0]) * 100
+        
+        # Calculate directional accuracy
+        predicted_directions = [1 if i == 0 or predictions[i] > predictions[i-1] else 0 for i in range(len(predictions))]
+        actual_directions = [1 if i == 0 or actual_prices[i] > actual_prices[i-1] else 0 for i in range(len(actual_prices))]
+        directional_accuracy = sum([1 for p, a in zip(predicted_directions, actual_directions) if p == a]) / len(predicted_directions) * 100
+        
+        # Calculate additional metrics
+        rmse = np.sqrt(np.mean([(actual - pred) ** 2 for actual, pred in zip(actual_prices, predictions)]))
+        
+        return {
+            'status': 'completed',
+            'mape': mape,
+            'directional_accuracy': directional_accuracy,
+            'rmse': rmse,
+            'prediction_period': record.prediction_days,
+            'data_points_used': len(actual_prices),
+            'message': f'基于{len(actual_prices)}天数据的准确率分析'
+        }
+        
+    except Exception as e:
+        logger.error(f"Error calculating prediction accuracy: {e}")
+        return {'error': f'准确率计算过程中出错: {str(e)}'}
+
+def calculate_prediction_accuracy(record, current_df):
+    """Legacy function for backward compatibility"""
+    try:
+        prediction_data = record.get_prediction_data()
+        if not prediction_data or 'prediction_results' not in prediction_data:
             return {'error': '无预测数据可供分析'}
         
         # Get prediction start date
@@ -341,7 +415,8 @@ def calculate_prediction_accuracy(record, current_df):
             }
         
         # Calculate accuracy metrics
-        predictions = prediction_data['predictions'][:len(actual_data)]
+        prediction_results = prediction_data['prediction_results'][:len(actual_data)]
+        predictions = np.array([float(result['close']) for result in prediction_results])
         actual_prices = actual_data['close'].values[:len(predictions)]
         
         # Calculate MAPE (Mean Absolute Percentage Error)
@@ -453,12 +528,11 @@ def get_prediction_chart_data(record_id):
         base_date = record.created_at.date()
         
         # Add prediction data points
-        if 'predictions' in prediction_data:
-            for i, price in enumerate(prediction_data['predictions']):
-                prediction_date = base_date + timedelta(days=i + 1)
+        if 'prediction_results' in prediction_data:
+            for result in prediction_data['prediction_results']:
                 chart_data['prediction_data'].append({
-                    'date': prediction_date.isoformat(),
-                    'predicted_price': float(price)
+                    'date': result['date'],
+                    'predicted_price': float(result['close'])
                 })
         
         # Get historical data for context (last 30 days before prediction)

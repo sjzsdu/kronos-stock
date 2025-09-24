@@ -1,14 +1,14 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
-from config import config
+import config as config_module
 from datetime import datetime
 
 def create_app(config_name='default'):
     """Application factory pattern"""
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
-    config[config_name].init_app(app)
+    app.config.from_object(config_module.config[config_name])
+    config_module.config[config_name].init_app(app)
     
     # Initialize database
     from app.models import db

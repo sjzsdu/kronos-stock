@@ -39,10 +39,10 @@
                         <a href="{{ url_for(item.endpoint) }}" 
                            class="sidebar-menu-item flex items-center px-3 py-2 text-sm font-medium rounded-md {% if request.endpoint == item.endpoint %} bg-blue-50 text-blue-600 {% else %} text-gray-700 hover:bg-gray-50 {% endif %}" 
                            title="{{ item.title }}">
-                            <div class="sidebar-menu-icon mr-3 text-gray-400">
+                            <div class="sidebar-menu-icon text-gray-400">
                                 <i class="{{ item.icon }}"></i>
                             </div>
-                            <span class="sidebar-label">{{ item.title }}</span>
+                            <span class="sidebar-label ml-3">{{ item.title }}</span>
                         </a>
                         {% endfor %}
                     </div>
