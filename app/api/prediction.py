@@ -822,3 +822,48 @@ def export_as_pdf(record_data):
     except Exception as e:
         logger.error(f"Error generating PDF: {str(e)}")
         return jsonify({'error': f'PDF generation failed: {str(e)}'}), 500
+
+@prediction_api.route('/predictions/<int:record_id>', methods=['DELETE'])
+def delete_prediction_record(record_id):
+    """Delete a prediction record"""
+    try:
+        # Get the record to delete
+        record = PredictionRecord.query.get_or_404(record_id)
+        
+        # Log the deletion attempt
+        logger.info(f"Attempting to delete prediction record {record_id} for stock {record.stock_code}")
+        
+        # Store record info for logging
+        stock_code = record.stock_code
+        model_type = record.model_type
+        created_at = record.created_at
+        
+        # Delete the record
+        db.session.delete(record)
+        db.session.commit()
+        
+        # Log successful deletion
+        logger.info(f"Successfully deleted prediction record {record_id} (stock: {stock_code}, model: {model_type}, created: {created_at})")
+        
+        return jsonify({
+            'success': True,
+            'message': f'预测记录已删除 (股票: {stock_code})',
+            'deleted_record': {
+                'id': record_id,
+                'stock_code': stock_code,
+                'model_type': model_type,
+                'created_at': created_at.isoformat() if created_at else None
+            }
+        })
+        
+    except Exception as e:
+        # Rollback in case of error
+        db.session.rollback()
+        logger.error(f"Error deleting prediction record {record_id}: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        return jsonify({
+            'success': False,
+            'error': f'删除失败: {str(e)}',
+            'message': '删除预测记录时发生错误'
+        }), 500

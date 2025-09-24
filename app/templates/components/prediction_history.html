@@ -118,6 +118,14 @@
                                 >
                                     <i class="fas fa-redo"></i>
                                 </button>
+                                
+                                <button 
+                                    class="text-red-600 hover:text-red-800 transition-colors"
+                                    onclick="confirmDeletePrediction({{ record.id }}, '{{ record.stock_code }}')"
+                                    title="删除记录"
+                                >
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -197,5 +205,74 @@
 // Show error message in a modal or alert
 function showError(errorMessage) {
     alert('错误信息：\n' + errorMessage);
+}
+
+// Confirm and delete prediction record
+function confirmDeletePrediction(recordId, stockCode) {
+    if (confirm(`确定要删除股票 ${stockCode} 的预测记录吗？\n\n此操作不可恢复！`)) {
+        deletePredictionRecord(recordId);
+    }
+}
+
+// Delete prediction record via API
+function deletePredictionRecord(recordId) {
+    fetch(`/api/predictions/${recordId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Show success message
+            showNotification('预测记录已删除', 'success');
+            // Reload the prediction history
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            return response.json().then(data => {
+                throw new Error(data.message || '删除失败');
+            });
+        }
+    })
+    .catch(error => {
+        console.error('删除失败:', error);
+        showNotification('删除失败: ' + error.message, 'error');
+    });
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${
+        type === 'success' ? 'bg-green-500 text-white' :
+        type === 'error' ? 'bg-red-500 text-white' :
+        'bg-blue-500 text-white'
+    }`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas ${
+                type === 'success' ? 'fa-check-circle' :
+                type === 'error' ? 'fa-exclamation-circle' :
+                'fa-info-circle'
+            } mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
 }
 </script>
