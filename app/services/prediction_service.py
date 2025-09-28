@@ -24,6 +24,9 @@ class PredictionService:
             if not valid:
                 return False, {'error': f'Invalid stock code: {validated_code}'}
             
+            # Get stock base info early (non-critical)
+            stock_info = stock_service.get_stock_info(validated_code)
+            
             # Get stock data
             success, df, message = stock_service.get_stock_data(validated_code)
             if not success:
@@ -75,6 +78,7 @@ class PredictionService:
             
             return True, {
                 'stock_code': validated_code,
+                'stock_info': stock_info,
                 'prediction_results': results,
                 'prediction_summary': summary,
                 'saved_file': filename,

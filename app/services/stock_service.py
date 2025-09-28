@@ -172,34 +172,84 @@ class StockService:
         from china_stock_data import StockData
         
         try:
-            # Create StockData instance
             stock_data = StockData(stock_code)
-            
-            # Get basic info
             info = stock_data.get_data('info')
             
-            if info is not None and not info.empty:
-                # Extract basic information from the data
-                stock_info = {
-                    'code': stock_code,
-                    'name': info.get('name', f"{stock_code} 股票"),
-                    'market': 'CN',
-                    'currency': 'CNY'
-                }
-                
-                # Try to get additional details if available
-                if 'industry' in info:
-                    stock_info['industry'] = info['industry']
-                if 'sector' in info:
-                    stock_info['sector'] = info['sector']
-                if 'exchange' in info:
-                    stock_info['exchange'] = info['exchange']
-                    
-                return stock_info
-            else:
-                # Fallback to basic info based on stock code
-                return self._get_fallback_stock_info(stock_code)
-                
+            # If info is a DataFrame with item/value columns, normalize it
+            normalized: Dict[str, Any] = {}
+            if info is not None:
+                try:
+                    if isinstance(info, pd.DataFrame) and set(['item', 'value']).issubset(info.columns):
+                        for _, row in info.iterrows():
+                            key = str(row['item']).strip()
+                            value = row['value']
+                            normalized[key] = value
+                    elif isinstance(info, dict):
+                        normalized = info
+                except Exception as e:
+                    current_app.logger.warning(f"Failed normalizing info DataFrame: {e}")
+            
+            # Mapping from Chinese keys to internal standardized keys
+            mapping = {
+                '股票代码': 'code',
+                '股票简称': 'name',
+                '行业': 'industry',
+                '总股本': 'total_shares',
+                '流通股': 'float_shares',
+                '总市值': 'market_cap',
+                '流通市值': 'float_market_cap',
+                '上市时间': 'list_date',
+                '最新': 'last_price'
+            }
+            
+            stock_info = {
+                'code': stock_code,
+                'name': f"{stock_code} 股票",
+                'market': 'CN',
+                'exchange': None,
+                'exchange_name': None,
+                'currency': 'CNY'
+            }
+            
+            for cn_key, std_key in mapping.items():
+                if cn_key in normalized and normalized[cn_key] not in (None, ''):
+                    stock_info[std_key] = normalized[cn_key]
+            
+            # Derive exchange by code pattern if not in info
+            if not stock_info.get('exchange'):
+                if stock_code.startswith(('00', '30', 'SZ.')):
+                    stock_info['exchange'] = 'SZSE'
+                    stock_info['exchange_name'] = '深圳证券交易所'
+                elif stock_code.startswith(('60', 'SH.')):
+                    stock_info['exchange'] = 'SSE'
+                    stock_info['exchange_name'] = '上海证券交易所'
+            
+            # Post-process numeric fields
+            numeric_fields = ['total_shares', 'float_shares', 'market_cap', 'float_market_cap', 'last_price']
+            for field in numeric_fields:
+                if field in stock_info:
+                    try:
+                        # Remove possible commas
+                        val = str(stock_info[field]).replace(',', '')
+                        stock_info[field] = float(val)
+                    except Exception:
+                        pass
+            
+            # Format list_date if present (YYYYMMDD -> YYYY-MM-DD)
+            if 'list_date' in stock_info:
+                raw = str(stock_info['list_date'])
+                if len(raw) == 8 and raw.isdigit():
+                    stock_info['list_date'] = f"{raw[0:4]}-{raw[4:6]}-{raw[6:8]}"
+            
+            # Fallback for name
+            if 'name' not in stock_info or not stock_info['name'] or stock_info['name'].startswith(stock_code):
+                # Try alternative keys
+                for alt in ['简称', '名称']:
+                    if alt in normalized:
+                        stock_info['name'] = normalized[alt]
+                        break
+            
+            return stock_info
         except Exception as e:
             current_app.logger.warning(f"Failed to get real stock info for {stock_code}: {e}")
             return self._get_fallback_stock_info(stock_code)

@@ -1,55 +1,121 @@
 {% if success %}
 <div class="flex flex-col gap-4">
-    <!-- Summary Card -->
+    <!-- Summary Card v1 (original gradient style) -->
     <div class="bg-white rounded-xl shadow-prediction p-6 transition-all duration-300 hover:shadow-xl">
-        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
-            <i class="fas fa-chart-line text-primary text-lg"></i>
-            摘要信息
-        </h3>
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 md:p-6 rounded-lg mb-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-                <h4 class="text-lg font-bold text-gray-800 flex items-center mb-3 md:mb-0">
-                    股票代码: {{ data.stock_code }}
-                </h4>
-                <div class="flex items-center px-3 py-1.5 rounded-full text-sm font-medium
-                    {% if data.prediction_summary.trend == 'bullish' %}
-                        bg-green-100 text-green-700
-                    {% else %}
-                        bg-red-100 text-red-700
+        <div class="flex items-center gap-2 mb-5">
+            <i class="fas fa-chart-line text-primary"></i>
+            <h3 class="text-lg font-semibold text-gray-800">摘要信息</h3>
+        </div>
+        {% if data.stock_info %}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Stock Info Card -->
+            <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-lg p-5 border border-blue-100">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-building text-blue-600"></i>
+                    <h4 class="font-semibold text-gray-800">股票信息</h4>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">代码:</span>
+                        <span class="font-semibold text-gray-900">{{ data.stock_info.code }}</span>
+                    </div>
+                    {% if data.stock_info.name %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">名称:</span>
+                        <span class="font-medium text-gray-900 text-right truncate max-w-[150px]" title="{{ data.stock_info.name }}">{{ data.stock_info.name }}</span>
+                    </div>
                     {% endif %}
-                ">
-                    <i class="fas fa-{{ 'arrow-up' if data.prediction_summary.trend == 'bullish' else 'arrow-down' }} mr-1"></i>
-                    {{ '看涨' if data.prediction_summary.trend == 'bullish' else '看跌' }}
+                    {% if data.stock_info.exchange %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">交易所:</span>
+                        <span class="font-medium text-gray-900">{{ data.stock_info.exchange }}</span>
+                    </div>
+                    {% endif %}
+                    {% if data.stock_info.industry %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">行业:</span>
+                        <span class="font-medium text-gray-900 text-right truncate max-w-[150px]" title="{{ data.stock_info.industry }}">{{ data.stock_info.industry }}</span>
+                    </div>
+                    {% endif %}
+                    {% if data.stock_info.list_date %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">上市时间:</span>
+                        <span class="font-medium text-gray-900">{{ data.stock_info.list_date }}</span>
+                    </div>
+                    {% endif %}
+                    {% if data.stock_info.last_price %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">最新价格:</span>
+                        <span class="font-semibold text-blue-600">¥{{ data.stock_info.last_price | round(2) }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Capital Structure Card -->
+            <div class="bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 rounded-lg p-5 border border-emerald-100">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-coins text-emerald-600"></i>
+                    <h4 class="font-semibold text-gray-800">资本结构</h4>
+                </div>
+                <div class="space-y-3">
+                    {% if data.stock_info.market_cap %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">总市值:</span>
+                        <span class="font-semibold text-gray-900">{{ (data.stock_info.market_cap / 1e8) | round(2) }} 亿</span>
+                    </div>
+                    {% endif %}
+                    {% if data.stock_info.float_market_cap %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">流通市值:</span>
+                        <span class="font-medium text-gray-900">{{ (data.stock_info.float_market_cap / 1e8) | round(2) }} 亿</span>
+                    </div>
+                    {% endif %}
+                    {% if data.stock_info.total_shares %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">总股本:</span>
+                        <span class="font-medium text-gray-900">{{ (data.stock_info.total_shares / 1e8) | round(2) }} 亿股</span>
+                    </div>
+                    {% endif %}
+                    {% if data.stock_info.float_shares %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">流通股:</span>
+                        <span class="font-medium text-gray-900">{{ (data.stock_info.float_shares / 1e8) | round(2) }} 亿股</span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="flex flex-col items-center text-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                <span class="text-gray-500 text-sm mb-1">当前价格</span>
-                <span class="text-2xl font-bold text-gray-800">¥{{ "%.2f"|format(data.prediction_summary.current_price) }}</span>
+
+        <!-- KPI Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-gray-50 rounded-lg p-4 text-center">
+                <div class="text-sm text-gray-600 mb-1">当前价格</div>
+                <div class="text-lg font-bold text-gray-900">¥{{ "%.2f"|format(data.prediction_summary.current_price) }}</div>
             </div>
-            <div class="flex flex-col items-center text-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                <span class="text-gray-500 text-sm mb-1">预测价格</span>
-                <span class="text-2xl font-bold text-blue-600">¥{{ "%.2f"|format(data.prediction_summary.target_price) }}</span>
+            <div class="bg-blue-50 rounded-lg p-4 text-center border border-blue-100">
+                <div class="text-sm text-gray-600 mb-1">预测价格</div>
+                <div class="text-lg font-bold text-blue-600">¥{{ "%.2f"|format(data.prediction_summary.target_price) }}</div>
             </div>
-            <div class="flex flex-col items-center text-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                <span class="text-gray-500 text-sm mb-1">预期涨幅</span>
-                <span class="text-2xl font-bold
-                    {% if data.prediction_summary.total_change_pct > 0 %}
-                        text-red-600
-                    {% else %}
-                        text-green-600
-                    {% endif %}
-                ">
-                    {{ "%.2f"|format(data.prediction_summary.total_change_pct) }}%
-                </span>
+            <div class="bg-{{ 'red' if data.prediction_summary.total_change_pct > 0 else 'green' }}-50 rounded-lg p-4 text-center border border-{{ 'red' if data.prediction_summary.total_change_pct > 0 else 'green' }}-100">
+                <div class="text-sm text-gray-600 mb-1">预期涨幅</div>
+                <div class="text-lg font-bold text-{{ 'red' if data.prediction_summary.total_change_pct > 0 else 'green' }}-600">{{ "%.2f"|format(data.prediction_summary.total_change_pct) }}%</div>
             </div>
-            <div class="flex flex-col items-center text-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                <span class="text-gray-500 text-sm mb-1">预测周期</span>
-                <span class="text-2xl font-bold text-gray-800">{{ data.prediction_summary.prediction_period }}</span>
+            <div class="bg-purple-50 rounded-lg p-4 text-center border border-purple-100">
+                <div class="text-sm text-gray-600 mb-1">预测周期</div>
+                <div class="text-lg font-bold text-purple-600">{{ data.prediction_summary.prediction_period }}</div>
             </div>
         </div>
+
+        <!-- Trend Badge -->
+        <div class="mt-4 flex justify-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium
+                {% if data.prediction_summary.trend == 'bullish' %}bg-red-100 text-red-700 border border-red-200{% elif data.prediction_summary.trend == 'bearish' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-gray-100 text-gray-700 border border-gray-200{% endif %}">
+                <i class="fas fa-{{ 'arrow-up' if data.prediction_summary.trend == 'bullish' else ('arrow-down' if data.prediction_summary.trend == 'bearish' else 'minus') }}"></i>
+                {{ '看涨趋势' if data.prediction_summary.trend == 'bullish' else ('看跌趋势' if data.prediction_summary.trend == 'bearish' else '震荡趋势') }}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Chart Container -->
@@ -161,7 +227,17 @@ function initPredictionChart() {
         }
         
         try {
-            const chartData = JSON.parse(chartDataElement.textContent);
+            let rawText = chartDataElement.textContent || '';
+            // 防止意外文本中包含换行或尾随空格
+            rawText = rawText.trim();
+            let chartData;
+            try {
+                chartData = JSON.parse(rawText);
+            } catch (parseErr) {
+                console.error('Failed to parse chart JSON data:', parseErr, rawText);
+                ctx.parentElement.innerHTML = '<div class="h-full flex items-center justify-center text-red-500">数据解析失败</div>';
+                return;
+            }
             
             const historicalData = chartData.historical || [];
             const predictionData = chartData.prediction || [];
@@ -184,7 +260,12 @@ function initPredictionChart() {
                 ...predictionData.map(item => item.close)
             ];
 
-            new Chart(ctx, {
+            // 若已有实例，先销毁（解决二次预测重复初始化问题）
+            if (window._predictionChart) {
+                try { window._predictionChart.destroy(); } catch(e){ console.warn('Destroy chart failed', e); }
+            }
+
+            window._predictionChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: allDates,
