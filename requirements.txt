@@ -10,7 +10,7 @@ numpy>=1.26.0,<2.0.0
 requests>=2.31.0
 torch>=2.1.0,<2.3.0
 einops>=0.6.0
-china_stock_data==0.2.1
+china_stock_data==0.2.2
 safetensors>=0.3.0
 reportlab>=4.0.0
 

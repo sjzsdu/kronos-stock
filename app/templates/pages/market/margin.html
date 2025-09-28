@@ -1,0 +1,146 @@
+{% extends "layouts/sidebar.html" %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container p-6">
+    <!-- Page header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <i class="fas fa-balance-scale text-blue-500"></i>
+            {{ page_title }}
+        </h1>
+        <p class="text-gray-600 mt-2">{{ page_description }}</p>
+    </div>
+
+    <!-- Data filters -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-filter text-blue-500"></i>
+            筛选条件
+        </h3>
+        <form class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">日期</label>
+                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">交易所</label>
+                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">全部</option>
+                    <option value="sh">上交所</option>
+                    <option value="sz">深交所</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-search mr-2"></i>查询
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Statistics cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">融资余额</p>
+                    <p class="text-2xl font-bold text-green-600">0.00亿</p>
+                </div>
+                <div class="bg-green-100 p-3 rounded-full">
+                    <i class="fas fa-arrow-up text-green-600"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">融券余额</p>
+                    <p class="text-2xl font-bold text-red-600">0.00亿</p>
+                </div>
+                <div class="bg-red-100 p-3 rounded-full">
+                    <i class="fas fa-arrow-down text-red-600"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">余额净额</p>
+                    <p class="text-2xl font-bold text-blue-600">0.00亿</p>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-full">
+                    <i class="fas fa-balance-scale text-blue-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data display area -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-table text-green-500"></i>
+            融资融券明细
+        </h3>
+        
+        <!-- Loading indicator -->
+        <div id="loading" class="hidden">
+            <div class="flex items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span class="ml-3 text-gray-600">正在加载数据...</span>
+            </div>
+        </div>
+
+        <!-- Data table placeholder -->
+        <div id="data-container">
+            <div class="text-center py-12 text-gray-500">
+                <i class="fas fa-chart-bar text-4xl mb-4"></i>
+                <p>选择筛选条件后点击查询按钮获取融资融券数据</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('loading').classList.remove('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('data-container').innerHTML = `
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">股票代码</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">股票名称</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">融资余额</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">融券余额</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">余额净额</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">000001</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">平安银行</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">12.3亿</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">0.5亿</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">11.8亿</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }, 1500);
+        });
+    }
+});
+</script>
+{% endblock %}

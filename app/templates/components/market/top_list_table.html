@@ -1,0 +1,89 @@
+{% if data.records and data.records|length > 0 %}
+<div class="mb-4 flex items-center justify-between">
+    <div class="text-sm text-gray-600">
+        <i class="fas fa-info-circle mr-1"></i>
+        数据日期: {{ data.date }} | 数据来源: {{ '实时数据' if data.source == 'real_data' else '模拟数据' }} | 共 {{ data.records|length }} 条记录
+    </div>
+</div>
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">股票代码</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">股票名称</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">涨跌幅(%)</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">买入金额</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">卖出金额</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成交额</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">上榜原因</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for record in data.records %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ record.stock_code }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{ record.stock_name }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    {% set change_pct = record.change_pct %}
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                {% if change_pct >= 0 %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                        {{ '+' if change_pct >= 0 else '' }}{{ "%.2f"|format(change_pct) }}%
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {% if record.buy_amount %}
+                        {% if record.buy_amount >= 100000000 %}
+                            {{ "%.2f"|format(record.buy_amount / 100000000) }}亿
+                        {% elif record.buy_amount >= 10000 %}
+                            {{ "%.2f"|format(record.buy_amount / 10000) }}万
+                        {% else %}
+                            {{ "%.2f"|format(record.buy_amount) }}
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {% if record.sell_amount %}
+                        {% if record.sell_amount >= 100000000 %}
+                            {{ "%.2f"|format(record.sell_amount / 100000000) }}亿
+                        {% elif record.sell_amount >= 10000 %}
+                            {{ "%.2f"|format(record.sell_amount / 10000) }}万
+                        {% else %}
+                            {{ "%.2f"|format(record.sell_amount) }}
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {% if record.turnover %}
+                        {% if record.turnover >= 100000000 %}
+                            {{ "%.2f"|format(record.turnover / 100000000) }}亿
+                        {% elif record.turnover >= 10000 %}
+                            {{ "%.2f"|format(record.turnover / 10000) }}万
+                        {% else %}
+                            {{ "%.2f"|format(record.turnover) }}
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                    <div class="truncate" title="{{ record.reason }}">{{ record.reason }}</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center py-12 text-gray-500">
+    <i class="fas fa-info-circle text-4xl mb-4"></i>
+    <p>暂无龙虎榜数据</p>
+</div>
+{% endif %}

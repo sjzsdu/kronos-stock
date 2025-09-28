@@ -78,3 +78,4 @@ package-lock.json
 pnpm-lock.yaml
 yarn.lock
 .data_cache/
+.market_cache/

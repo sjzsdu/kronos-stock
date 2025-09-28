@@ -1,0 +1,238 @@
+{% extends "layouts/sidebar.html" %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container p-6">
+    <!-- Page header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <i class="fas fa-map-marker-alt text-red-500"></i>
+            {{ page_title }}
+        </h1>
+        <p class="text-gray-600 mt-2">{{ page_description }}</p>
+    </div>
+
+    <!-- Top regions overview -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="text-center">
+                <p class="text-red-100 text-sm">北京</p>
+                <p class="text-xl font-bold">0.00万亿</p>
+                <p class="text-red-200 text-xs">成交金额</p>
+            </div>
+        </div>
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="text-center">
+                <p class="text-blue-100 text-sm">上海</p>
+                <p class="text-xl font-bold">0.00万亿</p>
+                <p class="text-blue-200 text-xs">成交金额</p>
+            </div>
+        </div>
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="text-center">
+                <p class="text-green-100 text-sm">深圳</p>
+                <p class="text-xl font-bold">0.00万亿</p>
+                <p class="text-green-200 text-xs">成交金额</p>
+            </div>
+        </div>
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="text-center">
+                <p class="text-purple-100 text-sm">广州</p>
+                <p class="text-xl font-bold">0.00万亿</p>
+                <p class="text-purple-200 text-xs">成交金额</p>
+            </div>
+        </div>
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="text-center">
+                <p class="text-orange-100 text-sm">杭州</p>
+                <p class="text-xl font-bold">0.00万亿</p>
+                <p class="text-orange-200 text-xs">成交金额</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">地区成交分布</h3>
+            <canvas id="regionChart"></canvas>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">成交趋势对比</h3>
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Data filters and table -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-filter text-red-500"></i>
+            数据筛选
+        </h3>
+        <form class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">开始日期</label>
+                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">结束日期</label>
+                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">地区</label>
+                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    <option value="">全部地区</option>
+                    <option value="beijing">北京</option>
+                    <option value="shanghai">上海</option>
+                    <option value="shenzhen">深圳</option>
+                    <option value="guangzhou">广州</option>
+                    <option value="hangzhou">杭州</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                    <i class="fas fa-search mr-2"></i>查询
+                </button>
+            </div>
+        </form>
+
+        <!-- Loading indicator -->
+        <div id="loading" class="hidden">
+            <div class="flex items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                <span class="ml-3 text-gray-600">正在加载数据...</span>
+            </div>
+        </div>
+
+        <!-- Data table -->
+        <div id="data-container">
+            <div class="text-center py-12 text-gray-500">
+                <i class="fas fa-chart-bar text-4xl mb-4"></i>
+                <p>选择筛选条件后点击查询按钮获取地区成交数据</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize region chart
+    const regionCtx = document.getElementById('regionChart').getContext('2d');
+    new Chart(regionCtx, {
+        type: 'pie',
+        data: {
+            labels: ['北京', '上海', '深圳', '广州', '杭州', '其他'],
+            datasets: [{
+                data: [25, 20, 18, 12, 10, 15],
+                backgroundColor: [
+                    '#EF4444', '#3B82F6', '#10B981', 
+                    '#8B5CF6', '#F59E0B', '#6B7280'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Initialize trend chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+            datasets: [
+                {
+                    label: '北京',
+                    data: [120, 190, 300, 500, 200, 300],
+                    borderColor: '#EF4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.1
+                },
+                {
+                    label: '上海',
+                    data: [100, 170, 280, 450, 180, 280],
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.1
+                },
+                {
+                    label: '深圳',
+                    data: [90, 150, 250, 400, 160, 250],
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Form submission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('loading').classList.remove('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('data-container').innerHTML = `
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">地区</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成交金额</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成交量</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">占比</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">环比增长</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">北京</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">0.52万亿</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">65亿股</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">25.2%</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">+5.8%</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">上海</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">0.41万亿</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">52亿股</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">19.8%</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">+3.2%</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">深圳</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">0.37万亿</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">47亿股</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">17.9%</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">-1.5%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }, 1500);
+        });
+    }
+});
+</script>
+{% endblock %}

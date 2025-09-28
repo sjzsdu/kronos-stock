@@ -35,13 +35,23 @@
                         <span class="text-lg tracking-tight">Kronos</span>
                     </a>
                     <nav class="flex items-center gap-1 ml-4">
-                        <a href="{{ url_for('views.prediction') }}" 
-                           class="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 
-                                  transition-all duration-200 ease-in-out
-                                hover:bg-indigo-100 hover:shadow-sm ">
-                            <i class="fas fa-chart-line"></i>
-                            <span>股票预测</span>
-                        </a>
+                        {% if primary_menu %}
+                            {% for menu_item in primary_menu %}
+                                {% set is_active = false %}
+                                {% if menu_item.key == 'market' and request.path.startswith('/market/') %}
+                                    {% set is_active = true %}
+                                {% elif menu_item.key == 'prediction' and (request.path == '/prediction' or request.path == '/history') %}
+                                    {% set is_active = true %}
+                                {% endif %}
+                                <a href="{{ url_for(menu_item.default_url) }}" 
+                                   class="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 
+                                          transition-all duration-200 ease-in-out
+                                          {% if is_active %}bg-indigo-100 text-indigo-700{% else %}text-slate-700 hover:bg-slate-100 hover:text-slate-900{% endif %}">
+                                    <i class="{{ menu_item.icon }}"></i>
+                                    <span>{{ menu_item.title }}</span>
+                                </a>
+                            {% endfor %}
+                        {% endif %}
                     </nav>
                 </div>
                 <div class="flex items-center gap-5">
