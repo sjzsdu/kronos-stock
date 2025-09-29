@@ -151,19 +151,44 @@ class MarketDataService:
         """
         try:
             # Try to get real data
-            real_data = self._get_real_data('margin')  # 融资融券数据的fetcher名称
+            real_data = self._get_real_data('margin_financing')  # 融资融券数据的fetcher名称
             
             if real_data is not None and not real_data.empty:
                 # Process real margin data
+                records = []
+                for _, row in real_data.head(50).iterrows():  # Limit to 50 records for display
+                    record = {}
+                    # Convert date format
+                    if pd.notna(row['信用交易日期']):
+                        date_str = str(int(row['信用交易日期']))
+                        if len(date_str) == 8:
+                            formatted_date = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
+                            record['trade_date'] = formatted_date
+                        else:
+                            record['trade_date'] = '未知日期'
+                    else:
+                        record['trade_date'] = '未知日期'
+                    
+                    # Map columns to standard format
+                    record['margin_balance'] = float(row['融资余额']) if pd.notna(row['融资余额']) else 0
+                    record['margin_buy'] = float(row['融资买入额']) if pd.notna(row['融资买入额']) else 0
+                    record['short_volume'] = float(row['融券余量']) if pd.notna(row['融券余量']) else 0
+                    record['short_amount'] = float(row['融券余量金额']) if pd.notna(row['融券余量金额']) else 0
+                    record['short_sell'] = float(row['融券卖出量']) if pd.notna(row['融券卖出量']) else 0
+                    record['total_balance'] = float(row['融资融券余额']) if pd.notna(row['融资融券余额']) else 0
+                    
+                    records.append(record)
+                
                 logger.info(f"Successfully retrieved margin data: {real_data.shape}")
                 return {
                     'success': True,
                     'data': {
                         'date': date or datetime.now().strftime('%Y-%m-%d'),
-                        'records': real_data.to_dict('records'),
-                        'source': 'real_data'
+                        'records': records,
+                        'source': 'real_data',
+                        'total_count': len(real_data)
                     },
-                    'message': f'Real margin data retrieved successfully'
+                    'message': f'Real margin data retrieved successfully ({len(records)} records)'
                 }
             
             # No real data available

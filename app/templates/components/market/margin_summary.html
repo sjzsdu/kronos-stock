@@ -1,0 +1,82 @@
+{% if data.records and data.records|length > 0 %}
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <i class="fas fa-chart-bar text-blue-500"></i>
+        融资融券统计概览
+    </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-blue-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-chart-line text-blue-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-blue-600">最新融资余额</p>
+                    <p class="text-lg font-semibold text-blue-900">
+                        {% set latest = data.records[0] %}
+                        {% if latest.margin_balance >= 100000000000 %}
+                            {{ "%.2f"|format(latest.margin_balance / 1000000000000) }}万亿
+                        {% elif latest.margin_balance >= 100000000 %}
+                            {{ "%.2f"|format(latest.margin_balance / 100000000) }}亿
+                        {% else %}
+                            {{ "%.2f"|format(latest.margin_balance / 10000) }}万
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-green-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-arrow-up text-green-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-600">最新买入额</p>
+                    <p class="text-lg font-semibold text-green-900">
+                        {% if latest.margin_buy >= 100000000 %}
+                            {{ "%.2f"|format(latest.margin_buy / 100000000) }}亿
+                        {% elif latest.margin_buy >= 10000 %}
+                            {{ "%.2f"|format(latest.margin_buy / 10000) }}万
+                        {% else %}
+                            {{ "%.2f"|format(latest.margin_buy) }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-purple-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-balance-scale text-purple-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-purple-600">融资融券总余额</p>
+                    <p class="text-lg font-semibold text-purple-900">
+                        {% if latest.total_balance >= 100000000000 %}
+                            {{ "%.2f"|format(latest.total_balance / 1000000000000) }}万亿
+                        {% elif latest.total_balance >= 100000000 %}
+                            {{ "%.2f"|format(latest.total_balance / 100000000) }}亿
+                        {% else %}
+                            {{ "%.2f"|format(latest.total_balance / 10000) }}万
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4 text-sm text-gray-500 text-center">
+        数据日期: {{ latest.trade_date }} | 基于最新一日交易数据
+    </div>
+</div>
+{% else %}
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="text-center py-8 text-gray-500">
+        <i class="fas fa-chart-bar text-3xl mb-3"></i>
+        <p>暂无融资融券统计数据</p>
+    </div>
+</div>
+{% endif %}

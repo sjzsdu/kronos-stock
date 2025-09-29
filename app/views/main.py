@@ -50,7 +50,7 @@ def market_szse():
 @views_bp.route('/market/region-data')
 def market_region_data():
     """Region trading data page"""
-    return render_template('pages/market/region_data.html', 
+    return render_template('pages/market/region.html', 
                          page_title='地区成交数据',
                          page_description='按地区分类的交易统计')
 
@@ -70,6 +70,26 @@ def htmx_top_list():
     
     if result['success']:
         return render_template('components/market/top_list_table.html', 
+                             data=result['data'])
+    else:
+        return render_template('components/market/error.html', 
+                             error=result.get('error', result.get('message', 'Unknown error')))
+
+@views_bp.route('/htmx/market/margin')
+def htmx_margin():
+    """HTMX endpoint for margin data"""
+    from flask import request
+    from app.services.market_data_service import market_data_service
+    
+    # Get query parameters
+    date = request.args.get('date')
+    exchange = request.args.get('exchange')
+    
+    # Get data from service
+    result = market_data_service.get_margin_data(date=date, exchange=exchange)
+    
+    if result['success']:
+        return render_template('components/market/margin_wrapper.html', 
                              data=result['data'])
     else:
         return render_template('components/market/error.html', 
