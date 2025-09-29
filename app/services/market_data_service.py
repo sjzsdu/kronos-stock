@@ -220,11 +220,43 @@ class MarketDataService:
         """
         try:
             # Try to get real data
-            real_data = self._get_real_data('northbound')  # 北向资金数据的fetcher名称
+            real_data = self._get_real_data('northbound_holdings')  # 北向资金持股数据的fetcher名称
             
             if real_data is not None and not real_data.empty:
-                # Process real northbound data
-                logger.info(f"Successfully retrieved northbound data: {real_data.shape}")
+                # Process real northbound holdings data
+                records = []
+                for _, row in real_data.head(50).iterrows():  # Limit to 50 records for display
+                    record = {}
+                    
+                    # Map columns to standard format
+                    record['rank'] = int(row['序号']) if pd.notna(row['序号']) else 0
+                    record['stock_code'] = str(int(row['代码'])).zfill(6) if pd.notna(row['代码']) else '000000'
+                    record['stock_name'] = str(row['名称']) if pd.notna(row['名称']) else '未知股票'
+                    record['close_price'] = float(row['今日收盘价']) if pd.notna(row['今日收盘价']) else 0
+                    record['change_pct'] = float(row['今日涨跌幅']) if pd.notna(row['今日涨跌幅']) else 0
+                    
+                    # Holdings data
+                    record['holding_shares'] = float(row['今日持股-股数']) if pd.notna(row['今日持股-股数']) else 0
+                    record['holding_value'] = float(row['今日持股-市值']) if pd.notna(row['今日持股-市值']) else 0
+                    record['holding_pct_float'] = float(row['今日持股-占流通股比']) if pd.notna(row['今日持股-占流通股比']) else 0
+                    record['holding_pct_total'] = float(row['今日持股-占总股本比']) if pd.notna(row['今日持股-占总股本比']) else 0
+                    
+                    # 5-day changes
+                    record['change_5d_shares'] = float(row['5日增持估计-股数']) if pd.notna(row['5日增持估计-股数']) else 0
+                    record['change_5d_value'] = float(row['5日增持估计-市值']) if pd.notna(row['5日增持估计-市值']) else 0
+                    record['change_5d_pct'] = float(row['5日增持估计-市值增幅']) if pd.notna(row['5日增持估计-市值增幅']) else 0
+                    
+                    record['sector'] = str(row['所属板块']) if pd.notna(row['所属板块']) else '其他'
+                    record['date'] = str(row['日期']) if pd.notna(row['日期']) else ''
+                    
+                    records.append(record)
+                
+                # Calculate summary statistics
+                total_holding_value = sum(record['holding_value'] for record in records)
+                avg_holding_pct = sum(record['holding_pct_float'] for record in records) / len(records) if records else 0
+                top_holdings = records[:10] if len(records) >= 10 else records
+                
+                logger.info(f"Successfully retrieved northbound holdings data: {real_data.shape}")
                 return {
                     'success': True,
                     'data': {
@@ -232,10 +264,17 @@ class MarketDataService:
                             'start': start_date or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'),
                             'end': end_date or datetime.now().strftime('%Y-%m-%d')
                         },
-                        'records': real_data.to_dict('records'),
-                        'source': 'real_data'
+                        'records': records,
+                        'summary': {
+                            'total_holdings': len(records),
+                            'total_value': total_holding_value,
+                            'avg_holding_pct': avg_holding_pct,
+                            'top_holdings': top_holdings
+                        },
+                        'source': 'real_data',
+                        'total_count': len(real_data)
                     },
-                    'message': f'Real northbound data retrieved successfully'
+                    'message': f'Real northbound holdings data retrieved successfully ({len(records)} records)'
                 }
             
             # No real data available

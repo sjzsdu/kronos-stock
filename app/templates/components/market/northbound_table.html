@@ -1,0 +1,90 @@
+{% if data.records and data.records|length > 0 %}
+<div class="mb-4 flex items-center justify-between">
+    <div class="text-sm text-gray-600">
+        <i class="fas fa-info-circle mr-1"></i>
+        数据来源: {{ '实时数据' if data.source == 'real_data' else '模拟数据' }} | 共 {{ data.records|length }} 条持股记录 | 总计 {{ data.total_count }} 只股票
+    </div>
+</div>
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">排名</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">股票代码</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">股票名称</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">收盘价</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">涨跌幅</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">持股数量(万股)</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">持股市值</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">占流通股比</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">5日增持</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">所属板块</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for record in data.records %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-bold text-gray-900">
+                        {% if record.rank <= 3 %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-yellow-500 rounded-full">
+                                {{ record.rank }}
+                            </span>
+                        {% else %}
+                            {{ record.rank }}
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-blue-600">{{ record.stock_code }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ record.stock_name }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ "%.2f"|format(record.close_price) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                {% if record.change_pct >= 0 %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                        {{ '+' if record.change_pct >= 0 else '' }}{{ "%.2f"|format(record.change_pct) }}%
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-600 font-medium">
+                    {{ "%.2f"|format(record.holding_shares / 10000) }}万股
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
+                    {% if record.holding_value >= 10000 %}
+                        {{ "%.2f"|format(record.holding_value / 10000) }}万
+                    {% elif record.holding_value >= 100000000 %}
+                        {{ "%.2f"|format(record.holding_value / 100000000) }}亿
+                    {% else %}
+                        {{ "%.2f"|format(record.holding_value) }}
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">
+                    {{ "%.2f"|format(record.holding_pct_float) }}%
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm font-medium
+                        {% if record.change_5d_pct >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                        {{ '+' if record.change_5d_pct >= 0 else '' }}{{ "%.2f"|format(record.change_5d_pct) }}%
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-md">
+                        {{ record.sector }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<div class="text-center py-12 text-gray-500">
+    <i class="fas fa-info-circle text-4xl mb-4"></i>
+    <p>暂无北向资金持股数据</p>
+</div>
+{% endif %}

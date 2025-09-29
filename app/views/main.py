@@ -1,8 +1,12 @@
 from flask import render_template, jsonify, redirect, url_for
 from . import views_bp
 from app.services import model_service
+from app.services.market_data_service import MarketDataService
 from datetime import datetime, timedelta
 import random
+
+# Initialize market data service
+market_service = MarketDataService()
 
 @views_bp.route('/')
 def index():
@@ -94,6 +98,22 @@ def htmx_margin():
     else:
         return render_template('components/market/error.html', 
                              error=result.get('error', result.get('message', 'Unknown error')))
+
+@views_bp.route('/htmx/market/northbound')
+def htmx_market_northbound():
+    """HTMX endpoint for northbound data"""
+    try:
+        data = market_service.get_northbound_data()
+        if data and data.get('success'):
+            return render_template('components/market/northbound_wrapper.html', 
+                                   data=data.get('data', {}))
+        else:
+            error_msg = data.get('error', 'No northbound data available') if data else 'Data service unavailable'
+            return render_template('components/market/error.html', 
+                                   message=error_msg)
+    except Exception as e:
+        return render_template('components/market/error.html', 
+                               message=f'Error loading northbound data: {str(e)}')
 
 @views_bp.route('/market/industry')
 def market_industry():
