@@ -1,255 +1,27 @@
 {% extends "layouts/sidebar.html" %}
 
-{% block head %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% endblock %}
-
 {% block content %}
 <div class="container p-6">
     <!-- Page header -->
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <i class="fas fa-industry text-indigo-500"></i>
-            {{ page_title }}
+            行业成交数据
         </h1>
-        <p class="text-gray-600 mt-2">{{ page_description }}</p>
+        <p class="text-gray-600 mt-2">按行业分类的交易统计数据</p>
     </div>
 
-    <!-- Top industries overview -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="text-center">
-                <p class="text-indigo-100 text-sm">科技</p>
-                <p class="text-xl font-bold">0.00万亿</p>
-                <p class="text-indigo-200 text-xs">成交金额</p>
+    <!-- HTMX loading container -->
+    <div id="industry-data-container" 
+         hx-get="{{ url_for('views.htmx_market_industry') }}" 
+         hx-trigger="load" 
+         hx-swap="innerHTML">
+        <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-indigo-600 rounded-full" role="status" aria-label="loading">
+                <span class="sr-only">Loading...</span>
             </div>
-        </div>
-        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="text-center">
-                <p class="text-green-100 text-sm">金融</p>
-                <p class="text-xl font-bold">0.00万亿</p>
-                <p class="text-green-200 text-xs">成交金额</p>
-            </div>
-        </div>
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="text-center">
-                <p class="text-blue-100 text-sm">医药</p>
-                <p class="text-xl font-bold">0.00万亿</p>
-                <p class="text-blue-200 text-xs">成交金额</p>
-            </div>
-        </div>
-        <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="text-center">
-                <p class="text-red-100 text-sm">消费</p>
-                <p class="text-xl font-bold">0.00万亿</p>
-                <p class="text-red-200 text-xs">成交金额</p>
-            </div>
-        </div>
-        <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="text-center">
-                <p class="text-yellow-100 text-sm">制造</p>
-                <p class="text-xl font-bold">0.00万亿</p>
-                <p class="text-yellow-200 text-xs">成交金额</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">行业成交分布</h3>
-            <canvas id="industryChart"></canvas>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">行业涨跌分布</h3>
-            <canvas id="performanceChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Hot sectors -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-fire text-orange-500"></i>
-            热门板块
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="border border-gray-200 rounded-lg p-4">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-800">人工智能</span>
-                    <span class="text-sm text-green-600">+8.5%</span>
-                </div>
-                <div class="text-xs text-gray-500">成交额: 520亿</div>
-            </div>
-            <div class="border border-gray-200 rounded-lg p-4">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-800">新能源汽车</span>
-                    <span class="text-sm text-green-600">+6.2%</span>
-                </div>
-                <div class="text-xs text-gray-500">成交额: 480亿</div>
-            </div>
-            <div class="border border-gray-200 rounded-lg p-4">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-800">生物医药</span>
-                    <span class="text-sm text-red-600">-2.1%</span>
-                </div>
-                <div class="text-xs text-gray-500">成交额: 350亿</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data filters and table -->
-    <div class="bg-white rounded-xl shadow-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-filter text-indigo-500"></i>
-            数据筛选
-        </h3>
-        <form class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">开始日期</label>
-                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">结束日期</label>
-                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">行业分类</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">全部行业</option>
-                    <option value="tech">科技</option>
-                    <option value="finance">金融</option>
-                    <option value="healthcare">医药</option>
-                    <option value="consumer">消费</option>
-                    <option value="manufacturing">制造</option>
-                </select>
-            </div>
-            <div class="flex items-end">
-                <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                    <i class="fas fa-search mr-2"></i>查询
-                </button>
-            </div>
-        </form>
-
-        <!-- Loading indicator -->
-        <div id="loading" class="hidden">
-            <div class="flex items-center justify-center py-8">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                <span class="ml-3 text-gray-600">正在加载数据...</span>
-            </div>
-        </div>
-
-        <!-- Data table -->
-        <div id="data-container">
-            <div class="text-center py-12 text-gray-500">
-                <i class="fas fa-chart-bar text-4xl mb-4"></i>
-                <p>选择筛选条件后点击查询按钮获取行业成交数据</p>
-            </div>
+            <p class="mt-4 text-gray-600">正在加载行业成交数据...</p>
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize industry chart
-    const industryCtx = document.getElementById('industryChart').getContext('2d');
-    new Chart(industryCtx, {
-        type: 'bar',
-        data: {
-            labels: ['科技', '金融', '医药', '消费', '制造', '能源'],
-            datasets: [{
-                label: '成交金额(万亿)',
-                data: [0.8, 0.6, 0.5, 0.4, 0.3, 0.2],
-                backgroundColor: [
-                    '#6366F1', '#10B981', '#3B82F6', 
-                    '#EF4444', '#F59E0B', '#8B5CF6'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // Initialize performance chart
-    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-    new Chart(performanceCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['上涨', '下跌', '平盘'],
-            datasets: [{
-                data: [60, 30, 10],
-                backgroundColor: ['#10B981', '#EF4444', '#6B7280']
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    // Form submission
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            document.getElementById('loading').classList.remove('hidden');
-            
-            setTimeout(() => {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('data-container').innerHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">行业</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成交金额</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成交量</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">涨跌幅</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">上涨家数</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">下跌家数</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">科技</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600">0.82万亿</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">102亿股</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">+2.5%</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">180</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">120</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">金融</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">0.65万亿</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">85亿股</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">+1.8%</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">45</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">25</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">医药</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">0.48万亿</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">68亿股</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">-0.5%</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">95</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">105</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }, 1500);
-        });
-    }
-});
-</script>
 {% endblock %}

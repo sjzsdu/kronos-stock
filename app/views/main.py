@@ -147,7 +147,39 @@ def htmx_market_szse():
         return render_template('components/market/error.html', 
                                message=f'Error loading SZSE data: {str(e)}')
 
+@views_bp.route('/htmx/market/regional')
+def htmx_market_regional():
+    """HTMX endpoint for regional trading data"""
+    try:
+        data = market_service.get_regional_data()
+        if data and data.get('success'):
+            return render_template('components/market/regional_wrapper.html', 
+                                   data=data.get('data', {}))
+        else:
+            error_msg = data.get('error', 'No regional data available') if data else 'Data service unavailable'
+            return render_template('components/market/error.html', 
+                                   message=error_msg)
+    except Exception as e:
+        return render_template('components/market/error.html', 
+                               message=f'Error loading regional data: {str(e)}')
+
 @views_bp.route('/market/industry')
 def market_industry():
     """Industry trading data - Statistics by industry"""
     return render_template('pages/market/industry.html', page_title='行业成交数据', page_description='按行业分类的交易统计')
+
+@views_bp.route('/htmx/market/industry')
+def htmx_market_industry():
+    """HTMX endpoint for industry trading data"""
+    try:
+        data = market_service.get_industry_data()
+        if data and data.get('success'):
+            return render_template('components/market/industry_wrapper.html', 
+                                   data=data.get('data', {}))
+        else:
+            error_msg = data.get('error', 'No industry data available') if data else 'Data service unavailable'
+            return render_template('components/market/error.html', 
+                                   message=error_msg)
+    except Exception as e:
+        return render_template('components/market/error.html', 
+                               message=f'Error loading industry data: {str(e)}')

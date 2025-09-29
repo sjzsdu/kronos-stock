@@ -1,0 +1,123 @@
+{% if data.records and data.records|length > 0 %}
+<div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <i class="fas fa-industry text-indigo-500"></i>
+            行业成交数据排行
+        </h3>
+        <p class="text-sm text-gray-600 mt-1">按交易额排序的行业数据</p>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">行业名称</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">成交金额</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">金额占比</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">成交股数</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">股数占比</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">成交笔数</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">交易天数</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for record in data.records %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <!-- 行业名称 -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-chart-bar text-indigo-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">{{ record.name_cn }}</div>
+                                <div class="text-xs text-gray-500">{{ record.name_en }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    
+                    <!-- 成交金额 -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <span class="text-sm font-semibold text-gray-900">
+                            {% if record.trading_amount >= 1000000000000 %}
+                                {{ "%.2f"|format(record.trading_amount / 1000000000000) }}万亿
+                            {% elif record.trading_amount >= 100000000000 %}
+                                {{ "%.1f"|format(record.trading_amount / 100000000000) }}千亿
+                            {% else %}
+                                {{ "%.2f"|format(record.trading_amount / 100000000) }}亿
+                            {% endif %}
+                        </span>
+                    </td>
+                    
+                    <!-- 金额占比 -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <div class="flex items-center justify-end">
+                            <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-2 rounded-full" 
+                                     style="width: {{ (record.amount_percentage * 5)|round(1) if record.amount_percentage * 5 <= 100 else 100 }}%"></div>
+                            </div>
+                            <span class="text-sm font-medium text-gray-900">{{ "%.2f"|format(record.amount_percentage) }}%</span>
+                        </div>
+                    </td>
+                    
+                    <!-- 成交股数 -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <span class="text-sm text-blue-600 font-medium">
+                            {% if record.trading_volume >= 100000000000 %}
+                                {{ "%.1f"|format(record.trading_volume / 100000000000) }}千亿股
+                            {% elif record.trading_volume >= 10000000000 %}
+                                {{ "%.2f"|format(record.trading_volume / 10000000000) }}百亿股
+                            {% else %}
+                                {{ "%.2f"|format(record.trading_volume / 100000000) }}亿股
+                            {% endif %}
+                        </span>
+                    </td>
+                    
+                    <!-- 股数占比 -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <span class="text-sm font-medium text-purple-600">{{ "%.2f"|format(record.volume_percentage) }}%</span>
+                    </td>
+                    
+                    <!-- 成交笔数 -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <span class="text-sm text-orange-600 font-medium">
+                            {% if record.transaction_count >= 10000000 %}
+                                {{ "%.1f"|format(record.transaction_count / 10000000) }}千万笔
+                            {% elif record.transaction_count >= 1000000 %}
+                                {{ "%.2f"|format(record.transaction_count / 1000000) }}百万笔
+                            {% else %}
+                                {{ "{:,}"|format(record.transaction_count) }}笔
+                            {% endif %}
+                        </span>
+                    </td>
+                    
+                    <!-- 交易天数 -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            {% if record.trading_days >= 20 %}bg-green-100 text-green-800
+                            {% elif record.trading_days >= 15 %}bg-yellow-100 text-yellow-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ record.trading_days }}天
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div class="flex items-center justify-between text-sm text-gray-600">
+            <span>共 {{ data.records|length }} 个行业</span>
+            <span>数据来源: 深交所行业成交统计</span>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="bg-white rounded-xl shadow-lg p-8 text-center">
+    <i class="fas fa-industry text-3xl text-gray-300 mb-4"></i>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">暂无行业成交数据</h3>
+    <p class="text-gray-500">请稍后再试或检查数据源</p>
+</div>
+{% endif %}

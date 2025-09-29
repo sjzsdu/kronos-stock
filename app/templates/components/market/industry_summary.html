@@ -1,0 +1,151 @@
+{% if data.records and data.records|length > 0 and data.summary %}
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <i class="fas fa-chart-bar text-indigo-500"></i>
+        行业交易概览
+    </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-indigo-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-list text-indigo-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-indigo-600">参与行业</p>
+                    <p class="text-lg font-semibold text-indigo-900">{{ data.summary.total_industries }}个</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-blue-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-coins text-blue-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-blue-600">总交易额</p>
+                    <p class="text-lg font-semibold text-blue-900">
+                        {% if data.summary.total_trading_amount >= 1000000000000 %}
+                            {{ "%.1f"|format(data.summary.total_trading_amount / 1000000000000) }}万亿
+                        {% elif data.summary.total_trading_amount >= 100000000000 %}
+                            {{ "%.0f"|format(data.summary.total_trading_amount / 100000000000) }}千亿
+                        {% else %}
+                            {{ "%.0f"|format(data.summary.total_trading_amount / 100000000) }}亿
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-purple-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-chart-line text-purple-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-purple-600">总成交股数</p>
+                    <p class="text-lg font-semibold text-purple-900">
+                        {% if data.summary.total_trading_volume >= 100000000000 %}
+                            {{ "%.1f"|format(data.summary.total_trading_volume / 100000000000) }}千亿股
+                        {% elif data.summary.total_trading_volume >= 10000000000 %}
+                            {{ "%.1f"|format(data.summary.total_trading_volume / 10000000000) }}百亿股
+                        {% else %}
+                            {{ "%.1f"|format(data.summary.total_trading_volume / 100000000) }}亿股
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-orange-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-calendar-alt text-orange-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-orange-600">平均交易天数</p>
+                    <p class="text-lg font-semibold text-orange-900">{{ "%.1f"|format(data.summary.avg_trading_days) }}天</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top 5 industries breakdown -->
+    <div class="mt-6">
+        <h4 class="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <i class="fas fa-trophy text-indigo-500"></i>
+            前五大交易行业
+        </h4>
+        <div class="space-y-3">
+            {% for i in range(5) %}
+                {% if data.summary.top_industries[i] %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white rounded-full
+                            {% if i == 0 %}bg-yellow-500
+                            {% elif i == 1 %}bg-gray-400  
+                            {% elif i == 2 %}bg-orange-400
+                            {% else %}bg-indigo-500{% endif %}">
+                            {{ i + 1 }}
+                        </span>
+                        <span class="font-medium text-gray-800">{{ data.summary.top_industries[i] }}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-semibold text-gray-700">
+                            {% if data.summary.top_trading_amounts[i] >= 1000000000000 %}
+                                {{ "%.2f"|format(data.summary.top_trading_amounts[i] / 1000000000000) }}万亿
+                            {% elif data.summary.top_trading_amounts[i] >= 100000000000 %}
+                                {{ "%.1f"|format(data.summary.top_trading_amounts[i] / 100000000000) }}千亿
+                            {% else %}
+                                {{ "%.2f"|format(data.summary.top_trading_amounts[i] / 100000000) }}亿
+                            {% endif %}
+                        </span>
+                        <div class="mt-1">
+                            <div class="w-20 bg-gray-200 rounded-full h-1.5">
+                                <div class="h-1.5 rounded-full 
+                                    {% if i == 0 %}bg-yellow-500
+                                    {% elif i == 1 %}bg-gray-400  
+                                    {% elif i == 2 %}bg-orange-400
+                                    {% else %}bg-indigo-500{% endif %}"
+                                    style="width: {{ (data.summary.top_trading_amounts[i] / data.summary.top_trading_amounts[0] * 100)|round(1) if data.summary.top_trading_amounts[0] > 0 else 0 }}%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Industry distribution chart -->
+    <div class="mt-6">
+        <h4 class="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <i class="fas fa-pie-chart text-indigo-500"></i>
+            行业分布概览
+        </h4>
+        <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span>平均市场占比</span>
+                <span>{{ "%.2f"|format(data.summary.avg_amount_percentage) }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 h-3 rounded-full" 
+                     style="width: {{ (data.summary.avg_amount_percentage * 10)|round(1) if data.summary.avg_amount_percentage * 10 <= 100 else 100 }}%"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4 text-sm text-gray-500 text-center">
+        数据来源: 深交所行业成交统计 | 实时更新
+    </div>
+</div>
+{% else %}
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="text-center py-8 text-gray-500">
+        <i class="fas fa-chart-bar text-3xl mb-3"></i>
+        <p>暂无行业交易概览数据</p>
+    </div>
+</div>
+{% endif %}
