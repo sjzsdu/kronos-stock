@@ -1,30 +1,30 @@
 {% if data.records and data.records|length > 0 %}
-<div class="mb-4 flex items-center justify-between">
-    <div class="text-sm text-gray-600">
+<div class="data-info">
+    <div class="data-info-text">
         <i class="fas fa-info-circle mr-1"></i>
         数据日期: {{ data.date }} | 数据来源: {{ '实时数据' if data.source == 'real_data' else '模拟数据' }} | 共 {{ data.records|length }} 条记录
     </div>
 </div>
-<div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+<div class="data-table-container">
+    <table class="data-table">
+        <thead class="data-table-header">
             <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">交易日期</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">融资余额</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">融资买入额</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">融券余量</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">融券余量金额</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">融券卖出量</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">融资融券余额</th>
+                <th class="data-table-th">交易日期</th>
+                <th class="data-table-th">融资余额</th>
+                <th class="data-table-th">融资买入额</th>
+                <th class="data-table-th">融券余量</th>
+                <th class="data-table-th">融券余量金额</th>
+                <th class="data-table-th">融券卖出量</th>
+                <th class="data-table-th">融资融券余额</th>
             </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="data-table-body">
             {% for record in data.records %}
-            <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">{{ record.trade_date }}</div>
+            <tr class="data-table-row">
+                <td class="data-table-td">
+                    <div class="data-table-text-primary">{{ record.trade_date }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
+                <td class="data-table-td data-currency">
                     {% if record.margin_balance >= 100000000000 %}
                         {{ "%.2f"|format(record.margin_balance / 1000000000000) }}万亿
                     {% elif record.margin_balance >= 100000000 %}
@@ -35,7 +35,7 @@
                         {{ "%.2f"|format(record.margin_balance) }}
                     {% endif %}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
+                <td class="data-table-td data-currency-green">
                     {% if record.margin_buy >= 100000000 %}
                         {{ "%.2f"|format(record.margin_buy / 100000000) }}亿
                     {% elif record.margin_buy >= 10000 %}
@@ -44,7 +44,7 @@
                         {{ "%.2f"|format(record.margin_buy) }}
                     {% endif %}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-600">
+                <td class="data-table-td data-currency-purple">
                     {% if record.short_volume >= 100000000 %}
                         {{ "%.2f"|format(record.short_volume / 100000000) }}亿
                     {% elif record.short_volume >= 10000 %}

@@ -34,17 +34,619 @@
 
 /* 组件类 */
 @layer components {
+  /* ========== 页面结构组件 ========== */
+  
+  /* 主容器 */
+  .page-container {
+    @apply container p-6;
+  }
+  
+  /* 页面标题 */
+  .page-header {
+    @apply mb-6;
+  }
+  
+  .page-title {
+    @apply text-3xl font-bold text-gray-900 flex items-center gap-3;
+  }
+  
+  .page-description {
+    @apply text-gray-600 mt-2;
+  }
+  
+  /* ========== 卡片组件 ========== */
+  
+  /* 基础卡片 */
+  .card {
+    @apply bg-white rounded-xl shadow-lg;
+  }
+  
+  /* 卡片内容区 */
+  .card-content {
+    @apply p-6;
+  }
+  
+  /* 带边距的卡片 */
+  .card-spaced {
+    @apply card mb-6;
+  }
+  
+  /* 悬停效果卡片 */
+  .card-interactive {
+    @apply card transition-all duration-300 hover:shadow-xl;
+  }
+  
+  /* ========== 表单组件 ========== */
+  
+  /* 表单容器 */
+  .form-container {
+    @apply card-content;
+  }
+  
+  /* 表单网格布局 */
+  .form-grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+  }
+  
+  /* 表单字段组 */
+  .form-field {
+    @apply flex flex-col;
+  }
+  
+  /* 表单标签 */
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+  
+  /* ========== 统一高度系统 ========== */
+  
+  /* 基础控件高度 - 使用 Tailwind 的 h-11 (44px) 确保一致性 */
+  .form-control-height {
+    @apply h-11 flex items-center;
+  }
+  
+  /* 快速组合类 - 减少重复书写 */
+  .input-base {
+    @apply w-full px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+  
+  .btn-base-style {
+    @apply px-4 rounded-lg transition-colors inline-flex items-center justify-center gap-2;
+  }
+  
+  /* ========== 表单控件 ========== */
+  
+  /* 基础输入框 */
+  .form-input {
+    @apply w-full px-3 border border-gray-300 rounded-lg focus:border-blue-500 form-control-height;
+  }
+  
   /* 自定义选择框 - 统一的下拉箭头样式 */
-  .custom-select {
-    @apply appearance-none bg-white pr-10;
+  .form-select {
+    @apply form-input appearance-none pr-10 relative text-xs cursor-pointer;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3e%3cpath d='M1.5 1.5L6 6L10.5 1.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
     background-position: right 12px center;
     background-repeat: no-repeat;
     background-size: 12px 8px;
   }
   
+  /* 智能定位优化 - 在容器边缘时自动调整方向 */
+  .form-select {
+    /* 提升 z-index 确保下拉框在最上层 */
+    position: relative;
+    z-index: 100;
+  }
+  
+  /* ========== 自定义下拉选择器组件 ========== */
+  
+  /* 自定义下拉容器 */
+  .custom-dropdown {
+    @apply relative inline-block w-full;
+  }
+  
+  /* 下拉触发按钮 */
+  .dropdown-trigger {
+    @apply form-input appearance-none pr-10 cursor-pointer select-none bg-white;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3e%3cpath d='M1.5 1.5L6 6L10.5 1.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 12px 8px;
+  }
+  
+  /* 下拉菜单容器 - 智能定位 */
+  .dropdown-menu {
+    @apply absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-auto;
+    /* 默认向下展开 */
+    top: 100%;
+  }
+  
+  /* 向上展开的下拉菜单（当空间不足时） */
+  .dropdown-menu.dropdown-up {
+    @apply -mt-1;
+    top: auto;
+    bottom: 100%;
+  }
+  
+  /* 下拉选项 */
+  .dropdown-option {
+    @apply px-3 py-2 cursor-pointer hover:bg-blue-50 hover:text-blue-700 transition-colors;
+  }
+  
+  /* 选中的选项 */
+  .dropdown-option.selected {
+    @apply bg-blue-100 text-blue-700 font-medium;
+  }
+  
+  /* 隐藏下拉菜单 */
+  .dropdown-menu.hidden {
+    display: none;
+  }
+  
   /* 聚焦时的箭头样式 */
-  .custom-select:focus {
+  .form-select:focus {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3e%3cpath d='M1.5 1.5L6 6L10.5 1.5' stroke='%233b82f6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+  }
+  
+  /* ========== 按钮组件 ========== */
+  
+  /* 基础按钮样式 - 统一高度和居中 */
+  .btn-base {
+    @apply px-4 rounded-lg transition-colors form-control-height justify-center;
+  }
+  
+  /* 主按钮 */
+  .btn-primary {
+    @apply btn-base bg-blue-600 text-white hover:bg-blue-700;
+  }
+  
+  /* 次要按钮 */
+  .btn-secondary {
+    @apply btn-base bg-gray-200 text-gray-800 hover:bg-gray-300;
+  }
+  
+  /* 带图标的按钮 */
+  .btn-icon {
+    @apply inline-flex items-center gap-2;
+  }
+  
+  /* 全宽按钮 */
+  .btn-full {
+    @apply w-full;
+  }
+  
+  /* ========== 内容区域组件 ========== */
+  
+  /* 节标题 */
+  .section-title {
+    @apply text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2;
+  }
+  
+  /* 筛选条件区域 */
+  .filter-section {
+    @apply card-spaced;
+  }
+  
+  .filter-title {
+    @apply section-title;
+  }
+  
+  /* 数据展示区域 */
+  .data-section {
+    @apply card-content;
+  }
+  
+  .data-title {
+    @apply section-title;
+  }
+  
+  /* ========== 加载状态组件 ========== */
+  
+  /* 加载指示器 */
+  .loading-indicator {
+    @apply flex items-center justify-center py-8;
+  }
+  
+  .loading-spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600;
+  }
+  
+  .loading-text {
+    @apply ml-3 text-gray-600;
+  }
+  
+  /* 空状态提示 */
+  .empty-state {
+    @apply text-center py-12 text-gray-500;
+  }
+  
+  /* ========== 图标和状态组件 ========== */
+  
+  /* 状态图标 */
+  .icon-primary {
+    @apply text-blue-500;
+  }
+  
+  .icon-success {
+    @apply text-green-500;
+  }
+  
+  .icon-warning {
+    @apply text-yellow-500;
+  }
+  
+  .icon-danger {
+    @apply text-red-500;
+  }
+  
+  /* ========== 表格组件 ========== */
+  
+  /* 数据表格容器 */
+  .data-table-container {
+    @apply overflow-x-auto;
+  }
+  
+  /* 基础数据表格 */
+  .data-table {
+    @apply min-w-full divide-y divide-gray-200;
+  }
+  
+  /* 表格头部 */
+  .data-table-header {
+    @apply bg-gray-50;
+  }
+  
+  /* 表格头部单元格 */
+  .data-table-th {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+  
+  /* 表格主体 */
+  .data-table-body {
+    @apply bg-white divide-y divide-gray-200;
+  }
+  
+  /* 表格行 */
+  .data-table-row {
+    @apply hover:bg-gray-50 transition-colors;
+  }
+  
+  /* 表格单元格 */
+  .data-table-td {
+    @apply px-6 py-4 whitespace-nowrap;
+  }
+  
+  /* 表格文本样式 */
+  .data-table-text {
+    @apply text-sm text-gray-900;
+  }
+  
+  .data-table-text-primary {
+    @apply text-sm font-medium text-gray-900;
+  }
+  
+  .data-table-text-secondary {
+    @apply text-sm text-gray-600;
+  }
+  
+  /* ========== 信息卡片组件 ========== */
+  
+  /* 信息卡片容器 */
+  .info-card {
+    @apply bg-gradient-to-br rounded-lg p-5 border;
+  }
+  
+  /* 不同色调的信息卡片 */
+  .info-card-blue {
+    @apply info-card from-blue-50 via-indigo-50 to-purple-50 border-blue-100;
+  }
+  
+  .info-card-green {
+    @apply info-card from-emerald-50 via-green-50 to-teal-50 border-emerald-100;
+  }
+  
+  .info-card-yellow {
+    @apply info-card from-yellow-50 via-orange-50 to-red-50 border-yellow-100;
+  }
+  
+  .info-card-purple {
+    @apply info-card from-purple-50 via-pink-50 to-rose-50 border-purple-100;
+  }
+  
+  /* 信息卡片标题 */
+  .info-card-title {
+    @apply flex items-center gap-2 mb-4 font-semibold text-gray-800;
+  }
+  
+  /* 信息卡片内容 */
+  .info-card-content {
+    @apply space-y-3;
+  }
+  
+  /* 信息卡片项目 */
+  .info-card-item {
+    @apply flex justify-between items-center;
+  }
+  
+  .info-card-label {
+    @apply text-gray-600;
+  }
+  
+  .info-card-value {
+    @apply font-medium text-gray-900;
+  }
+  
+  .info-card-value-primary {
+    @apply font-semibold text-blue-600;
+  }
+  
+  /* ========== 统计数字组件 ========== */
+  
+  /* 统计卡片网格 */
+  .stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6;
+  }
+  
+  /* 单个统计卡片 */
+  .stat-card {
+    @apply bg-white rounded-lg p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow;
+  }
+  
+  /* 统计标题 */
+  .stat-title {
+    @apply text-sm text-gray-600 mb-2;
+  }
+  
+  /* 统计数值 */
+  .stat-value {
+    @apply text-2xl md:text-3xl font-bold text-gray-900;
+  }
+  
+  /* 统计变化 */
+  .stat-change {
+    @apply text-sm font-medium;
+  }
+  
+  .stat-change-positive {
+    @apply stat-change text-green-600;
+  }
+  
+  .stat-change-negative {
+    @apply stat-change text-red-600;
+  }
+  
+  /* ========== 导航和菜单组件 ========== */
+  
+  /* 顶部导航 */
+  .top-nav {
+    @apply z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur shadow-sm;
+  }
+  
+  .top-nav-container {
+    @apply max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-6;
+  }
+  
+  /* 品牌标志 */
+  .brand-logo {
+    @apply flex items-center gap-2 font-semibold text-slate-800;
+  }
+  
+  .brand-icon {
+    @apply grid h-9 w-9 place-items-center rounded-md bg-primary text-white text-lg font-bold shadow-sm;
+  }
+  
+  .brand-text {
+    @apply text-lg tracking-tight;
+  }
+  
+  /* 导航菜单项 */
+  .nav-item {
+    @apply px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-all duration-200 ease-in-out;
+  }
+  
+  .nav-item-active {
+    @apply nav-item bg-indigo-100 text-indigo-700;
+  }
+  
+  .nav-item-inactive {
+    @apply nav-item text-slate-700 hover:bg-slate-100 hover:text-slate-900;
+  }
+  
+  /* ========== 筛选器组件 ========== */
+  
+  /* 筛选器容器 */
+  .filter-container {
+    @apply flex flex-wrap gap-4 md:gap-6 items-end;
+  }
+  
+  /* 筛选器字段 */
+  .filter-field {
+    @apply flex flex-col min-w-[150px] flex-1;
+  }
+  
+  .filter-field-fixed {
+    @apply flex flex-col min-w-[150px];
+  }
+  
+  /* 筛选器输入框 - 继承统一高度系统 */
+  .filter-input {
+    @apply w-full px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all form-control-height;
+  }
+  
+  /* 筛选器选择框 - 推荐使用 form-select */
+  .filter-select {
+    @apply form-select;
+  }
+  
+  /* ========== 数据展示组件 ========== */
+  
+  /* 数据信息行 */
+  .data-info {
+    @apply mb-4 flex items-center justify-between;
+  }
+  
+  .data-info-text {
+    @apply text-sm text-gray-600;
+  }
+  
+  /* 数据格式化 */
+  .data-currency {
+    @apply font-medium text-blue-600;
+  }
+  
+  .data-currency-green {
+    @apply font-medium text-green-600;
+  }
+  
+  .data-currency-purple {
+    @apply font-medium text-purple-600;
+  }
+  
+  .data-currency-orange {
+    @apply font-medium text-orange-600;
+  }
+  
+  /* 数值变化指示器 */
+  .value-change {
+    @apply font-medium;
+  }
+  
+  .value-up {
+    @apply value-change text-green-600;
+  }
+  
+  .value-down {
+    @apply value-change text-red-600;
+  }
+  
+  .value-neutral {
+    @apply value-change text-gray-600;
+  }
+  
+  /* ========== 市场情绪组件 ========== */
+  
+  /* 市场统计容器 */
+  .market-stats {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-white rounded-lg shadow-sm;
+  }
+  
+  /* 统计项目 */
+  .stat-item {
+    @apply text-center;
+  }
+  
+  .stat-label {
+    @apply text-xs text-gray-500 block mb-1;
+  }
+  
+  /* 情绪指示器 */
+  .sentiment-container {
+    @apply bg-white rounded-lg p-4 shadow-sm;
+  }
+  
+  .sentiment-header {
+    @apply text-sm font-medium text-gray-700 mb-3;
+  }
+  
+  .sentiment-bar {
+    @apply w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2;
+  }
+  
+  .sentiment-fill {
+    @apply h-full transition-all duration-300;
+  }
+  
+  .sentiment-fill-bullish {
+    @apply sentiment-fill bg-green-500;
+  }
+  
+  .sentiment-fill-bearish {
+    @apply sentiment-fill bg-red-500;
+  }
+  
+  .sentiment-labels {
+    @apply flex justify-between text-xs;
+  }
+  
+  /* ========== 动画和过渡效果 ========== */
+  
+  /* 悬停动画 */
+  .hover-lift {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  /* 淡入动画 */
+  .fade-in {
+    @apply animate-in fade-in duration-300;
+  }
+  
+  /* 滑入动画 */
+  .slide-up {
+    @apply animate-in slide-in-from-bottom-4 duration-300;
+  }
+  
+  /* ========== 响应式助手类 ========== */
+  
+  /* 响应式间距 */
+  .responsive-padding {
+    @apply px-4 md:px-6;
+  }
+  
+  /* 响应式网格 */
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  /* 响应式文本 */
+  .responsive-text-sm {
+    @apply text-sm md:text-base;
+  }
+  
+  .responsive-text-lg {
+    @apply text-lg md:text-xl;
+  }
+  
+  .responsive-text-xl {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+  
+  /* 移动端隐藏/显示 */
+  .mobile-hidden {
+    @apply hidden md:block;
+  }
+  
+  .mobile-only {
+    @apply block md:hidden;
+  }
+  
+  /* ========== 工具类扩展 ========== */
+  
+  /* 截断文本 */
+  .text-truncate-100 {
+    @apply truncate max-w-[100px];
+  }
+  
+  .text-truncate-150 {
+    @apply truncate max-w-[150px];
+  }
+  
+  .text-truncate-200 {
+    @apply truncate max-w-[200px];
+  }
+  
+  /* Flex 居中 */
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+  
+  .flex-between {
+    @apply flex items-center justify-between;
+  }
+  
+  .flex-start {
+    @apply flex items-center justify-start;
+  }
+  
+  .flex-end {
+    @apply flex items-center justify-end;
   }
 }

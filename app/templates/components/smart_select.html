@@ -1,0 +1,81 @@
+<!-- 智能下拉选择框组件 -->
+<!-- 使用 Choices.js 实现自动定位下拉框 -->
+
+<!-- 在页面头部引入 Choices.js -->
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+{% endblock %}
+
+<!-- 使用示例 -->
+<select class="smart-select form-select" name="model_type" id="model_type">
+    <option value="">全部模型</option>
+    <option value="kronos-base">Kronos Base</option>
+    <option value="kronos-small">Kronos Small</option>
+    <option value="kronos-mini">Kronos Mini</option>
+</select>
+
+<!-- 初始化脚本 -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化所有智能选择框
+    const selects = document.querySelectorAll('.smart-select');
+    
+    selects.forEach(select => {
+        new Choices(select, {
+            searchEnabled: false,
+            itemSelectText: '',
+            // 智能定位配置
+            position: 'auto', // 自动计算最佳位置
+            flip: true,       // 空间不足时自动翻转
+            // 样式配置
+            classNames: {
+                containerOuter: 'choices form-control-height',
+                containerInner: 'choices__inner',
+                input: 'choices__input',
+                inputCloned: 'choices__input--cloned',
+                list: 'choices__list',
+                listItems: 'choices__list--multiple',
+                listSingle: 'choices__list--single', 
+                listDropdown: 'choices__list--dropdown',
+                item: 'choices__item',
+                itemSelectable: 'choices__item--selectable',
+                itemDisabled: 'choices__item--disabled',
+                itemChoice: 'choices__item--choice',
+                placeholder: 'choices__placeholder',
+                group: 'choices__group',
+                groupHeading: 'choices__heading',
+                button: 'choices__button'
+            }
+        });
+    });
+});
+</script>
+
+<!-- 自定义样式调整 -->
+<style>
+.choices {
+    height: 44px !important; /* 统一高度 */
+}
+
+.choices__inner {
+    min-height: 44px !important;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+}
+
+.choices__list--dropdown {
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid #e5e7eb !important;
+    z-index: 1000 !important;
+}
+
+.choices__item--selectable {
+    padding: 8px 12px !important;
+}
+
+.choices__item--selectable:hover {
+    background-color: #f3f4f6 !important;
+}
+</style>

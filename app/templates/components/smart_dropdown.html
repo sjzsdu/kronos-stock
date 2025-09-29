@@ -1,0 +1,123 @@
+<!-- 轻量级智能下拉组件 -->
+<!-- 参数：
+     - options: 选项列表 [{"value": "val", "text": "显示文本", "selected": true}]
+     - name: 表单字段名称
+     - id: 组件ID
+     - placeholder: 占位符文本
+     - class: 额外CSS类
+-->
+
+<div class="custom-dropdown" id="dropdown-{{ id or name }}">
+    <!-- 隐藏的原生 select 用于表单提交 -->
+    <select name="{{ name }}" class="hidden" id="hidden-{{ id or name }}">
+        {% for option in options %}
+        <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>
+            {{ option.text }}
+        </option>
+        {% endfor %}
+    </select>
+    
+    <!-- 自定义显示按钮 -->
+    <button type="button" 
+            class="dropdown-trigger {{ class }}" 
+            onclick="toggleDropdown('{{ id or name }}')"
+            id="trigger-{{ id or name }}">
+        <span class="dropdown-text">{{ placeholder or "请选择..." }}</span>
+    </button>
+    
+    <!-- 下拉菜单 -->
+    <div class="dropdown-menu hidden" id="menu-{{ id or name }}">
+        {% for option in options %}
+        <div class="dropdown-option" 
+             data-value="{{ option.value }}"
+             onclick="selectOption('{{ id or name }}', '{{ option.value }}', '{{ option.text }}')"
+             {% if option.selected %}data-selected="true"{% endif %}>
+            {{ option.text }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+// 智能下拉组件 JavaScript
+function toggleDropdown(dropdownId) {
+    const menu = document.getElementById(`menu-${dropdownId}`);
+    const trigger = document.getElementById(`trigger-${dropdownId}`);
+    
+    // 关闭其他下拉框
+    document.querySelectorAll('.dropdown-menu').forEach(m => {
+        if (m !== menu) m.classList.add('hidden');
+    });
+    
+    // 切换当前下拉框
+    menu.classList.toggle('hidden');
+    
+    if (!menu.classList.contains('hidden')) {
+        // 智能定位逻辑
+        positionDropdown(menu, trigger);
+    }
+}
+
+function selectOption(dropdownId, value, text) {
+    const hiddenSelect = document.getElementById(`hidden-${dropdownId}`);
+    const trigger = document.getElementById(`trigger-${dropdownId}`);
+    const menu = document.getElementById(`menu-${dropdownId}`);
+    
+    // 更新隐藏的 select 值
+    hiddenSelect.value = value;
+    
+    // 更新显示文本
+    trigger.querySelector('.dropdown-text').textContent = text;
+    
+    // 更新选中状态
+    menu.querySelectorAll('.dropdown-option').forEach(option => {
+        option.classList.remove('selected');
+        if (option.dataset.value === value) {
+            option.classList.add('selected');
+        }
+    });
+    
+    // 关闭下拉框
+    menu.classList.add('hidden');
+    
+    // 触发 change 事件
+    hiddenSelect.dispatchEvent(new Event('change'));
+}
+
+function positionDropdown(menu, trigger) {
+    const rect = trigger.getBoundingClientRect();
+    const menuHeight = 240; // 最大高度
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    
+    // 重置位置类
+    menu.classList.remove('dropdown-up');
+    
+    // 如果下方空间不足且上方空间更大，则向上展开
+    if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+        menu.classList.add('dropdown-up');
+    }
+}
+
+// 点击外部关闭下拉框
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.custom-dropdown')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    }
+});
+
+// 初始化选中状态
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+        const selectedOption = dropdown.querySelector('.dropdown-option[data-selected="true"]');
+        if (selectedOption) {
+            const dropdownId = dropdown.id.replace('dropdown-', '');
+            const value = selectedOption.dataset.value;
+            const text = selectedOption.textContent;
+            selectOption(dropdownId, value, text);
+        }
+    });
+});
+</script>

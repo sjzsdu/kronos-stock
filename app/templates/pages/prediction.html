@@ -5,13 +5,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="container p-6">
+<div class="page-container">
     <!-- 表单区域 -->
-    <div class="mb-4 bg-white rounded-xl shadow-prediction p-6 transition-all duration-300 hover:shadow-xl">
-        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
-            <i class="fas fa-brain text-primary text-lg"></i>
-            AI股票预测
-        </h3>
+    <div class="card-interactive mb-4">
+        <div class="card-content">
+            <h3 class="section-title text-xl mb-6">
+                <i class="fas fa-brain icon-primary text-lg"></i>
+                AI股票预测
+            </h3>
         <form hx-post="/api/predictions"
                     hx-target="#prediction-results"
                     hx-indicator="#loading"
@@ -20,7 +21,7 @@
             <!-- 单行表单布局 -->
             <div class="flex items-end gap-3 flex-nowrap overflow-x-auto hide-scrollbar">
                 <!-- 股票代码 -->
-                <div class="flex flex-col shrink-0 min-w-[120px]">
+                <div class="form-field shrink-0 min-w-[120px]">
                     <label for="stock_code" class="text-xs font-medium text-gray-600 mb-1.5 whitespace-nowrap">股票代码</label>
                     <input 
                         type="text" 
@@ -28,17 +29,17 @@
                         name="stock_code" 
                         placeholder="000001" 
                         required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-transparent text-sm h-[38px]"
+                        class="form-input text-sm"
                     >
                 </div>
                 
                 <!-- 预测天数 -->
-                <div class="flex flex-col shrink-0 min-w-[100px]">
+                <div class="form-field shrink-0 min-w-[100px]">
                     <label for="prediction_days" class="text-xs font-medium text-gray-600 mb-1.5 whitespace-nowrap">预测天数</label>
                     <select 
                         id="prediction_days" 
                         name="prediction_days" 
-                        class="custom-select w-full px-3 py-2 border border-gray-300 rounded-md  focus:ring-primary focus:border-transparent text-sm h-[38px]"
+                        class="form-select"
                     >
                         <option value="7">7天</option>
                         <option value="15">15天</option>
@@ -47,12 +48,12 @@
                 </div>
                 
                 <!-- 预测模型 -->
-                <div class="flex flex-col shrink-0 min-w-[140px]">
+                <div class="form-field shrink-0 min-w-[140px]">
                     <label for="model_type" class="text-xs font-medium text-gray-600 mb-1.5 whitespace-nowrap">预测模型</label>
                     <select 
                         id="model_type" 
                         name="model_type" 
-                        class="custom-select w-full px-3 py-2 border border-gray-300 rounded-md  focus:ring-primary focus:border-transparent text-sm h-[38px]"
+                        class="form-select"
                     >
                         <option value="kronos-mini">Kronos Mini</option>
                         <option value="kronos-small">Kronos Small</option>
@@ -64,7 +65,7 @@
                 <div class="flex items-center gap-3 shrink-0 ml-2">
                     <button 
                         type="submit" 
-                        class="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-1.5 shadow-sm hover:shadow whitespace-nowrap text-sm h-[38px]"
+                        class="btn-primary btn-icon text-sm whitespace-nowrap"
                     >
                         <i class="fas fa-magic text-xs"></i>
                         <span>开始预测</span>

@@ -1,14 +1,22 @@
-{% extends "layouts/sidebar.html" %}
+{% extends "l    <!-- Dynamic content loading area for summary statistics -->
+    <div id="northbound-summary" class="card-spaced">
+        <div class="card-content text-center">
+            <div class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <span class="loading-text">正在加载北向资金概览数据...</span>
+            </div>
+        </div>
+    </div>ar.html" %}
 
 {% block content %}
-<div class="container p-6">
+<div class="page-container">
     <!-- Page header -->
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <i class="fas fa-arrow-down text-green-500"></i>
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-arrow-down icon-success"></i>
             {{ page_title }}
         </h1>
-        <p class="text-gray-600 mt-2">{{ page_description }}</p>
+        <p class="page-description">{{ page_description }}</p>
     </div>
 
     <!-- Dynamic content loading area for summary statistics -->
@@ -25,20 +33,22 @@
     </div>
 
     <!-- Control panel -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-2 text-gray-600">
-                <i class="fas fa-info-circle"></i>
-                <span class="text-sm">北向资金持股情况实时数据</span>
+    <div class="card-spaced">
+        <div class="card-content">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-2 text-gray-600">
+                    <i class="fas fa-info-circle"></i>
+                    <span class="text-sm">北向资金持股情况实时数据</span>
+                </div>
+                <button 
+                    class="btn-primary btn-icon"
+                    hx-get="{{ url_for('views.htmx_market_northbound') }}"
+                    hx-target="#northbound-table"
+                    hx-indicator="#loading">
+                    <i class="fas fa-refresh"></i>
+                    刷新数据
+                </button>
             </div>
-            <button 
-                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                hx-get="{{ url_for('views.htmx_market_northbound') }}"
-                hx-target="#northbound-table"
-                hx-indicator="#loading">
-                <i class="fas fa-refresh mr-2"></i>
-                刷新数据
-            </button>
         </div>
     </div>
 
@@ -46,13 +56,12 @@
     <div id="northbound-table" hx-get="{{ url_for('views.htmx_market_northbound') }}" 
          hx-trigger="load"
          hx-indicator="#loading">
-        <div id="loading" class="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm rounded-md text-gray-500 bg-white">
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                正在加载北向资金持股数据...
+        <div id="loading" class="card text-center">
+            <div class="card-content">
+                <div class="loading-indicator">
+                    <div class="loading-spinner"></div>
+                    <span class="loading-text">正在加载北向资金持股数据...</span>
+                </div>
             </div>
         </div>
     </div>

@@ -59,23 +59,23 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="fullName">姓名</label>
-                                <input type="text" class="form-control" id="fullName" value="张三">
+                                <input type="text" class="form-input" id="fullName" value="张三">
                             </div>
                             <div class="form-group">
                                 <label for="email">邮箱</label>
-                                <input type="email" class="form-control" id="email" value="zhangsan@example.com">
+                                <input type="email" class="form-input" id="email" value="zhangsan@example.com">
                             </div>
                             <div class="form-group">
                                 <label for="phone">手机号</label>
-                                <input type="tel" class="form-control" id="phone" value="138****8888">
+                                <input type="tel" class="form-input" id="phone" value="138****8888">
                             </div>
                             <div class="form-group">
                                 <label for="birthday">生日</label>
-                                <input type="date" class="form-control" id="birthday" value="1990-01-01">
+                                <input type="date" class="form-input" id="birthday" value="1990-01-01">
                             </div>
                             <div class="form-group">
                                 <label for="gender">性别</label>
-                                <select class="form-control" id="gender">
+                                <select class="form-select" id="gender">
                                     <option value="male" selected>男</option>
                                     <option value="female">女</option>
                                     <option value="other">其他</option>
@@ -83,15 +83,15 @@
                             </div>
                             <div class="form-group">
                                 <label for="occupation">职业</label>
-                                <input type="text" class="form-control" id="occupation" value="金融分析师">
+                                <input type="text" class="form-input" id="occupation" value="金融分析师">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="bio">个人简介</label>
-                            <textarea class="form-control" id="bio" rows="4">专注于股票投资分析，拥有5年投资经验，擅长技术分析和基本面研究。</textarea>
+                            <textarea class="form-textarea" id="bio" rows="4">专注于股票投资分析，拥有5年投资经验，擅长技术分析和基本面研究。</textarea>
                         </div>
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn-primary">
                                 <i class="fas fa-save"></i> 保存信息
                             </button>
                         </div>
@@ -108,7 +108,7 @@
                     <div class="security-section">
                         <h5>密码设置</h5>
                         <div class="form-group">
-                            <button class="btn btn-outline-primary" onclick="changePassword()">
+                            <button class="btn-secondary" onclick="changePassword()">
                                 <i class="fas fa-key"></i> 修改密码
                             </button>
                         </div>
@@ -137,7 +137,7 @@
                                         <div class="device-details">Chrome 浏览器 • 北京 • 2023-10-15 14:30</div>
                                     </div>
                                 </div>
-                                <button class="btn btn-sm btn-outline-danger" onclick="logoutDevice('macbook')">
+                                <button class="btn-danger-outline btn-sm" onclick="logoutDevice('macbook')">
                                     <i class="fas fa-sign-out-alt"></i> 退出登录
                                 </button>
                             </div>
@@ -149,7 +149,7 @@
                                         <div class="device-details">Safari 浏览器 • 上海 • 2023-10-14 09:15</div>
                                     </div>
                                 </div>
-                                <button class="btn btn-sm btn-outline-danger" onclick="logoutDevice('iphone')">
+                                <button class="btn-danger-outline btn-sm" onclick="logoutDevice('iphone')">
                                     <i class="fas fa-sign-out-alt"></i> 退出登录
                                 </button>
                             </div>
@@ -275,7 +275,7 @@
                         <div class="setting-group">
                             <h5>语言设置</h5>
                             <div class="form-group">
-                                <select class="form-control" id="language">
+                                <select class="form-select" id="language">
                                     <option value="zh-CN" selected>简体中文</option>
                                     <option value="zh-TW">繁体中文</option>
                                     <option value="en">English</option>
@@ -287,7 +287,7 @@
                             <h5>默认设置</h5>
                             <div class="form-group">
                                 <label>默认预测模型</label>
-                                <select class="form-control" id="defaultModel">
+                                <select class="form-select" id="defaultModel">
                                     <option value="kronos-base" selected>Kronos Base</option>
                                     <option value="kronos-small">Kronos Small</option>
                                     <option value="kronos-mini">Kronos Mini</option>
@@ -295,7 +295,7 @@
                             </div>
                             <div class="form-group">
                                 <label>默认预测天数</label>
-                                <select class="form-control" id="defaultDays">
+                                <select class="form-select" id="defaultDays">
                                     <option value="1">1天</option>
                                     <option value="3">3天</option>
                                     <option value="5" selected>5天</option>
@@ -325,10 +325,10 @@
                                 <p>剩余天数：365天</p>
                             </div>
                             <div class="plan-actions">
-                                <button class="btn btn-primary" onclick="renewSubscription()">
+                                <button class="btn-primary" onclick="renewSubscription()">
                                     <i class="fas fa-redo"></i> 续费订阅
                                 </button>
-                                <button class="btn btn-outline-danger" onclick="cancelSubscription()">
+                                <button class="btn-danger-outline" onclick="cancelSubscription()">
                                     <i class="fas fa-times"></i> 取消订阅
                                 </button>
                             </div>

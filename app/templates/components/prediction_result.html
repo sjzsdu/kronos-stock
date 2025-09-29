@@ -9,56 +9,56 @@
         {% if data.stock_info %}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <!-- Stock Info Card -->
-            <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-lg p-5 border border-blue-100">
-                <div class="flex items-center gap-2 mb-4">
+            <div class="info-card-blue">
+                <div class="info-card-title">
                     <i class="fas fa-building text-blue-600"></i>
-                    <h4 class="font-semibold text-gray-800">股票信息</h4>
+                    <h4>股票信息</h4>
                 </div>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">代码:</span>
+                <div class="info-card-content">
+                    <div class="info-card-item">
+                        <span class="info-card-label">代码:</span>
                         <span class="font-semibold text-gray-900">{{ data.stock_info.code }}</span>
                     </div>
                     {% if data.stock_info.name %}
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">名称:</span>
-                        <span class="font-medium text-gray-900 text-right truncate max-w-[150px]" title="{{ data.stock_info.name }}">{{ data.stock_info.name }}</span>
+                    <div class="info-card-item">
+                        <span class="info-card-label">名称:</span>
+                        <span class="info-card-value text-right text-truncate-150" title="{{ data.stock_info.name }}">{{ data.stock_info.name }}</span>
                     </div>
                     {% endif %}
                     {% if data.stock_info.exchange %}
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">交易所:</span>
-                        <span class="font-medium text-gray-900">{{ data.stock_info.exchange }}</span>
+                    <div class="info-card-item">
+                        <span class="info-card-label">交易所:</span>
+                        <span class="info-card-value">{{ data.stock_info.exchange }}</span>
                     </div>
                     {% endif %}
                     {% if data.stock_info.industry %}
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">行业:</span>
-                        <span class="font-medium text-gray-900 text-right truncate max-w-[150px]" title="{{ data.stock_info.industry }}">{{ data.stock_info.industry }}</span>
+                    <div class="info-card-item">
+                        <span class="info-card-label">行业:</span>
+                        <span class="info-card-value text-right text-truncate-150" title="{{ data.stock_info.industry }}">{{ data.stock_info.industry }}</span>
                     </div>
                     {% endif %}
                     {% if data.stock_info.list_date %}
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">上市时间:</span>
-                        <span class="font-medium text-gray-900">{{ data.stock_info.list_date }}</span>
+                    <div class="info-card-item">
+                        <span class="info-card-label">上市时间:</span>
+                        <span class="info-card-value">{{ data.stock_info.list_date }}</span>
                     </div>
                     {% endif %}
                     {% if data.stock_info.last_price %}
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">最新价格:</span>
-                        <span class="font-semibold text-blue-600">¥{{ data.stock_info.last_price | round(2) }}</span>
+                    <div class="info-card-item">
+                        <span class="info-card-label">最新价格:</span>
+                        <span class="info-card-value-primary">¥{{ data.stock_info.last_price | round(2) }}</span>
                     </div>
                     {% endif %}
                 </div>
             </div>
 
             <!-- Capital Structure Card -->
-            <div class="bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 rounded-lg p-5 border border-emerald-100">
-                <div class="flex items-center gap-2 mb-4">
+            <div class="info-card-green">
+                <div class="info-card-title">
                     <i class="fas fa-coins text-emerald-600"></i>
-                    <h4 class="font-semibold text-gray-800">资本结构</h4>
+                    <h4>资本结构</h4>
                 </div>
-                <div class="space-y-3">
+                <div class="info-card-content">
                     {% if data.stock_info.market_cap %}
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">总市值:</span>
