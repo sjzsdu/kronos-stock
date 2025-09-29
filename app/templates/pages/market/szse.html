@@ -1,201 +1,27 @@
 {% extends "layouts/sidebar.html" %}
 
-{% block head %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% endblock %}
-
 {% block content %}
 <div class="container p-6">
     <!-- Page header -->
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <i class="fas fa-chart-pie text-purple-500"></i>
-            {{ page_title }}
+            深交所数据
         </h1>
-        <p class="text-gray-600 mt-2">{{ page_description }}</p>
+        <p class="text-gray-600 mt-2">深圳证券交易所市场数据总览</p>
     </div>
 
-    <!-- Market overview -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-purple-100 text-sm">总成交金额</p>
-                    <p class="text-2xl font-bold">0.00万亿</p>
-                </div>
-                <i class="fas fa-coins text-3xl text-purple-200"></i>
+    <!-- HTMX loading container -->
+    <div id="szse-data-container" 
+         hx-get="{{ url_for('views.htmx_market_szse') }}" 
+         hx-trigger="load" 
+         hx-swap="innerHTML">
+        <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-purple-600 rounded-full" role="status" aria-label="loading">
+                <span class="sr-only">Loading...</span>
             </div>
-        </div>
-        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-green-100 text-sm">上涨家数</p>
-                    <p class="text-2xl font-bold">0</p>
-                </div>
-                <i class="fas fa-arrow-up text-3xl text-green-200"></i>
-            </div>
-        </div>
-        <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-red-100 text-sm">下跌家数</p>
-                    <p class="text-2xl font-bold">0</p>
-                </div>
-                <i class="fas fa-arrow-down text-3xl text-red-200"></i>
-            </div>
-        </div>
-        <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-orange-100 text-sm">创业板成交</p>
-                    <p class="text-2xl font-bold">0.00万亿</p>
-                </div>
-                <i class="fas fa-rocket text-3xl text-orange-200"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">深证成指走势</h3>
-            <canvas id="indexChart"></canvas>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">板块成交分布</h3>
-            <canvas id="sectorChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Data filters and table -->
-    <div class="bg-white rounded-xl shadow-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-filter text-purple-500"></i>
-            数据查询
-        </h3>
-        <form class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">开始日期</label>
-                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">结束日期</label>
-                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">板块</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                    <option value="">全部</option>
-                    <option value="main">主板</option>
-                    <option value="sme">中小板</option>
-                    <option value="gem">创业板</option>
-                </select>
-            </div>
-            <div class="flex items-end">
-                <button type="submit" class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                    <i class="fas fa-search mr-2"></i>查询
-                </button>
-            </div>
-        </form>
-
-        <!-- Loading indicator -->
-        <div id="loading" class="hidden">
-            <div class="flex items-center justify-center py-8">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                <span class="ml-3 text-gray-600">正在加载数据...</span>
-            </div>
-        </div>
-
-        <!-- Data table -->
-        <div id="data-container">
-            <div class="text-center py-12 text-gray-500">
-                <i class="fas fa-chart-bar text-4xl mb-4"></i>
-                <p>选择筛选条件后点击查询按钮获取深交所市场数据</p>
-            </div>
+            <p class="mt-4 text-gray-600">正在加载深交所市场数据...</p>
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize index chart
-    const indexCtx = document.getElementById('indexChart').getContext('2d');
-    new Chart(indexCtx, {
-        type: 'line',
-        data: {
-            labels: ['9:30', '10:00', '10:30', '11:00', '13:00', '13:30', '14:00', '14:30', '15:00'],
-            datasets: [{
-                label: '深证成指',
-                data: [10500, 10520, 10515, 10525, 10530, 10540, 10535, 10545, 10550],
-                borderColor: 'rgb(147, 51, 234)',
-                backgroundColor: 'rgba(147, 51, 234, 0.1)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: false
-                }
-            }
-        }
-    });
-
-    // Initialize sector chart
-    const sectorCtx = document.getElementById('sectorChart').getContext('2d');
-    new Chart(sectorCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['主板', '中小板', '创业板'],
-            datasets: [{
-                data: [50, 30, 20],
-                backgroundColor: ['#8B5CF6', '#06B6D4', '#F59E0B']
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });
-
-    // Form submission
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            document.getElementById('loading').classList.remove('hidden');
-            
-            setTimeout(() => {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('data-container').innerHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成交金额</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成交量</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">上涨家数</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">下跌家数</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">深证成指</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">2024-01-15</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-600">0.85万亿</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">120亿股</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">1100</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">850</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">10550.25</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }, 1500);
-        });
-    }
-});
-</script>
 {% endblock %}

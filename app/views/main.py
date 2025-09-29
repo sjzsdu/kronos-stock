@@ -115,6 +115,38 @@ def htmx_market_northbound():
         return render_template('components/market/error.html', 
                                message=f'Error loading northbound data: {str(e)}')
 
+@views_bp.route('/htmx/market/sse')
+def htmx_market_sse():
+    """HTMX endpoint for SSE market data"""
+    try:
+        data = market_service.get_sse_data()
+        if data and data.get('success'):
+            return render_template('components/market/sse_wrapper.html', 
+                                   data=data.get('data', {}))
+        else:
+            error_msg = data.get('error', 'No SSE data available') if data else 'Data service unavailable'
+            return render_template('components/market/error.html', 
+                                   message=error_msg)
+    except Exception as e:
+        return render_template('components/market/error.html', 
+                               message=f'Error loading SSE data: {str(e)}')
+
+@views_bp.route('/htmx/market/szse')
+def htmx_market_szse():
+    """HTMX endpoint for SZSE market data"""
+    try:
+        data = market_service.get_szse_data()
+        if data and data.get('success'):
+            return render_template('components/market/szse_wrapper.html', 
+                                   data=data.get('data', {}))
+        else:
+            error_msg = data.get('error', 'No SZSE data available') if data else 'Data service unavailable'
+            return render_template('components/market/error.html', 
+                                   message=error_msg)
+    except Exception as e:
+        return render_template('components/market/error.html', 
+                               message=f'Error loading SZSE data: {str(e)}')
+
 @views_bp.route('/market/industry')
 def market_industry():
     """Industry trading data - Statistics by industry"""

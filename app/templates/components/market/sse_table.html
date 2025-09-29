@@ -1,0 +1,113 @@
+{% if data.records and data.records|length > 0 %}
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <i class="fas fa-building text-blue-500"></i>
+        上海证券交易所市场总貌
+    </h3>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        项目
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        总计
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        主板
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        科创板
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for record in data.records %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            {% if record.item == '上市公司' %}
+                                <i class="fas fa-building text-blue-500 mr-2"></i>
+                            {% elif record.item == '总市值' %}
+                                <i class="fas fa-coins text-green-500 mr-2"></i>
+                            {% elif record.item == '流通股本' %}
+                                <i class="fas fa-chart-pie text-purple-500 mr-2"></i>
+                            {% elif record.item == '平均市盈率' %}
+                                <i class="fas fa-percentage text-orange-500 mr-2"></i>
+                            {% else %}
+                                <i class="fas fa-chart-line text-gray-500 mr-2"></i>
+                            {% endif %}
+                            <span class="text-sm font-medium text-gray-900">{{ record.item }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 font-semibold">
+                        {% if record.item == '总市值' or record.item == '流通股本' %}
+                            {% if record.total >= 10000 %}
+                                {{ "%.2f"|format(record.total / 10000) }}万亿
+                            {% elif record.total >= 1000 %}
+                                {{ "%.1f"|format(record.total / 1000) }}千亿
+                            {% else %}
+                                {{ "%.2f"|format(record.total) }}亿
+                            {% endif %}
+                        {% elif record.item == '平均市盈率' %}
+                            {{ "%.2f"|format(record.total) }}倍
+                        {% elif '数量' in record.item or '公司' in record.item or '股票' in record.item %}
+                            {{ "%d"|format(record.total) }}家
+                        {% else %}
+                            {{ "%.2f"|format(record.total) }}
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-blue-600">
+                        {% if record.item == '总市值' or record.item == '流通股本' %}
+                            {% if record.main_board >= 10000 %}
+                                {{ "%.2f"|format(record.main_board / 10000) }}万亿
+                            {% elif record.main_board >= 1000 %}
+                                {{ "%.1f"|format(record.main_board / 1000) }}千亿
+                            {% else %}
+                                {{ "%.2f"|format(record.main_board) }}亿
+                            {% endif %}
+                        {% elif record.item == '平均市盈率' %}
+                            {{ "%.2f"|format(record.main_board) }}倍
+                        {% elif '数量' in record.item or '公司' in record.item or '股票' in record.item %}
+                            {{ "%d"|format(record.main_board) }}家
+                        {% else %}
+                            {{ "%.2f"|format(record.main_board) }}
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-orange-600">
+                        {% if record.item == '总市值' or record.item == '流通股本' %}
+                            {% if record.star_board >= 10000 %}
+                                {{ "%.2f"|format(record.star_board / 10000) }}万亿
+                            {% elif record.star_board >= 1000 %}
+                                {{ "%.1f"|format(record.star_board / 1000) }}千亿
+                            {% else %}
+                                {{ "%.2f"|format(record.star_board) }}亿
+                            {% endif %}
+                        {% elif record.item == '平均市盈率' %}
+                            {{ "%.2f"|format(record.star_board) }}倍
+                        {% elif '数量' in record.item or '公司' in record.item or '股票' in record.item %}
+                            {{ "%d"|format(record.star_board) }}家
+                        {% else %}
+                            {{ "%.2f"|format(record.star_board) }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-4 text-sm text-gray-500 text-center">
+        数据来源: 上海证券交易所 | 实时更新
+    </div>
+</div>
+{% else %}
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="text-center py-8 text-gray-500">
+        <i class="fas fa-building text-3xl mb-3"></i>
+        <p>暂无上交所市场数据</p>
+    </div>
+</div>
+{% endif %}

@@ -1,0 +1,154 @@
+{% if data.records and data.records|length > 0 and data.summary %}
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <i class="fas fa-chart-area text-purple-500"></i>
+        深交所市场概览
+    </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-purple-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-coins text-purple-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-purple-600">市价总值</p>
+                    <p class="text-lg font-semibold text-purple-900">
+                        {% if data.summary.market_value >= 10000 %}
+                            {{ "%.2f"|format(data.summary.market_value / 10000) }}万亿
+                        {% elif data.summary.market_value >= 1000 %}
+                            {{ "%.1f"|format(data.summary.market_value / 1000) }}千亿
+                        {% else %}
+                            {{ "%.2f"|format(data.summary.market_value) }}亿
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-green-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-dollar-sign text-green-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-600">成交金额</p>
+                    <p class="text-lg font-semibold text-green-900">
+                        {% if data.summary.turnover_amount >= 1000 %}
+                            {{ "%.2f"|format(data.summary.turnover_amount / 1000) }}千亿
+                        {% else %}
+                            {{ "%.2f"|format(data.summary.turnover_amount) }}亿
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-blue-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-chart-bar text-blue-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-blue-600">成交量</p>
+                    <p class="text-lg font-semibold text-blue-900">
+                        {{ "%.2f"|format(data.summary.turnover_volume) }}亿股
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-orange-50 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-percentage text-orange-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-orange-600">平均市盈率</p>
+                    <p class="text-lg font-semibold text-orange-900">
+                        {{ "%.2f"|format(data.summary.avg_pe_ratio) }}倍
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Board breakdown -->
+    <div class="mt-6">
+        <h4 class="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <i class="fas fa-layer-group text-purple-500"></i>
+            板块市值分布
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Main Board A -->
+            <div class="bg-purple-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h5 class="font-medium text-purple-800">主板A股</h5>
+                    <i class="fas fa-building text-purple-500"></i>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-sm text-purple-600">市价总值</span>
+                        <span class="text-sm font-semibold text-purple-800">
+                            {% if data.summary.main_board_a_value >= 10000 %}
+                                {{ "%.2f"|format(data.summary.main_board_a_value / 10000) }}万亿
+                            {% elif data.summary.main_board_a_value >= 1000 %}
+                                {{ "%.1f"|format(data.summary.main_board_a_value / 1000) }}千亿
+                            {% else %}
+                                {{ "%.2f"|format(data.summary.main_board_a_value) }}亿
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="w-full bg-purple-200 rounded-full h-2">
+                        <div class="bg-purple-600 h-2 rounded-full" 
+                             style="width: {{ (data.summary.main_board_a_value / data.summary.market_value * 100)|round(1) if data.summary.market_value > 0 else 0 }}%"></div>
+                    </div>
+                    <div class="text-xs text-purple-500">
+                        占比: {{ (data.summary.main_board_a_value / data.summary.market_value * 100)|round(1) if data.summary.market_value > 0 else 0 }}%
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Growth Board -->
+            <div class="bg-orange-50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h5 class="font-medium text-orange-800">创业板/科创板</h5>
+                    <i class="fas fa-rocket text-orange-500"></i>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-sm text-orange-600">市价总值</span>
+                        <span class="text-sm font-semibold text-orange-800">
+                            {% if data.summary.growth_board_value >= 10000 %}
+                                {{ "%.2f"|format(data.summary.growth_board_value / 10000) }}万亿
+                            {% elif data.summary.growth_board_value >= 1000 %}
+                                {{ "%.1f"|format(data.summary.growth_board_value / 1000) }}千亿
+                            {% else %}
+                                {{ "%.2f"|format(data.summary.growth_board_value) }}亿
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="w-full bg-orange-200 rounded-full h-2">
+                        <div class="bg-orange-600 h-2 rounded-full" 
+                             style="width: {{ (data.summary.growth_board_value / data.summary.market_value * 100)|round(1) if data.summary.market_value > 0 else 0 }}%"></div>
+                    </div>
+                    <div class="text-xs text-orange-500">
+                        占比: {{ (data.summary.growth_board_value / data.summary.market_value * 100)|round(1) if data.summary.market_value > 0 else 0 }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4 text-sm text-gray-500 text-center">
+        数据来源: 深圳证券交易所 | 实时更新
+    </div>
+</div>
+{% else %}
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="text-center py-8 text-gray-500">
+        <i class="fas fa-chart-area text-3xl mb-3"></i>
+        <p>暂无深交所市场概览数据</p>
+    </div>
+</div>
+{% endif %}

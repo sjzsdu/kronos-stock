@@ -61,6 +61,15 @@ class MarketDataService:
         except Exception as e:
             logger.error(f"Error getting real data for {fetcher_name}: {str(e)}")
             return None
+    
+    def _safe_float(self, value):
+        """Safely convert value to float"""
+        if pd.isna(value):
+            return 0.0
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return 0.0
         
     def get_top_list_data(self, date: Optional[str] = None, exchange: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -291,6 +300,141 @@ class MarketDataService:
                 'success': False,
                 'data': None,
                 'error': f'Error retrieving northbound data: {str(e)}'
+            }
+    
+    def get_sse_data(self) -> Dict[str, Any]:
+        """
+        Get Shanghai Stock Exchange (SSE) market overview data
+        
+        Returns:
+            Dictionary containing SSE market overview data
+        """
+        try:
+            # Get real SSE summary data
+            real_data = self._get_real_data('sse_summary')
+            
+            if real_data is not None and not real_data.empty:
+                # Process SSE summary data
+                records = []
+                for _, row in real_data.iterrows():
+                    record = {
+                        'item': str(row['项目']),
+                        'total': self._safe_float(row['股票']),
+                        'main_board': self._safe_float(row['主板']),
+                        'star_board': self._safe_float(row['科创板'])
+                    }
+                    records.append(record)
+                
+                # Calculate summary statistics
+                total_companies = next((r['total'] for r in records if r['item'] == '上市公司'), 0)
+                total_market_value = next((r['total'] for r in records if r['item'] == '总市值'), 0)
+                avg_pe_ratio = next((r['total'] for r in records if r['item'] == '平均市盈率'), 0)
+                circulating_shares = next((r['total'] for r in records if r['item'] == '流通股本'), 0)
+                
+                logger.info(f"Successfully retrieved SSE summary data: {real_data.shape}")
+                return {
+                    'success': True,
+                    'data': {
+                        'records': records,
+                        'summary': {
+                            'total_companies': int(total_companies),
+                            'total_market_value': total_market_value,
+                            'avg_pe_ratio': avg_pe_ratio,
+                            'circulating_shares': circulating_shares,
+                            'main_board_companies': next((r['main_board'] for r in records if r['item'] == '上市公司'), 0),
+                            'star_board_companies': next((r['star_board'] for r in records if r['item'] == '上市公司'), 0)
+                        },
+                        'source': 'real_data',
+                        'total_count': len(real_data)
+                    },
+                    'message': f'Real SSE summary data retrieved successfully ({len(records)} items)'
+                }
+            
+            # No real data available
+            logger.warning("No real SSE summary data available")
+            return {
+                'success': False,
+                'data': None,
+                'error': 'No SSE summary data available - real-time data service not accessible'
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting SSE summary data: {str(e)}")
+            return {
+                'success': False,
+                'data': None,
+                'error': f'Error retrieving SSE summary data: {str(e)}'
+            }
+    
+    def get_szse_data(self) -> Dict[str, Any]:
+        """
+        Get Shenzhen Stock Exchange (SZSE) market overview data
+        
+        Returns:
+            Dictionary containing SZSE market overview data
+        """
+        try:
+            # Try SZSE daily deal data first, fallback to SSE data if not available
+            real_data = self._get_real_data('szse_deal_daily')
+            
+            # If SZSE data not available, try SSE data as fallback
+            if real_data is None or real_data.empty:
+                real_data = self._get_real_data('sse_deal_daily')
+            
+            if real_data is not None and not real_data.empty:
+                # Process SZSE/SSE daily deal data
+                records = []
+                for _, row in real_data.iterrows():
+                    record = {
+                        'item': str(row['单日情况']),
+                        'total': self._safe_float(row['股票']),
+                        'main_board_a': self._safe_float(row.get('主板A', row.get('主板', 0))),
+                        'main_board_b': self._safe_float(row.get('主板B', 0)),
+                        'growth_board': self._safe_float(row.get('科创板', row.get('创业板', 0))),
+                        'stock_repurchase': self._safe_float(row.get('股票回购', 0))
+                    }
+                    records.append(record)
+                
+                # Calculate summary statistics
+                market_value = next((r['total'] for r in records if r['item'] == '市价总值'), 0)
+                avg_pe_ratio = next((r['total'] for r in records if r['item'] == '平均市盈率'), 0)
+                turnover_volume = next((r['total'] for r in records if r['item'] == '成交量'), 0)
+                turnover_amount = next((r['total'] for r in records if r['item'] == '成交金额'), 0)
+                
+                logger.info(f"Successfully retrieved SZSE daily data: {real_data.shape}")
+                return {
+                    'success': True,
+                    'data': {
+                        'records': records,
+                        'summary': {
+                            'market_value': market_value,
+                            'avg_pe_ratio': avg_pe_ratio,
+                            'turnover_volume': turnover_volume,
+                            'turnover_amount': turnover_amount,
+                            'main_board_a_value': next((r['main_board_a'] for r in records if r['item'] == '市价总值'), 0),
+                            'growth_board_value': next((r['growth_board'] for r in records if r['item'] == '市价总值'), 0),
+                            'total_companies': len([r for r in records if '数量' in r['item'] or '家数' in r['item']])
+                        },
+                        'source': 'real_data',
+                        'total_count': len(real_data)
+                    },
+                    'message': f'Real SZSE daily data retrieved successfully ({len(records)} items)'
+                }
+            
+            # No real data available
+            logger.warning("No real SZSE daily data available")
+            return {
+                'success': False,
+                'data': None,
+                'error': 'No SZSE daily data available - real-time data service not accessible'
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting SZSE daily data: {str(e)}")
+            return {
+                'success': False,
+                'data': None,
+                'error': f'Error retrieving SZSE daily data: {str(e)}'
             }
     
     def get_exchange_data(self, exchange: str, start_date: Optional[str] = None, end_date: Optional[str] = None) -> Dict[str, Any]:
