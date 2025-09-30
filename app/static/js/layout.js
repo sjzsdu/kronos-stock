@@ -2,10 +2,11 @@
 class LayoutManager {
     constructor() {
         this.sidebar = document.getElementById('sidebar');
-        this.mainContent = document.querySelector('.app-main');
+        this.mainContent = document.querySelector('.app-main') || document.querySelector('.sidebar-main');
         this.isMobile = window.innerWidth <= 768;
         this.sidebarCollapsed = this.isMobile;
         this.sidebarLabelSelector = '.sidebar-label';
+        this.hasSidebarLayout = document.querySelector('.sidebar-layout') !== null;
         
         this.init();
     }
@@ -17,9 +18,11 @@ class LayoutManager {
     }
     
     setupEventListeners() {
-        // Sidebar toggle
+        // Sidebar toggle - 支持多种选择器
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.sidebar-toggle')) {
+            if (e.target.closest('.sidebar-toggle') || e.target.closest('#sidebarToggle')) {
+                e.preventDefault();
+                e.stopPropagation();
                 this.toggleSidebar();
             }
         });
@@ -57,9 +60,24 @@ class LayoutManager {
     updateSidebarToggleUI() {
         const btn = document.getElementById('sidebarToggle');
         if (!btn) return;
+        
+        // 更新 ARIA 状态
         btn.setAttribute('aria-expanded', String(!this.sidebarCollapsed));
-        // Tooltip aria-label sync
         btn.setAttribute('aria-label', this.sidebarCollapsed ? '展开侧边栏' : '折叠侧边栏');
+        
+        // 更新图标显示状态
+        const expandedIcon = btn.querySelector('.icon-expanded');
+        const collapsedIcon = btn.querySelector('.icon-collapsed');
+        
+        if (expandedIcon && collapsedIcon) {
+            if (this.sidebarCollapsed) {
+                expandedIcon.classList.add('hidden');
+                collapsedIcon.classList.remove('hidden');
+            } else {
+                expandedIcon.classList.remove('hidden');
+                collapsedIcon.classList.add('hidden');
+            }
+        }
     }
     
     setupMobileLayout() {
@@ -112,20 +130,19 @@ class LayoutManager {
                 mi.classList.remove('px-0');
             }
         });
-        // Toggle wrapper shift outward
-        const toggleWrapper = this.sidebar.querySelector('.sidebar-toggle-wrapper');
-        if (toggleWrapper) {
-            // Keep slight outward shift when collapsed
+        
+        // 更新布局容器状态类来控制按钮位置
+        const layoutContainer = document.querySelector('.sidebar-layout');
+        if (layoutContainer) {
             if (this.sidebarCollapsed) {
-                toggleWrapper.classList.remove('-right-3');
-                toggleWrapper.classList.add('-right-4');
+                layoutContainer.classList.add('sidebar-collapsed');
             } else {
-                toggleWrapper.classList.remove('-right-4');
-                toggleWrapper.classList.add('-right-3');
+                layoutContainer.classList.remove('sidebar-collapsed');
             }
         }
+        
         this.updateSidebarToggleUI();
-        if (!skipSave) localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
+        if (!skipSave) localStorage.setItem('sidebarCollapsed', String(this.sidebarCollapsed));
         // Dispatch resize after transition
         setTimeout(() => window.dispatchEvent(new Event('resize')), 300);
     }
@@ -136,6 +153,11 @@ class LayoutManager {
         
         if (wasMobile !== this.isMobile) {
             this.setupMobileLayout();
+        }
+        
+        // Handle chart resizing for sidebar layout
+        if (this.hasSidebarLayout && window.chartManager) {
+            window.chartManager.resizeCharts();
         }
     }
     
@@ -154,9 +176,33 @@ class LayoutManager {
     }
     
     toggleMobileMenu() {
-        const mobileMenu = document.querySelector('.mobile-nav');
-        if (mobileMenu) {
-            mobileMenu.classList.toggle('hidden');
+        const overlay = document.getElementById('mobileNavOverlay');
+        const panel = document.getElementById('mobileNavPanel');
+        const button = document.querySelector('.mobile-menu-toggle');
+        const mainContent = document.getElementById('mainContent');
+        
+        if (overlay && panel) {
+            const isOpen = !panel.classList.contains('closed');
+            
+            if (isOpen) {
+                // Close menu
+                panel.classList.add('closed');
+                overlay.classList.add('hidden');
+                button && button.setAttribute('aria-expanded', 'false');
+                // Restore main content scrolling
+                if (mainContent) {
+                    mainContent.style.overflow = '';
+                }
+            } else {
+                // Open menu
+                panel.classList.remove('closed');
+                overlay.classList.remove('hidden');
+                button && button.setAttribute('aria-expanded', 'true');
+                // Prevent main content from scrolling behind overlay
+                if (mainContent) {
+                    mainContent.style.overflow = 'hidden';
+                }
+            }
         }
     }
     
@@ -180,9 +226,15 @@ class LayoutManager {
             this.focusSearch();
         }
         
-        // Escape: Close all dropdowns
+        // Escape: Close mobile menu or dropdowns
         if (e.key === 'Escape') {
-            this.closeAllDropdowns();
+            const panel = document.getElementById('mobileNavPanel');
+            if (panel && !panel.classList.contains('closed')) {
+                e.preventDefault();
+                this.toggleMobileMenu();
+            } else {
+                this.closeAllDropdowns();
+            }
         }
     }
     
@@ -673,38 +725,3 @@ function logout() {
     // 实际项目中可以发送登出请求到服务器
     window.location.href = '/';
 }
-
-// Initialize layout manager when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    window.layoutManager = new LayoutManager();
-    console.log('LayoutManager initialized');
-});
-
-(function initSidebarToggle(){
-  const sidebar = document.getElementById('sidebar');
-  const btn = document.getElementById('sidebarToggle');
-  if(!sidebar || !btn) return;
-  const STORAGE_KEY = 'sidebar:collapsed';
-  const labelSelector = '.sidebar-label';
-
-  function apply(collapsed){
-    sidebar.classList.toggle('w-64', !collapsed);
-    sidebar.classList.toggle('w-16', collapsed);
-    sidebar.querySelectorAll(labelSelector).forEach(el=>el.classList.toggle('hidden', collapsed));
-    btn.setAttribute('aria-expanded', (!collapsed).toString());
-    btn.setAttribute('aria-label', collapsed ? '展开侧边栏' : '折叠侧边栏');
-    btn.querySelector('.icon-expanded').classList.toggle('hidden', collapsed);
-    btn.querySelector('.icon-collapsed').classList.toggle('hidden', !collapsed);
-  }
-
-  let collapsed = localStorage.getItem(STORAGE_KEY)==='1';
-  apply(collapsed);
-
-  btn.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    collapsed = !collapsed;
-    localStorage.setItem(STORAGE_KEY, collapsed ? '1':'0');
-    apply(collapsed);
-    window.dispatchEvent(new Event('resize'));
-  });
-})();

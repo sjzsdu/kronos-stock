@@ -21,20 +21,31 @@
     
     {% block head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
-    <div class="flex flex-col min-h-screen">
-        <!-- Header -->
-        <header class="z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-6">
-                <div class="flex items-center gap-4 flex-1 min-w-0">
-                    <button class="mobile-menu-toggle p-2 rounded-md text-slate-600 hover:bg-slate-100 md:hidden" onclick="layoutManager.toggleMobileMenu()">
-                        <i class="fas fa-bars"></i>
+<body class="h-screen bg-slate-50 text-slate-800 antialiased overflow-hidden">
+    <!-- 稳定的全屏布局：上下结构 -->
+    <div class="flex flex-col h-screen">
+        <!-- Header: 固定高度，不滚动 -->
+        <header class="app-header" role="banner">
+            <div class="header-container">
+                <!-- Brand and Navigation Section -->
+                <div class="brand-section">
+                    <!-- Mobile Menu Toggle -->
+                    <button 
+                        class="mobile-menu-btn mobile-menu-toggle" 
+                        onclick="layoutManager.toggleMobileMenu()"
+                        aria-label="切换移动端菜单"
+                        aria-expanded="false">
+                        <i class="fas fa-bars" aria-hidden="true"></i>
                     </button>
-                    <a href="{{ url_for('views.index') }}" class="flex items-center gap-2 font-semibold text-slate-800">
-                        <span class="grid h-9 w-9 place-items-center rounded-md bg-primary text-white text-lg font-bold shadow-prediction-sm">K</span>
+                    
+                    <!-- Brand Logo -->
+                    <a href="{{ url_for('views.index') }}" class="brand-link" aria-label="返回首页">
+                        <span class="brand-icon" aria-hidden="true">K</span>
                         <span class="text-lg tracking-tight">Kronos</span>
                     </a>
-                    <nav class="flex items-center gap-1 ml-4">
+                    
+                    <!-- Main Navigation -->
+                    <nav class="main-nav" role="navigation" aria-label="主导航">
                         {% if primary_menu %}
                             {% for menu_item in primary_menu %}
                                 {% set is_active = false %}
@@ -44,26 +55,86 @@
                                     {% set is_active = true %}
                                 {% endif %}
                                 <a href="{{ url_for(menu_item.default_url) }}" 
-                                   class="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 
-                                          transition-all duration-200 ease-in-out
-                                          {% if is_active %}bg-indigo-100 text-indigo-700{% else %}text-slate-700 hover:bg-slate-100 hover:text-slate-900{% endif %}">
-                                    <i class="{{ menu_item.icon }}"></i>
+                                   class="nav-link {% if is_active %}nav-link-active{% else %}nav-link-inactive{% endif %}"
+                                   {% if is_active %}aria-current="page"{% endif %}>
+                                    <i class="{{ menu_item.icon }}" aria-hidden="true"></i>
                                     <span>{{ menu_item.title }}</span>
                                 </a>
                             {% endfor %}
                         {% endif %}
                     </nav>
                 </div>
-                <div class="flex items-center gap-5">
-                    <a href="https://github.com/sjzsdu/kronos-stock" target="_blank" rel="noopener noreferrer" class="p-2 rounded-md text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition" title="查看项目源码">
-                        <i class="fab fa-github text-lg"></i>
+                
+                <!-- Header Actions -->
+                <div class="header-actions">
+                    <a href="https://github.com/sjzsdu/kronos-stock" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="action-btn" 
+                       title="查看项目源码"
+                       aria-label="在新窗口中查看 GitHub 源代码">
+                        <i class="fab fa-github text-lg" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
         </header>
-        <main class="flex-1" id="mainContent">
+        
+        <!-- Content Area: 占满剩余空间，子布局控制滚动 -->
+        <div class="flex-1 overflow-hidden">
             {% block body %}{% endblock %}
-        </main>
+        </div>
+        
+        <!-- Mobile Navigation Overlay -->
+        <div class="mobile-nav-overlay hidden" id="mobileNavOverlay" onclick="layoutManager.toggleMobileMenu()"></div>
+        
+        <!-- Mobile Navigation Panel -->
+        <nav class="mobile-nav-panel closed" id="mobileNavPanel" role="navigation" aria-label="移动端主导航">
+            <!-- Mobile Nav Header -->
+            <div class="mobile-nav-header">
+                <div class="flex items-center gap-2">
+                    <span class="brand-icon" aria-hidden="true">K</span>
+                    <span class="text-lg font-semibold tracking-tight">Kronos</span>
+                </div>
+                <button 
+                    class="action-btn" 
+                    onclick="layoutManager.toggleMobileMenu()"
+                    aria-label="关闭移动端菜单">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            
+            <!-- Mobile Nav Content -->
+            <div class="mobile-nav-content">
+                {% if primary_menu %}
+                    {% for menu_item in primary_menu %}
+                        {% set is_active = false %}
+                        {% if menu_item.key == 'market' and request.path.startswith('/market/') %}
+                            {% set is_active = true %}
+                        {% elif menu_item.key == 'prediction' and (request.path == '/prediction' or request.path == '/history') %}
+                            {% set is_active = true %}
+                        {% endif %}
+                        <a href="{{ url_for(menu_item.default_url) }}" 
+                           class="mobile-nav-link {% if is_active %}mobile-nav-link-active{% else %}mobile-nav-link-inactive{% endif %}"
+                           {% if is_active %}aria-current="page"{% endif %}>
+                            <i class="{{ menu_item.icon }}" aria-hidden="true"></i>
+                            <span>{{ menu_item.title }}</span>
+                        </a>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- Mobile Nav Footer -->
+                <div class="mt-auto pt-6">
+                    <a href="https://github.com/sjzsdu/kronos-stock" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="mobile-nav-link mobile-nav-link-inactive"
+                       aria-label="在新窗口中查看 GitHub 源代码">
+                        <i class="fab fa-github" aria-hidden="true"></i>
+                        <span>查看源码</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
     </div>
 
     <!-- JavaScript -->

@@ -30,9 +30,85 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;  /* Safari and Chrome */
   }
+  
+  /* 全屏布局工具类 */
+  .app-layout {
+    @apply flex flex-col h-screen;
+  }
+  
+  .main-content {
+    @apply flex-1 overflow-y-auto;
+  }
+  
+  .main-content-container {
+    @apply min-h-full;
+  }
+  
+  /* Sidebar 布局类 - 占满容器高度，不覆盖header */
+  .sidebar-layout {
+    @apply relative flex h-full overflow-visible;
+  }
+  
+  .sidebar-main {
+    @apply flex-1 overflow-y-auto;
+  }
+  
+  .sidebar-aside {
+    @apply flex-shrink-0 h-full;
+  }
+  
+  /* 页面内容容器 */
+  .page-content {
+    @apply min-h-full p-6;
+  }
+  
+  /* 非侧边栏页面布局 */
+  .page-layout {
+    @apply h-full overflow-y-auto;
+  }
+  
+  /* 侧边栏组件 */
+  .sidebar-panel {
+    @apply flex-shrink-0 h-full overflow-hidden;
+  }
+  
+  .sidebar-content {
+    @apply h-full overflow-y-auto;
+  }
+  
+  /* Sidebar 按钮定位修复 */
+  .sidebar-panel {
+    @apply relative;
+  }
+  
+  .sidebar-toggle-btn {
+    @apply absolute top-3 -right-4 z-20 w-8 h-8 rounded-full
+           flex items-center justify-center
+           bg-white/90 backdrop-blur border border-slate-200 shadow-md
+           text-slate-500 hover:text-primary hover:shadow-lg
+           transition-all duration-200
+           opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60;
+  }
+  
+  /* 改进的按钮定位 - 相对于整个布局容器 */
+  .sidebar-toggle-btn-fixed {
+    @apply absolute top-3 z-30 w-8 h-8 rounded-full
+           flex items-center justify-center
+           bg-white/90 backdrop-blur border border-slate-200 shadow-md
+           text-slate-500 hover:text-primary hover:shadow-lg
+           transition-all duration-300
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60;
+    left: 240px; /* 展开状态位置居中: 256px - 16px (按钮宽度的50%) */
+  }
+  
+  /* 按钮位置状态 - 居中对齐到边界线 */
+  .sidebar-collapsed .sidebar-toggle-btn-fixed {
+    left: 48px; /* 折叠状态位置居中: 64px - 16px (按钮宽度的50%) */
+  }
 }
 
-/* 组件类 */
+/* 组件类 - 基于 Tailwind 最佳实践的可复用组件 */
 @layer components {
   /* ========== 页面结构组件 ========== */
   
@@ -98,6 +174,105 @@
     @apply block text-sm font-medium text-gray-700 mb-2;
   }
   
+  /* ========== 导航组件 ========== */
+  
+  /* 应用头部 */
+  .app-header {
+    @apply flex-shrink-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/75 shadow-sm;
+  }
+  
+  /* 头部容器 */
+  .header-container {
+    @apply mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 md:px-6;
+  }
+  
+  /* 品牌logo区域 */
+  .brand-section {
+    @apply flex min-w-0 flex-1 items-center gap-4;
+  }
+  
+  /* 移动端菜单按钮 */
+  .mobile-menu-btn {
+    @apply rounded-md p-2 text-slate-600 transition-colors hover:bg-slate-100 md:hidden;
+  }
+  
+  /* 品牌链接 */
+  .brand-link {
+    @apply flex items-center gap-2 font-semibold text-slate-800 no-underline hover:text-slate-900;
+  }
+  
+  /* 品牌图标 */
+  .brand-icon {
+    @apply grid h-9 w-9 place-items-center rounded-md bg-primary text-lg font-bold text-white shadow-prediction-sm;
+  }
+  
+  /* 主导航 */
+  .main-nav {
+    @apply ml-4 hidden items-center gap-1 md:flex;
+  }
+  
+  /* 导航链接 */
+  .nav-link {
+    @apply flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 ease-in-out;
+  }
+  
+  .nav-link-active {
+    @apply bg-indigo-100 text-indigo-700;
+  }
+  
+  .nav-link-inactive {
+    @apply text-slate-700 hover:bg-slate-100 hover:text-slate-900;
+  }
+  
+  /* 头部操作区 */
+  .header-actions {
+    @apply flex items-center gap-3;
+  }
+  
+  /* 操作按钮 */
+  .action-btn {
+    @apply rounded-md p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800;
+  }
+  
+  /* ========== 移动端导航 ========== */
+  
+  /* 移动端导航叠加层 */
+  .mobile-nav-overlay {
+    @apply fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm md:hidden;
+  }
+  
+  /* 移动端导航面板 */
+  .mobile-nav-panel {
+    @apply fixed left-0 top-0 z-50 h-full w-80 max-w-[85vw] bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:hidden;
+  }
+  
+  .mobile-nav-panel.closed {
+    @apply -translate-x-full;
+  }
+  
+  /* 移动端导航头部 */
+  .mobile-nav-header {
+    @apply flex h-16 items-center justify-between border-b border-slate-200 px-4;
+  }
+  
+  /* 移动端导航内容 */
+  .mobile-nav-content {
+    @apply flex flex-col p-4;
+  }
+  
+  /* 移动端导航链接 */
+  .mobile-nav-link {
+    @apply flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium transition-colors;
+  }
+  
+  .mobile-nav-link-active {
+    @apply bg-indigo-50 text-indigo-700;
+  }
+  
+  .mobile-nav-link-inactive {
+    @apply text-slate-700 hover:bg-slate-50 hover:text-slate-900;
+  }
+  
   /* ========== 统一高度系统 ========== */
   
   /* 基础控件高度 - 使用 Tailwind 的 h-11 (44px) 确保一致性 */
@@ -123,7 +298,7 @@
   
   /* 自定义选择框 - 统一的下拉箭头样式 */
   .form-select {
-    @apply form-input appearance-none pr-10 relative text-xs cursor-pointer;
+    @apply form-input appearance-none pr-10 relative text-sm cursor-pointer;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3e%3cpath d='M1.5 1.5L6 6L10.5 1.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
     background-position: right 12px center;
     background-repeat: no-repeat;

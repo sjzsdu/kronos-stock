@@ -1,30 +1,12 @@
 {% extends "layouts/base.html" %}
 
 {% block body %}
-<div class="flex h-screen bg-gray-50 overflow-hidden">
-    <!-- Dynamic Sidebar -->
-    <aside id="sidebar" class="group relative w-64 bg-white border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out">
+<!-- 左右布局：在 base 的内容区域中 -->
+<div class="sidebar-layout bg-gray-50">
+    <!-- Dynamic Sidebar: 左侧固定面板 -->
+    <aside id="sidebar" class="sidebar-panel group w-64 bg-white border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out">
 
-        <!-- 折叠按钮：圆形 / 半悬浮 / 默认隐藏 -->
-        <button
-            id="sidebarToggle"
-            type="button"
-            aria-label="折叠侧边栏"
-            aria-expanded="true"
-            style="transform: translateX(50%);"
-            class="absolute top-3 right-0 translate-x-1/2 transform w-8 h-8 rounded-full
-                   flex items-center justify-center
-                   bg-white/90 backdrop-blur border border-slate-200 shadow-md
-                   text-slate-500 hover:text-primary hover:shadow-lg
-                   transition-all duration-200
-                   opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto
-                   focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-        >
-            <span class="icon-expanded"><i class="fas fa-chevron-left text-xs"></i></span>
-            <span class="icon-collapsed hidden"><i class="fas fa-chevron-right text-xs"></i></span>
-        </button>
-
-        <div class="py-4 h-full overflow-y-auto">
+        <div class="sidebar-content py-4">
             {% if sidebar_menu %}
                 {% for section in sidebar_menu %}
                 <div class="mb-6 px-4">
@@ -53,9 +35,21 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto">
+    <!-- Main Content: 唯一可滚动区域 -->
+    <main class="flex-1 overflow-y-auto bg-white">
         {% block content %}{% endblock %}
     </main>
+    
+    <!-- 折叠按钮：定位在整个布局容器上 -->
+    <button
+        id="sidebarToggle"
+        type="button"
+        aria-label="折叠侧边栏"
+        aria-expanded="true"
+        class="sidebar-toggle-btn-fixed"
+    >
+        <span class="icon-expanded"><i class="fas fa-chevron-left text-xs"></i></span>
+        <span class="icon-collapsed hidden"><i class="fas fa-chevron-right text-xs"></i></span>
+    </button>
 </div>
 {% endblock %}
