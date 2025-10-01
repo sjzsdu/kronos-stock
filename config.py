@@ -141,6 +141,11 @@ class DevelopmentConfig(Config):
     # 开发环境使用 SQLite
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///kronos_stock_dev.db'
     
+    # SQLite 不使用连接池配置，但需要开启外键约束
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'connect_args': {'check_same_thread': False}
+    }
+    
 class ProductionConfig(Config):
     """生产环境配置"""
     DEBUG = False
@@ -161,6 +166,9 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    
+    # 测试环境不使用连接池配置
+    SQLALCHEMY_ENGINE_OPTIONS = {}
     
     # 测试环境快速配置
     BCRYPT_LOG_ROUNDS = 4  # 更快的测试速度

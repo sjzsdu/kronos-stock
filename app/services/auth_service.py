@@ -14,7 +14,7 @@ import jwt
 from flask import current_app, request
 from flask_login import login_user, logout_user
 
-from app import db
+from app.models import db
 from app.models.user import User, UserProfile, UserSession
 from app.utils.validators import validate_email, validate_password
 

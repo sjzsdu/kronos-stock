@@ -107,5 +107,15 @@ def create_app(config_name='default'):
                 app.logger.warning(f"⚠️  Failed to load default model: {message}")
         except Exception as e:
             app.logger.error(f"❌ Model initialization error: {e}")
+        
+        # 为SQLite启用外键约束
+        if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI']:
+            from sqlalchemy import event
+            
+            @event.listens_for(db.engine, "connect")
+            def set_sqlite_pragma(dbapi_connection, connection_record):
+                cursor = dbapi_connection.cursor()
+                cursor.execute("PRAGMA foreign_keys=ON")
+                cursor.close()
     
     return app

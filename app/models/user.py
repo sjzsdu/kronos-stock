@@ -10,7 +10,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
-from app import db
+from .prediction import db
 
 class User(UserMixin, db.Model):
     """用户基础模型"""
@@ -83,11 +83,24 @@ class UserProfile(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # 个人信息
+    nickname = db.Column(db.String(50))  # 用户昵称
     phone = db.Column(db.String(20))
+    avatar_url = db.Column(db.String(255))  # 头像URL
+    bio = db.Column(db.Text)  # 个人简介
+    location = db.Column(db.String(100))  # 所在地
+    birth_date = db.Column(db.Date)  # 生日
+    gender = db.Column(db.String(10))  # 性别: 男/女/其他/不愿透露
+    
+    # 投资相关信息  
+    investment_experience = db.Column(db.String(20))  # 投资经验: 新手/初级/中级/高级/专业
+    risk_preference = db.Column(db.String(20))  # 风险偏好: 保守型/稳健型/平衡型/积极型/激进型
+    
+    # 系统设置
     timezone = db.Column(db.String(50), default='Asia/Shanghai')
     
     # 偏好设置 (JSON 格式)
-    notification_preferences = db.Column(db.Text, default='{}')
+    preferences = db.Column(db.Text, default='{}')  # 用户偏好设置
+    notification_settings = db.Column(db.Text, default='{}')  # 通知设置
     
     # 订阅信息
     subscription_tier = db.Column(db.String(20), default='free')  # free, premium, enterprise
@@ -97,16 +110,27 @@ class UserProfile(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
-    def get_notification_preferences(self):
-        """获取通知偏好设置"""
+    def get_preferences(self):
+        """获取用户偏好设置"""
         try:
-            return json.loads(self.notification_preferences or '{}')
+            return json.loads(self.preferences or '{}')
         except:
             return {}
     
-    def set_notification_preferences(self, preferences):
-        """设置通知偏好"""
-        self.notification_preferences = json.dumps(preferences)
+    def set_preferences(self, preferences):
+        """设置用户偏好"""
+        self.preferences = json.dumps(preferences)
+    
+    def get_notification_settings(self):
+        """获取通知设置"""
+        try:
+            return json.loads(self.notification_settings or '{}')
+        except:
+            return {}
+    
+    def set_notification_settings(self, settings):
+        """设置通知选项"""
+        self.notification_settings = json.dumps(settings)
     
     def is_premium(self):
         """检查是否为高级用户"""
@@ -146,15 +170,20 @@ class UserSession(db.Model):
 
 
 class UserPrediction(db.Model):
-    """用户预测关联"""
+    """用户预测记录"""
     __tablename__ = 'user_predictions'
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
-    # 关联到预测系统
-    prediction_id = db.Column(db.String(100), nullable=False)  # 关联现有预测系统
+    # 预测信息
     stock_code = db.Column(db.String(10), nullable=False)
+    model_type = db.Column(db.String(50), nullable=False)  # 使用的模型类型
+    prediction_type = db.Column(db.String(20), default='price')  # 预测类型: price, trend, volatility
+    
+    # 预测结果 (JSON 格式)
+    prediction_result = db.Column(db.Text, nullable=False)  # 预测结果数据
+    prediction_metadata = db.Column(db.Text, default='{}')  # 元数据: 参数、模型版本等
     
     # 用户标记
     is_favorite = db.Column(db.Boolean, default=False)
@@ -163,8 +192,30 @@ class UserPrediction(db.Model):
     # 时间戳
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
+    def get_prediction_result(self):
+        """获取预测结果"""
+        try:
+            return json.loads(self.prediction_result or '{}')
+        except:
+            return {}
+    
+    def set_prediction_result(self, result):
+        """设置预测结果"""
+        self.prediction_result = json.dumps(result)
+    
+    def get_metadata(self):
+        """获取元数据"""
+        try:
+            return json.loads(self.prediction_metadata or '{}')
+        except:
+            return {}
+    
+    def set_metadata(self, metadata):
+        """设置元数据"""
+        self.prediction_metadata = json.dumps(metadata)
+    
     def __repr__(self):
-        return f'<UserPrediction {self.prediction_id} by user {self.user_id}>'
+        return f'<UserPrediction {self.stock_code} by user {self.user_id}>'
 
 
 class Watchlist(db.Model):
@@ -177,12 +228,18 @@ class Watchlist(db.Model):
     # 股票信息
     stock_code = db.Column(db.String(10), nullable=False)
     stock_name = db.Column(db.String(100))
+    notes = db.Column(db.Text)  # 用户备注
+    
+    # 显示和排序
+    sort_order = db.Column(db.Integer, default=0)  # 排序位置
+    is_active = db.Column(db.Boolean, default=True)  # 是否激活
     
     # 提醒设置 (JSON 格式)
     alert_thresholds = db.Column(db.Text, default='{}')
     
     # 时间戳
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     # 唯一约束：用户不能重复添加同一股票
     __table_args__ = (db.UniqueConstraint('user_id', 'stock_code', name='unique_user_stock'),)
