@@ -20,7 +20,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    full_name = db.Column(db.String(100), nullable=False)
+    full_name = db.Column(db.String(100))
     
     # 用户状态和角色
     role = db.Column(db.String(20), default='user', nullable=False)  # user, premium, admin
@@ -70,6 +70,17 @@ class User(UserMixin, db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'last_login': self.last_login.isoformat() if self.last_login else None
         }
+    
+    def save(self):
+        """保存到数据库"""
+        db.session.add(self)
+        db.session.commit()
+        return self
+    
+    def delete(self):
+        """从数据库删除"""
+        db.session.delete(self)
+        db.session.commit()
     
     def __repr__(self):
         return f'<User {self.email}>'
@@ -140,6 +151,17 @@ class UserProfile(db.Model):
             return True
         return False
     
+    def save(self):
+        """保存到数据库"""
+        db.session.add(self)
+        db.session.commit()
+        return self
+    
+    def delete(self):
+        """从数据库删除"""
+        db.session.delete(self)
+        db.session.commit()
+    
     def __repr__(self):
         return f'<UserProfile {self.user_id}>'
 
@@ -148,11 +170,12 @@ class UserSession(db.Model):
     """用户会话管理"""
     __tablename__ = 'user_sessions'
     
-    id = db.Column(db.String(255), primary_key=True)  # 会话ID
+    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # 会话信息
-    session_token = db.Column(db.String(255), nullable=False, index=True)
+    token = db.Column(db.String(255), nullable=False, unique=True, index=True)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
     ip_address = db.Column(db.String(45))  # 支持 IPv6
     user_agent = db.Column(db.Text)
     
@@ -164,6 +187,17 @@ class UserSession(db.Model):
     def is_expired(self):
         """检查会话是否过期"""
         return datetime.now(timezone.utc) > self.expires_at.replace(tzinfo=timezone.utc)
+    
+    def save(self):
+        """保存到数据库"""
+        db.session.add(self)
+        db.session.commit()
+        return self
+    
+    def delete(self):
+        """从数据库删除"""
+        db.session.delete(self)
+        db.session.commit()
     
     def __repr__(self):
         return f'<UserSession {self.id} for user {self.user_id}>'
@@ -214,6 +248,17 @@ class UserPrediction(db.Model):
         """设置元数据"""
         self.prediction_metadata = json.dumps(metadata)
     
+    def save(self):
+        """保存到数据库"""
+        db.session.add(self)
+        db.session.commit()
+        return self
+    
+    def delete(self):
+        """从数据库删除"""
+        db.session.delete(self)
+        db.session.commit()
+    
     def __repr__(self):
         return f'<UserPrediction {self.stock_code} by user {self.user_id}>'
 
@@ -255,5 +300,78 @@ class Watchlist(db.Model):
         """设置提醒阈值"""
         self.alert_thresholds = json.dumps(thresholds)
     
+    def save(self):
+        """保存到数据库"""
+        db.session.add(self)
+        db.session.commit()
+        return self
+    
+    def delete(self):
+        """从数据库删除"""
+        db.session.delete(self)
+        db.session.commit()
+    
     def __repr__(self):
         return f'<Watchlist {self.stock_code} for user {self.user_id}>'
+
+
+class PasswordResetToken(db.Model):
+    """密码重置令牌"""
+    __tablename__ = 'password_reset_tokens'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    token = db.Column(db.String(255), nullable=False, unique=True, index=True)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_used = db.Column(db.Boolean, default=False, nullable=False)
+    used_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    def is_expired(self):
+        """检查令牌是否过期"""
+        return datetime.now(timezone.utc) > self.expires_at.replace(tzinfo=timezone.utc)
+    
+    def save(self):
+        """保存到数据库"""
+        db.session.add(self)
+        db.session.commit()
+        return self
+    
+    def delete(self):
+        """从数据库删除"""
+        db.session.delete(self)
+        db.session.commit()
+    
+    def __repr__(self):
+        return f'<PasswordResetToken for user {self.user_id}>'
+
+
+class EmailVerification(db.Model):
+    """邮箱验证令牌"""
+    __tablename__ = 'email_verifications'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    token = db.Column(db.String(255), nullable=False, unique=True, index=True)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_verified = db.Column(db.Boolean, default=False, nullable=False)
+    verified_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    def is_expired(self):
+        """检查令牌是否过期"""
+        return datetime.now(timezone.utc) > self.expires_at.replace(tzinfo=timezone.utc)
+    
+    def save(self):
+        """保存到数据库"""
+        db.session.add(self)
+        db.session.commit()
+        return self
+    
+    def delete(self):
+        """从数据库删除"""
+        db.session.delete(self)
+        db.session.commit()
+    
+    def __repr__(self):
+        return f'<EmailVerification for user {self.user_id}>'
