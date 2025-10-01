@@ -23,7 +23,7 @@ class AuthService:
     """用户认证服务类"""
     
     @staticmethod
-    def register_user(email: str, password: str, full_name: str) -> Tuple[bool, str, Optional[User]]:
+    def register_user(email: str, password: str, full_name: str, nickname: str = None) -> Tuple[bool, str, Optional[User]]:
         """
         用户注册
         
@@ -31,6 +31,7 @@ class AuthService:
             email: 用户邮箱
             password: 用户密码
             full_name: 用户全名
+            nickname: 用户昵称（可选）
             
         Returns:
             (成功标志, 消息, 用户对象)
@@ -64,6 +65,8 @@ class AuthService:
             
             # 创建用户档案
             profile = UserProfile(user_id=user.id)
+            if nickname:
+                profile.nickname = nickname.strip()
             db.session.add(profile)
             
             db.session.commit()

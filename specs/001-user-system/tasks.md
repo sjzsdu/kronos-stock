@@ -50,15 +50,15 @@
 - [ ] T021 [P] 密码加密和验证服务 in app/services/password_service.py
 - [ ] T022 用户输入验证和清理 in app/utils/validators.py
 
-## Phase 3.5: API端点实现
-- [ ] T023 POST /api/auth/register 用户注册端点 in app/api/auth.py
-- [ ] T024 POST /api/auth/login 用户登录端点 in app/api/auth.py
-- [ ] T025 POST /api/auth/logout 用户登出端点 in app/api/auth.py
-- [ ] T026 POST /api/auth/reset-password 密码重置端点 in app/api/auth.py
-- [ ] T027 GET /api/user/profile 获取用户档案端点 in app/api/user.py
-- [ ] T028 PUT /api/user/profile 更新用户档案端点 in app/api/user.py
-- [ ] T029 GET /api/user/watchlist 获取关注列表端点 in app/api/user.py
-- [ ] T030 POST /api/user/watchlist 添加股票到关注列表 in app/api/user.py
+## Phase 3.5: API端点实现 ✅ 已完成
+- [x] T023 POST /api/auth/register 用户注册端点 in app/api/auth.py
+- [x] T024 POST /api/auth/login 用户登录端点 in app/api/auth.py
+- [x] T025 POST /api/auth/logout 用户登出端点 in app/api/auth.py
+- [x] T026 POST /api/auth/reset-password 密码重置端点 in app/api/auth.py
+- [x] T027 GET /api/user/profile 获取用户档案端点 in app/api/user.py
+- [x] T028 PUT /api/user/profile 更新用户档案端点 in app/api/user.py
+- [x] T029 GET /api/user/watchlist 获取关注列表端点 in app/api/user.py
+- [x] T030 POST /api/user/watchlist 添加股票到关注列表 in app/api/user.py
 
 ## Phase 3.6: 用户界面实现
 - [ ] T031 [P] 用户登录页面模板 in app/templates/auth/login.html

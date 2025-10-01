@@ -19,27 +19,100 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 def register():
     """用户注册"""
     try:
-        data = request.get_json()
+        # 检查Content-Type
+        if not request.is_json:
+            return jsonify({
+                'success': False,
+                'message': '请求必须是JSON格式',
+                'errors': {'content_type': ['Content-Type必须是application/json']}
+            }), 400
+        
+        try:
+            data = request.get_json(force=False)
+        except Exception as json_error:
+            return jsonify({
+                'success': False,
+                'message': 'JSON格式错误',
+                'errors': {'json': ['无效的JSON数据']}
+            }), 400
         
         if not data:
             return jsonify({
                 'success': False,
-                'message': '请提供注册信息'
+                'message': '请提供注册信息',
+                'errors': {'data': ['请求体不能为空']}
             }), 400
         
         # 获取并验证输入
         email = sanitize_input(data.get('email', ''))
         password = data.get('password', '')
+        confirm_password = data.get('confirm_password', '')
         full_name = sanitize_input(data.get('full_name', ''))
+        nickname = sanitize_input(data.get('nickname', ''))
         
-        if not all([email, password, full_name]):
+        # 如果没有提供full_name，使用nickname作为full_name
+        if not full_name and nickname:
+            full_name = nickname
+        
+        # 验证必填字段和格式
+        errors = {}
+        
+        # 邮箱验证
+        if not email:
+            errors['email'] = ['邮箱不能为空']
+        elif not validate_email(email):
+            errors['email'] = ['邮箱格式无效']
+        
+        # 密码验证
+        if not password:
+            errors['password'] = ['密码不能为空']
+        elif len(password) < 8:
+            errors['password'] = ['密码长度至少8位']
+        elif not any(c.isdigit() for c in password):
+            errors['password'] = ['密码必须包含至少一个数字']
+        elif not any(c.isalpha() for c in password):
+            errors['password'] = ['密码必须包含至少一个字母']
+        
+        # 确认密码验证
+        if confirm_password and confirm_password != password:
+            errors['confirm_password'] = ['两次输入的密码不一致']
+        
+        # 昵称验证（必填）
+        if not nickname:
+            errors['nickname'] = ['昵称不能为空']
+        elif len(nickname) > 50:
+            errors['nickname'] = ['昵称长度不能超过50个字符']
+        elif nickname.strip() == '':
+            errors['nickname'] = ['昵称不能为空']
+        else:
+            # 检查是否包含特殊字符（只允许中文、英文、数字）
+            import re
+            if not re.match(r'^[\u4e00-\u9fa5a-zA-Z0-9]+$', nickname.strip()):
+                errors['nickname'] = ['昵称只能包含中文、英文和数字']
+        
+        # 如果既没有full_name也没有nickname，报错
+        if not full_name and not nickname:
+            errors['nickname'] = ['昵称不能为空']
+        
+        if errors:
             return jsonify({
                 'success': False,
-                'message': '邮箱、密码和姓名都是必填项'
+                'message': '输入信息有误',
+                'errors': errors
             }), 400
         
+        # 检查邮箱是否已存在
+        from app.models.user import User
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return jsonify({
+                'success': False,
+                'message': '该邮箱已被注册',
+                'errors': {'email': ['邮箱已存在']}
+            }), 409
+        
         # 执行注册
-        success, message, user = AuthService.register_user(email, password, full_name)
+        success, message, user = AuthService.register_user(email, password, full_name, nickname)
         
         if success:
             return jsonify({
@@ -49,20 +122,23 @@ def register():
                     'id': user.id,
                     'email': user.email,
                     'full_name': user.full_name,
+                    'nickname': nickname,
                     'created_at': user.created_at.isoformat()
                 }
             }), 201
         else:
             return jsonify({
                 'success': False,
-                'message': message
+                'message': message,
+                'errors': {'registration': [message]}
             }), 400
             
     except Exception as e:
         current_app.logger.error(f"注册API错误: {str(e)}")
         return jsonify({
             'success': False,
-            'message': '注册失败，请稍后重试'
+            'message': '注册失败，请稍后重试',
+            'errors': {'server': ['服务器内部错误']}
         }), 500
 
 

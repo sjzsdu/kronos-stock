@@ -154,8 +154,8 @@ def update_profile(current_user_id):
 
 
 @user_bp.route('/predictions', methods=['GET'])
-@login_required
-def get_predictions():
+@token_required
+def get_predictions(current_user_id):
     """获取用户预测记录"""
     try:
         # 分页参数
@@ -165,7 +165,7 @@ def get_predictions():
         offset = (page - 1) * per_page
         
         predictions = UserService.get_user_predictions(
-            current_user.id, limit=per_page, offset=offset
+            current_user_id, limit=per_page, offset=offset
         )
         
         predictions_data = []
@@ -199,11 +199,11 @@ def get_predictions():
 
 
 @user_bp.route('/watchlist', methods=['GET'])
-@login_required
-def get_watchlist():
+@token_required
+def get_watchlist(current_user_id):
     """获取关注股票列表"""
     try:
-        watchlist = UserService.get_user_watchlist(current_user.id)
+        watchlist = UserService.get_user_watchlist(current_user_id)
         
         watchlist_data = []
         for item in watchlist:
@@ -231,8 +231,8 @@ def get_watchlist():
 
 
 @user_bp.route('/watchlist', methods=['POST'])
-@login_required
-def add_to_watchlist():
+@token_required  
+def add_to_watchlist(current_user_id):
     """添加股票到关注列表"""
     try:
         data = request.get_json()
@@ -254,7 +254,7 @@ def add_to_watchlist():
             }), 400
         
         success, message = UserService.add_to_watchlist(
-            current_user.id, stock_code, stock_name, notes
+            current_user_id, stock_code, stock_name, notes
         )
         
         return jsonify({
@@ -271,8 +271,8 @@ def add_to_watchlist():
 
 
 @user_bp.route('/watchlist/<stock_code>', methods=['DELETE'])
-@login_required
-def remove_from_watchlist(stock_code):
+@token_required
+def remove_from_watchlist(current_user_id, stock_code):
     """从关注列表移除股票"""
     try:
         stock_code = sanitize_input(stock_code)
@@ -283,7 +283,7 @@ def remove_from_watchlist(stock_code):
                 'message': '无效的股票代码'
             }), 400
         
-        success, message = UserService.remove_from_watchlist(current_user.id, stock_code)
+        success, message = UserService.remove_from_watchlist(current_user_id, stock_code)
         
         return jsonify({
             'success': success,
@@ -299,8 +299,8 @@ def remove_from_watchlist(stock_code):
 
 
 @user_bp.route('/watchlist/reorder', methods=['PUT'])
-@login_required
-def reorder_watchlist():
+@token_required
+def reorder_watchlist(current_user_id):
     """重新排序关注列表"""
     try:
         data = request.get_json()
@@ -321,7 +321,7 @@ def reorder_watchlist():
         # 清理股票代码
         clean_codes = [sanitize_input(code) for code in stock_codes if code]
         
-        success, message = UserService.update_watchlist_order(current_user.id, clean_codes)
+        success, message = UserService.update_watchlist_order(current_user_id, clean_codes)
         
         return jsonify({
             'success': success,
@@ -337,11 +337,11 @@ def reorder_watchlist():
 
 
 @user_bp.route('/statistics', methods=['GET'])
-@login_required
-def get_statistics():
+@token_required
+def get_statistics(current_user_id):
     """获取用户统计信息"""
     try:
-        stats = UserService.get_user_statistics(current_user.id)
+        stats = UserService.get_user_statistics(current_user_id)
         
         # 格式化统计数据
         formatted_stats = {
@@ -367,8 +367,8 @@ def get_statistics():
 
 
 @user_bp.route('/account', methods=['DELETE'])
-@login_required
-def delete_account():
+@token_required
+def delete_account(current_user_id):
     """删除用户账户"""
     try:
         data = request.get_json()
@@ -381,7 +381,7 @@ def delete_account():
         
         password = data['password']
         
-        success, message = UserService.delete_user_account(current_user.id, password)
+        success, message = UserService.delete_user_account(current_user_id, password)
         
         return jsonify({
             'success': success,
