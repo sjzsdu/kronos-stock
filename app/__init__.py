@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
+from flask_login import LoginManager
 import config as config_module
 from datetime import datetime
 
@@ -16,6 +17,19 @@ def create_app(config_name='default'):
     
     # Initialize Flask-Migrate
     migrate = Migrate(app, db)
+    
+    # Initialize Flask-Login
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth_views.login_page'
+    login_manager.login_message = '请先登录以访问该页面'
+    login_manager.login_message_category = 'info'
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        """加载用户回调函数"""
+        from app.models.user import User
+        return User.query.get(int(user_id))
     
     # Initialize extensions
     CORS(app, origins=app.config['CORS_ORIGINS'])
@@ -64,10 +78,22 @@ def create_app(config_name='default'):
     from app.api.prediction import prediction_api
     from app.api.market import market_api
     
+    # Register user system blueprints
+    from app.api.auth import auth_bp
+    from app.api.user import user_bp
+    from app.views.auth_views import auth_views
+    from app.views.user_views import user_views
+    
     app.register_blueprint(views_bp)
     app.register_blueprint(prediction_api, url_prefix='/api')
     app.register_blueprint(market_api, url_prefix='/api')
     app.register_blueprint(api_bp, url_prefix='/api')
+    
+    # Register user system blueprints
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
+    app.register_blueprint(auth_views)
+    app.register_blueprint(user_views)
     
     # Initialize model service with default model
     with app.app_context():

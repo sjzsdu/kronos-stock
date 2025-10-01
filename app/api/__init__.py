@@ -8,3 +8,7 @@ from . import model
 from . import stock
 from . import prediction
 from . import market
+
+# Import user system API routes
+from . import auth
+from . import user

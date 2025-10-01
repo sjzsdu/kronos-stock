@@ -1,5 +1,9 @@
 # Kronos Stock Prediction System - AI Coding Instructions
 
+## Language Policy
+
+**CRITICAL**: This project follows Chinese-First development principles. ALL code comments, documentation, variable names (where semantically appropriate), UI text, and commit messages MUST use Chinese as the primary language. English should only be used for technical keywords, library APIs, and internationally standardized terms.
+
 ## Architecture Overview
 
 This is a modern Flask + HTMX stock prediction system with a modular architecture. The system uses PyTorch models for stock price prediction and provides both web UI and REST API interfaces.

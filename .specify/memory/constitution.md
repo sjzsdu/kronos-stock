@@ -1,10 +1,10 @@
 <!--
 Sync Impact Report:
-- Version change: 1.0.0 → 1.1.0
-- Modified principles: Added VI. Component-First UI Development (NON-NEGOTIABLE)
-- Added sections: Enhanced Technology Stack Standards with CSS Architecture guidelines
+- Version change: 1.1.0 → 1.2.0
+- Modified principles: Added VII. Chinese-First Development (NON-NEGOTIABLE)
+- Added sections: Language Policy section in copilot-instructions.md
 - Removed sections: None
-- Templates requiring updates: ✅ All templates validated for consistency
+- Templates requiring updates: ✅ .github/copilot-instructions.md updated with language policy
 - Follow-up TODOs: None - all placeholders resolved
 -->
 
@@ -42,6 +42,11 @@ All UI development MUST prioritize reusable component classes from `assets/css/i
 
 **Rationale**: Ensures design system consistency, reduces CSS duplication, improves maintainability, and enables systematic UI updates across the application.
 
+### VII. Chinese-First Development (NON-NEGOTIABLE)
+ALL project content MUST use Chinese as the primary language: code comments, variable names (where semantically appropriate), documentation, user interface text, error messages, and commit messages. English MAY be used only for technical keywords, library APIs, and internationally standardized terms. Documentation MUST be written in Chinese with technical terms explained in context.
+
+**Rationale**: Ensures consistent communication within the Chinese development team, improves code readability for local developers, and maintains cultural alignment with the target user base.
+
 ## Technology Stack Standards
 
 Technology choices MUST align with the established stack: Flask 2.3.3 with SQLAlchemy, HTMX for dynamic interactions, TailwindCSS with component-first approach via `assets/css/input.css`, PyTorch for ML operations, and pytest for testing. New dependencies MUST be justified and documented. Legacy Bootstrap usage is deprecated in favor of TailwindCSS component system.
@@ -62,4 +67,4 @@ This constitution supersedes all other development practices and guidelines. All
 
 **Amendments require semantic versioning**: MAJOR for breaking changes to core principles, MINOR for new principles or expanded guidance, PATCH for clarifications and refinements. Changes MUST include migration plan and template consistency updates.
 
-**Version**: 1.1.0 | **Ratified**: 2025-10-01 | **Last Amended**: 2025-10-01
+**Version**: 1.2.0 | **Ratified**: 2025-10-01 | **Last Amended**: 2025-10-01

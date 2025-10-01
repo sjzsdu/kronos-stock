@@ -3,8 +3,11 @@ flask==2.3.3
 flask-cors==4.0.0
 flask-sqlalchemy==3.0.5
 flask-migrate==4.0.5
+flask-login>=0.6.2
 pymysql>=1.1.0
 python-dotenv>=1.0.0
+bcrypt>=4.0.0
+PyJWT>=2.8.0
 pandas>=2.2.3,<3.0.0
 numpy>=1.26.0,<2.0.0
 requests>=2.31.0
