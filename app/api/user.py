@@ -9,17 +9,27 @@ from flask_login import login_required, current_user
 
 from app.services.user_service import UserService
 from app.utils.validators import sanitize_input
+from app.decorators.auth_decorators import token_required, get_current_user
 
 
 user_bp = Blueprint('user', __name__, url_prefix='/api/user')
 
 
 @user_bp.route('/profile', methods=['GET'])
-@login_required
-def get_profile():
+@token_required
+def get_profile(current_user_id):
     """获取用户完整档案"""
     try:
-        profile = UserService.get_user_profile(current_user.id)
+        # 获取用户对象
+        from app.models.user import User
+        current_user = User.query.get(current_user_id)
+        if not current_user:
+            return jsonify({
+                'success': False,
+                'message': '用户不存在'
+            }), 404
+            
+        profile = UserService.get_user_profile(current_user_id)
         
         if profile:
             profile_data = {
@@ -32,9 +42,13 @@ def get_profile():
                 'birth_date': profile.birth_date.isoformat() if profile.birth_date else None,
                 'gender': profile.gender,
                 'investment_experience': profile.investment_experience,
+                'investment_style': profile.investment_style,
+                'risk_tolerance': profile.risk_tolerance,
                 'risk_preference': profile.risk_preference,
+                'preferred_sectors': profile.get_preferred_sectors(),
                 'preferences': profile.get_preferences(),
                 'notification_settings': profile.get_notification_settings(),
+                'notification_preferences': profile.get_notification_preferences(),
                 'created_at': profile.created_at.isoformat(),
                 'updated_at': profile.updated_at.isoformat() if profile.updated_at else None
             }
@@ -43,6 +57,13 @@ def get_profile():
         
         return jsonify({
             'success': True,
+            'user': {
+                'id': current_user.id,
+                'email': current_user.email,
+                'is_active': current_user.is_active,
+                'created_at': current_user.created_at.isoformat() if current_user.created_at else None,
+                'last_login': current_user.last_login.isoformat() if current_user.last_login else None
+            },
             'profile': profile_data
         }), 200
         
@@ -55,8 +76,8 @@ def get_profile():
 
 
 @user_bp.route('/profile', methods=['PUT'])
-@login_required
-def update_profile():
+@token_required
+def update_profile(current_user_id):
     """更新用户档案"""
     try:
         data = request.get_json()
@@ -78,19 +99,51 @@ def update_profile():
         direct_fields = [
             'phone', 'avatar_url', 'birth_date', 'gender',
             'investment_experience', 'risk_preference',
-            'preferences', 'notification_settings'
+            'preferences', 'notification_settings',
+            'investment_style', 'risk_tolerance', 'preferred_sectors',
+            'notification_preferences'
         ]
         for field in direct_fields:
             if field in data:
                 clean_data[field] = data[field]
         
         # 更新档案
-        success, message = UserService.update_user_profile(current_user.id, clean_data)
+        success, message = UserService.update_user_profile(current_user_id, clean_data)
         
-        return jsonify({
-            'success': success,
-            'message': message
-        }), 200 if success else 400
+        if success:
+            # 获取更新后的档案数据
+            updated_profile = UserService.get_user_profile(current_user_id)
+            profile_data = {
+                'user_id': updated_profile.user_id,
+                'nickname': updated_profile.nickname,
+                'phone': updated_profile.phone,
+                'avatar_url': updated_profile.avatar_url,
+                'bio': updated_profile.bio,
+                'birth_date': updated_profile.birth_date.isoformat() if updated_profile.birth_date else None,
+                'gender': updated_profile.gender,
+                'location': updated_profile.location,
+                'investment_experience': updated_profile.investment_experience,
+                'risk_preference': updated_profile.risk_preference,
+                'investment_style': updated_profile.investment_style,
+                'risk_tolerance': updated_profile.risk_tolerance,
+                'preferred_sectors': updated_profile.get_preferred_sectors(),
+                'preferences': updated_profile.get_preferences(),
+                'notification_settings': updated_profile.get_notification_settings(),
+                'notification_preferences': updated_profile.get_notification_preferences(),
+                'created_at': updated_profile.created_at.isoformat(),
+                'updated_at': updated_profile.updated_at.isoformat() if updated_profile.updated_at else None
+            } if updated_profile else None
+            
+            return jsonify({
+                'success': success,
+                'message': message,
+                'profile': profile_data
+            }), 200
+        else:
+            return jsonify({
+                'success': success,
+                'message': message
+            }), 400
         
     except Exception as e:
         current_app.logger.error(f"更新用户档案API错误: {str(e)}")

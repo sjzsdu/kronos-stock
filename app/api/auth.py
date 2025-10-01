@@ -8,7 +8,8 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
 
 from app.services.auth_service import AuthService
-from app.utils.validators import sanitize_input
+from app.decorators.auth_decorators import token_required
+from app.utils.validators import sanitize_input, validate_email
 
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
@@ -69,12 +70,28 @@ def register():
 def login():
     """用户登录"""
     try:
-        data = request.get_json()
+        # 检查Content-Type
+        if not request.is_json:
+            return jsonify({
+                'success': False,
+                'message': '请求必须是JSON格式',
+                'errors': {'content_type': ['Content-Type必须是application/json']}
+            }), 400
+        
+        try:
+            data = request.get_json(force=False)
+        except Exception as json_error:
+            return jsonify({
+                'success': False,
+                'message': 'JSON格式错误',
+                'errors': {'json': ['无效的JSON数据']}
+            }), 400
         
         if not data:
             return jsonify({
                 'success': False,
-                'message': '请提供登录信息'
+                'message': '请提供登录信息',
+                'errors': {'data': ['请求体不能为空']}
             }), 400
         
         # 获取并验证输入
@@ -82,27 +99,62 @@ def login():
         password = data.get('password', '')
         remember = data.get('remember', False)
         
-        if not all([email, password]):
+        # 验证必填字段和格式
+        errors = {}
+        
+        if not email:
+            errors['email'] = ['邮箱不能为空']
+        elif not validate_email(email):
+            errors['email'] = ['邮箱格式无效']
+            
+        if not password:
+            errors['password'] = ['密码不能为空']
+        
+        if errors:
             return jsonify({
                 'success': False,
-                'message': '邮箱和密码都是必填项'
+                'message': '输入信息有误',
+                'errors': errors
             }), 400
         
         # 执行登录
-        success, message, user = AuthService.authenticate_user(email, password, remember)
+        result = AuthService.authenticate_user(email, password, remember)
+        
+        if len(result) == 5:
+            success, message, user, token, expires_at = result
+        elif len(result) == 4:
+            success, message, user, token = result
+            expires_at = None
+        else:
+            success, message, user = result
+            token = None
+            expires_at = None
         
         if success:
-            return jsonify({
+            # 获取用户档案信息
+            from app.models.user import UserProfile
+            profile = UserProfile.query.filter_by(user_id=user.id).first()
+            
+            response_data = {
                 'success': True,
                 'message': message,
                 'user': {
                     'id': user.id,
                     'email': user.email,
                     'full_name': user.full_name,
+                    'nickname': profile.nickname if profile else None,
                     'role': user.role,
                     'last_login': user.last_login.isoformat() if user.last_login else None
                 }
-            }), 200
+            }
+            
+            if token:
+                response_data['token'] = token
+            
+            if expires_at:
+                response_data['expires_at'] = expires_at.isoformat()
+                
+            return jsonify(response_data), 200
         else:
             return jsonify({
                 'success': False,
@@ -118,11 +170,43 @@ def login():
 
 
 @auth_bp.route('/logout', methods=['POST'])
-@login_required
-def logout():
+@token_required
+def logout(current_user_id):
     """用户登出"""
     try:
-        success = AuthService.logout_user_session(current_user)
+        # 通过ID获取用户对象
+        from app.models.user import User
+        current_user = User.query.get(current_user_id)
+        if not current_user:
+            return jsonify({
+                'success': False,
+                'message': '用户不存在'
+            }), 404
+            
+        # 检查是否请求登出所有会话
+        data = request.get_json(silent=True) or {}
+        logout_all = data.get('logout_all', False)
+        
+        # 对于API调用，我们需要使session失效
+        if hasattr(request, 'current_session'):
+            from app.models import db
+            
+            if logout_all:
+                # 登出所有会话
+                from app.models.user import UserSession
+                UserSession.query.filter_by(
+                    user_id=current_user.id,
+                    is_active=True
+                ).update({'is_active': False})
+            else:
+                # 只登出当前会话
+                current_session = request.current_session
+                current_session.is_active = False
+                
+            db.session.commit()
+            success = True
+        else:
+            success = AuthService.logout_user_session(current_user)
         
         if success:
             return jsonify({
@@ -144,10 +228,19 @@ def logout():
 
 
 @auth_bp.route('/change-password', methods=['POST'])
-@login_required
-def change_password():
+@token_required
+def change_password(current_user_id):
     """修改密码"""
     try:
+        # 通过ID获取用户对象
+        from app.models.user import User
+        current_user = User.query.get(current_user_id)
+        if not current_user:
+            return jsonify({
+                'success': False,
+                'message': '用户不存在'
+            }), 404
+            
         data = request.get_json()
         
         if not data:

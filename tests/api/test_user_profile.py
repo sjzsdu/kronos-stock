@@ -29,14 +29,16 @@ class TestUserProfileContract:
         with app.app_context():
             self.test_user = User(
                 email='profile_test@example.com',
-                password_hash='$2b$12$test_hashed_password',
                 is_active=True
             )
+            self.test_user.set_password('test_password')
             self.test_user.save()
+            # 保存用户ID以避免会话分离错误
+            self.test_user_id = self.test_user.id
             
             # 创建用户档案
             self.test_profile = UserProfile(
-                user_id=self.test_user.id,
+                user_id=self.test_user_id,
                 nickname='测试用户',
                 bio='这是一个测试用户的简介',
                 avatar_url='https://example.com/avatar.jpg',
@@ -58,7 +60,7 @@ class TestUserProfileContract:
             
             # 创建活跃会话
             self.test_session = UserSession(
-                user_id=self.test_user.id,
+                user_id=self.test_user_id,
                 token='profile_valid_token_12345',
                 expires_at=datetime.utcnow() + timedelta(hours=24),
                 is_active=True

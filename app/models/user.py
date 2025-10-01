@@ -105,6 +105,9 @@ class UserProfile(db.Model):
     # 投资相关信息  
     investment_experience = db.Column(db.String(20))  # 投资经验: 新手/初级/中级/高级/专业
     risk_preference = db.Column(db.String(20))  # 风险偏好: 保守型/稳健型/平衡型/积极型/激进型
+    investment_style = db.Column(db.String(20))  # 投资风格: conservative/balanced/aggressive
+    risk_tolerance = db.Column(db.String(20))  # 风险承受能力: low/medium/high
+    preferred_sectors = db.Column(db.Text)  # 偏好行业 (JSON格式)
     
     # 系统设置
     timezone = db.Column(db.String(50), default='Asia/Shanghai')
@@ -112,6 +115,7 @@ class UserProfile(db.Model):
     # 偏好设置 (JSON 格式)
     preferences = db.Column(db.Text, default='{}')  # 用户偏好设置
     notification_settings = db.Column(db.Text, default='{}')  # 通知设置
+    notification_preferences = db.Column(db.Text, default='{}')  # 通知偏好设置
     
     # 订阅信息
     subscription_tier = db.Column(db.String(20), default='free')  # free, premium, enterprise
@@ -120,6 +124,26 @@ class UserProfile(db.Model):
     # 时间戳
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    
+    def __init__(self, **kwargs):
+        """初始化用户档案，自动处理JSON字段"""
+        # 处理preferred_sectors字段 - 如果是列表则转换为JSON
+        if 'preferred_sectors' in kwargs and isinstance(kwargs['preferred_sectors'], list):
+            kwargs['preferred_sectors'] = json.dumps(kwargs['preferred_sectors'])
+        
+        # 处理notification_preferences字段 - 如果是字典则转换为JSON
+        if 'notification_preferences' in kwargs and isinstance(kwargs['notification_preferences'], dict):
+            kwargs['notification_preferences'] = json.dumps(kwargs['notification_preferences'])
+        
+        # 处理preferences字段 - 如果是字典则转换为JSON
+        if 'preferences' in kwargs and isinstance(kwargs['preferences'], dict):
+            kwargs['preferences'] = json.dumps(kwargs['preferences'])
+        
+        # 处理notification_settings字段 - 如果是字典则转换为JSON
+        if 'notification_settings' in kwargs and isinstance(kwargs['notification_settings'], dict):
+            kwargs['notification_settings'] = json.dumps(kwargs['notification_settings'])
+        
+        super().__init__(**kwargs)
     
     def get_preferences(self):
         """获取用户偏好设置"""
@@ -142,6 +166,28 @@ class UserProfile(db.Model):
     def set_notification_settings(self, settings):
         """设置通知选项"""
         self.notification_settings = json.dumps(settings)
+    
+    def get_notification_preferences(self):
+        """获取通知偏好设置"""
+        try:
+            return json.loads(self.notification_preferences or '{}')
+        except:
+            return {}
+    
+    def set_notification_preferences(self, preferences):
+        """设置通知偏好"""
+        self.notification_preferences = json.dumps(preferences)
+    
+    def get_preferred_sectors(self):
+        """获取偏好行业"""
+        try:
+            return json.loads(self.preferred_sectors or '[]')
+        except:
+            return []
+    
+    def set_preferred_sectors(self, sectors):
+        """设置偏好行业"""
+        self.preferred_sectors = json.dumps(sectors)
     
     def is_premium(self):
         """检查是否为高级用户"""

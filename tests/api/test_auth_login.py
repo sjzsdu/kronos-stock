@@ -28,10 +28,13 @@ class TestUserLoginContract:
         # 创建测试用户
         with app.app_context():
             self.test_user = User(
-                email='login_test@example.com',
-                password_hash='$2b$12$test_hashed_password'  # 假设的密码哈希
+                email='login_test@example.com'
             )
+            # 使用正确的密码设置方法
+            self.test_user.set_password('correct_password')
             self.test_user.save()
+            # 保存用户ID以避免会话分离错误
+            self.test_user_id = self.test_user.id
 
     def test_login_success_contract(self):
         """测试成功登录的API合约"""
@@ -184,7 +187,7 @@ class TestUserLoginContract:
             with self.app.app_context():
                 session = UserSession.query.filter_by(token=token).first()
                 assert session is not None
-                assert session.user_id == self.test_user.id
+                assert session.user_id == self.test_user_id
                 assert session.expires_at > datetime.utcnow()
                 assert session.is_active is True
 
@@ -307,9 +310,9 @@ class TestUserLoginContract:
         with self.app.app_context():
             inactive_user = User(
                 email='inactive@example.com',
-                password_hash='$2b$12$test_hashed_password',
                 is_active=False
             )
+            inactive_user.set_password('correct_password')
             inactive_user.save()
 
         login_data = {
@@ -353,7 +356,7 @@ class TestUserLoginContract:
         # 具体的会话管理策略取决于业务需求
         with self.app.app_context():
             active_sessions = UserSession.query.filter_by(
-                user_id=self.test_user.id,
+                user_id=self.test_user_id,
                 is_active=True
             ).count()
             

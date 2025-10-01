@@ -21,7 +21,16 @@ def validate_email(email: str) -> bool:
     if not email or len(email) > 254:
         return False
     
-    # 基本邮箱格式验证
+    # 基本邮箱格式验证 - 不允许连续的点号
+    # 检查是否有连续的点号
+    if '..' in email:
+        return False
+    
+    # 检查开头和结尾不能是点号
+    local_part = email.split('@')[0] if '@' in email else email
+    if local_part.startswith('.') or local_part.endswith('.'):
+        return False
+    
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return bool(re.match(pattern, email))
 

@@ -59,7 +59,8 @@ class UserService:
             # 更新档案信息
             allowed_fields = [
                 'nickname', 'phone', 'avatar_url', 'bio', 'location',
-                'birth_date', 'gender', 'investment_experience', 'risk_preference'
+                'birth_date', 'gender', 'investment_experience', 'risk_preference',
+                'investment_style', 'risk_tolerance'
             ]
             
             for field in allowed_fields:
@@ -77,6 +78,16 @@ class UserService:
                 current_alerts = profile.get_notification_settings()
                 current_alerts.update(profile_data['notification_settings'])
                 profile.set_notification_settings(current_alerts)
+            
+            # 更新偏好行业
+            if 'preferred_sectors' in profile_data:
+                profile.set_preferred_sectors(profile_data['preferred_sectors'])
+            
+            # 更新通知偏好设置
+            if 'notification_preferences' in profile_data:
+                current_notif_prefs = profile.get_notification_preferences()
+                current_notif_prefs.update(profile_data['notification_preferences'])
+                profile.set_notification_preferences(current_notif_prefs)
             
             user.updated_at = datetime.now(timezone.utc)
             db.session.commit()

@@ -93,15 +93,15 @@ class AuthService:
             user = User.query.filter_by(email=email.lower().strip()).first()
             
             if not user:
-                return False, "用户不存在", None
+                return False, "用户不存在", None, None, None
             
             # 检查用户状态
             if not user.is_active:
-                return False, "账户已被禁用", None
+                return False, "账户已被禁用", None, None, None
             
             # 验证密码
             if not user.check_password(password):
-                return False, "密码错误", None
+                return False, "密码错误", None, None, None
             
             # 更新最后登录时间
             user.last_login = datetime.now(timezone.utc)
@@ -110,16 +110,22 @@ class AuthService:
             login_user(user, remember=remember)
             
             # 创建会话记录
-            AuthService._create_user_session(user)
+            session = AuthService._create_user_session(user)
             
             db.session.commit()
             
-            return True, "登录成功", user
+            # 返回会话token和过期时间
+            if session:
+                token = session.token
+                expires_at = session.expires_at
+                return True, "登录成功", user, token, expires_at
+            else:
+                return True, "登录成功", user, None, None
             
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"用户登录失败: {str(e)}")
-            return False, "登录失败，请稍后重试", None
+            return False, "登录失败，请稍后重试", None, None, None
     
     @staticmethod
     def logout_user_session(user: User) -> bool:
@@ -292,14 +298,15 @@ class AuthService:
             session_id = hashlib.sha256(session_token.encode()).hexdigest()
             
             # 创建会话
-            expires_at = datetime.now(timezone.utc) + timedelta(
-                seconds=current_app.config.get('PERMANENT_SESSION_LIFETIME', 86400)
-            )
+            session_lifetime = current_app.config.get('PERMANENT_SESSION_LIFETIME', timedelta(seconds=86400))
+            if isinstance(session_lifetime, timedelta):
+                expires_at = datetime.now(timezone.utc) + session_lifetime
+            else:
+                expires_at = datetime.now(timezone.utc) + timedelta(seconds=int(session_lifetime))
             
             session = UserSession(
-                id=session_id,
                 user_id=user.id,
-                session_token=session_token,
+                token=session_token,
                 ip_address=request.remote_addr,
                 user_agent=request.headers.get('User-Agent', ''),
                 expires_at=expires_at

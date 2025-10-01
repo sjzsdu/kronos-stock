@@ -28,14 +28,16 @@ class TestUserLogoutContract:
         # 创建测试用户和会话
         with app.app_context():
             self.test_user = User(
-                email='logout_test@example.com',
-                password_hash='$2b$12$test_hashed_password'
+                email='logout_test@example.com'
             )
+            self.test_user.set_password('test_password')
             self.test_user.save()
+            # 保存用户ID以避免会话分离错误
+            self.test_user_id = self.test_user.id
             
             # 创建活跃会话
             self.test_session = UserSession(
-                user_id=self.test_user.id,
+                user_id=self.test_user_id,
                 token='test_valid_token_12345',
                 expires_at=datetime.utcnow() + timedelta(hours=24),
                 is_active=True
@@ -143,7 +145,7 @@ class TestUserLogoutContract:
         # 创建过期的会话
         with self.app.app_context():
             expired_session = UserSession(
-                user_id=self.test_user.id,
+                user_id=self.test_user_id,
                 token='expired_token_12345',
                 expires_at=datetime.utcnow() - timedelta(hours=1),  # 已过期
                 is_active=True
@@ -171,7 +173,7 @@ class TestUserLogoutContract:
         # 创建非活跃的会话
         with self.app.app_context():
             inactive_session = UserSession(
-                user_id=self.test_user.id,
+                user_id=self.test_user_id,
                 token='inactive_token_12345',
                 expires_at=datetime.utcnow() + timedelta(hours=24),
                 is_active=False  # 非活跃
@@ -243,7 +245,7 @@ class TestUserLogoutContract:
         with self.app.app_context():
             additional_sessions = [
                 UserSession(
-                    user_id=self.test_user.id,
+                    user_id=self.test_user_id,
                     token=f'session_token_{i}',
                     expires_at=datetime.utcnow() + timedelta(hours=24),
                     is_active=True
@@ -271,7 +273,7 @@ class TestUserLogoutContract:
             # 验证所有会话都被标记为非活跃
             with self.app.app_context():
                 active_sessions = UserSession.query.filter_by(
-                    user_id=self.test_user.id,
+                    user_id=self.test_user_id,
                     is_active=True
                 ).count()
                 assert active_sessions == 0
@@ -390,7 +392,7 @@ class TestUserLogoutContract:
         with self.app.app_context():
             expired_sessions = [
                 UserSession(
-                    user_id=self.test_user.id,
+                    user_id=self.test_user_id,
                     token=f'expired_{i}',
                     expires_at=datetime.utcnow() - timedelta(days=i+1),
                     is_active=True
