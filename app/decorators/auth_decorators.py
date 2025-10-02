@@ -135,3 +135,81 @@ def get_current_session():
         当前会话对象，如果未认证则返回None
     """
     return getattr(request, 'current_session', None)
+
+
+def login_required(f):
+    """
+    登录认证装饰器（会话认证版本）
+    适用于Web页面，使用Flask session进行认证
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        from flask import session, redirect, url_for, g
+        
+        # 检查会话中是否有用户ID
+        user_id = session.get('user_id')
+        if not user_id:
+            # API请求返回JSON错误
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    'error': 'Authentication required',
+                    'message': '需要登录认证',
+                    'code': 'AUTH_REQUIRED'
+                }), 401
+            
+            # HTMX请求返回重定向
+            if request.headers.get('HX-Request'):
+                return jsonify({
+                    'redirect': url_for('auth_views.login_page', next=request.url),
+                    'message': '需要登录认证'
+                }), 401
+            
+            # 普通请求重定向
+            return redirect(url_for('auth_views.login_page', next=request.url))
+        
+        # 验证用户是否存在且处于活跃状态
+        user = User.query.get(user_id)
+        if not user or not user.is_active:
+            # 清除无效会话
+            session.pop('user_id', None)
+            
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    'error': 'User account invalid',
+                    'message': '用户账户无效',
+                    'code': 'USER_INVALID'
+                }), 401
+            
+            return redirect(url_for('auth_views.login_page'))
+        
+        # 将用户信息设置到Flask g对象
+        g.current_user = user
+        g.user_authenticated = True
+        
+        return f(*args, **kwargs)
+    
+    return decorated_function
+
+
+def current_user_required(f):
+    """
+    当前用户装饰器，确保g.current_user可用
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        from flask import g
+        
+        if not hasattr(g, 'current_user') or not g.current_user:
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    'error': 'User data not available',
+                    'message': '用户数据不可用',
+                    'code': 'USER_DATA_ERROR'
+                }), 500
+            
+            from flask import redirect, url_for
+            return redirect(url_for('auth_views.login_page'))
+        
+        return f(*args, **kwargs)
+    
+    return decorated_function
