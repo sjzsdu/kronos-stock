@@ -19,6 +19,109 @@
     <!-- Tailwind build output -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tw.css') }}">
     
+    <!-- 用户认证相关样式 -->
+    <style>
+        /* 认证按钮样式 */
+        .auth-btn {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+        }
+        
+        .auth-btn-primary {
+            background-color: rgb(37 99 235);
+            color: white;
+            border: 1px solid rgb(37 99 235);
+        }
+        
+        .auth-btn-primary:hover {
+            background-color: rgb(29 78 216);
+            border-color: rgb(29 78 216);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .auth-btn-secondary {
+            background-color: transparent;
+            color: rgb(71 85 105);
+            border: 1px solid rgb(203 213 225);
+        }
+        
+        .auth-btn-secondary:hover {
+            background-color: rgb(248 250 252);
+            border-color: rgb(148 163 184);
+            color: rgb(51 65 85);
+        }
+        
+        /* 用户下拉菜单样式 */
+        .user-dropdown-menu {
+            min-width: 220px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .user-dropdown-menu a,
+        .user-dropdown-menu button {
+            transition: background-color 0.15s ease;
+        }
+        
+        .user-dropdown-menu a:hover,
+        .user-dropdown-menu button:hover {
+            background-color: rgb(248 250 252);
+        }
+        
+        /* 移动端用户区域样式 */
+        .mobile-user-section {
+            background: linear-gradient(135deg, rgb(239 246 255) 0%, rgb(248 250 252) 100%);
+        }
+        
+        .mobile-auth-section {
+            background: linear-gradient(135deg, rgb(248 250 252) 0%, rgb(241 245 249) 100%);
+        }
+        
+        /* 响应式隐藏/显示 */
+        @media (max-width: 640px) {
+            .auth-buttons {
+                display: none;
+            }
+        }
+        
+        @media (min-width: 641px) {
+            .mobile-user-section,
+            .mobile-auth-section {
+                display: none;
+            }
+        }
+        
+        /* 用户头像动画 */
+        .user-menu-trigger {
+            cursor: pointer;
+        }
+        
+        .user-menu-trigger:hover .user-avatar {
+            transform: scale(1.05);
+        }
+        
+        /* 下拉菜单动画 */
+        .user-dropdown-menu {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        
+        .user-dropdown-menu.hidden {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+    </style>
+    
     {% block head %}{% endblock %}
 </head>
 <body class="h-screen bg-slate-50 text-slate-800 antialiased overflow-hidden">
@@ -67,6 +170,81 @@
                 
                 <!-- Header Actions -->
                 <div class="header-actions">
+                    <!-- 用户认证状态 -->
+                    <div class="user-auth-section" id="userAuthSection">
+                        {% if session.get('user_id') %}
+                            <!-- 已登录用户 -->
+                            <div class="user-menu-trigger relative" id="userMenuTrigger">
+                                <!-- 用户头像组件 -->
+                                {% include 'components/user_avatar.html' %}
+                                
+                                <!-- 用户下拉菜单 -->
+                                <div class="user-dropdown-menu absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border border-slate-200 z-50 hidden" id="userDropdownMenu">
+                                    <div class="py-2">
+                                        <div class="px-4 py-3 border-b border-slate-200">
+                                            <p class="text-sm font-medium text-slate-800">{{ session.get('username', session.get('email', '').split('@')[0]) }}</p>
+                                            <p class="text-xs text-slate-600">{{ session.get('email', '') }}</p>
+                                        </div>
+                                        
+                                        <a href="{{ url_for('user.dashboard') }}" 
+                                           class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                            <i class="fas fa-tachometer-alt mr-3 text-blue-500" aria-hidden="true"></i>
+                                            仪表板
+                                        </a>
+                                        
+                                        <a href="{{ url_for('user.profile') }}" 
+                                           class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                            <i class="fas fa-user-cog mr-3 text-green-500" aria-hidden="true"></i>
+                                            个人资料
+                                        </a>
+                                        
+                                        <a href="{{ url_for('user.watchlist') }}" 
+                                           class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                            <i class="fas fa-star mr-3 text-yellow-500" aria-hidden="true"></i>
+                                            关注列表
+                                        </a>
+                                        
+                                        <div class="border-t border-slate-200 my-1"></div>
+                                        
+                                        {% if session.get('is_admin') %}
+                                        <a href="{{ url_for('admin.dashboard') }}" 
+                                           class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                            <i class="fas fa-crown mr-3 text-red-500" aria-hidden="true"></i>
+                                            管理后台
+                                        </a>
+                                        <div class="border-t border-slate-200 my-1"></div>
+                                        {% endif %}
+                                        
+                                        <button type="button" 
+                                                class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                                hx-post="/api/auth/logout"
+                                                hx-confirm="确定要退出登录吗？"
+                                                hx-swap="none"
+                                                hx-on:htmx:after-request="if(event.detail.successful) window.location.reload()">
+                                            <i class="fas fa-sign-out-alt mr-3" aria-hidden="true"></i>
+                                            退出登录
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <!-- 未登录用户 -->
+                            <div class="auth-buttons flex items-center space-x-2">
+                                <a href="{{ url_for('auth.login') }}" 
+                                   class="auth-btn auth-btn-secondary"
+                                   hx-boost="true">
+                                    登录
+                                </a>
+                                <a href="{{ url_for('auth.register') }}" 
+                                   class="auth-btn auth-btn-primary"
+                                   hx-boost="true">
+                                    注册
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- GitHub 链接 -->
                     <a href="https://github.com/sjzsdu/kronos-stock" 
                        target="_blank" 
                        rel="noopener noreferrer" 
@@ -83,6 +261,9 @@
         <div class="flex-1 overflow-hidden">
             {% block body %}{% endblock %}
         </div>
+        
+        <!-- HTMX认证状态监控组件 -->
+        {% include 'components/auth_status_monitor.html' %}
         
         <!-- Mobile Navigation Overlay -->
         <div class="mobile-nav-overlay hidden" id="mobileNavOverlay" onclick="layoutManager.toggleMobileMenu()"></div>
@@ -105,6 +286,77 @@
             
             <!-- Mobile Nav Content -->
             <div class="mobile-nav-content">
+                <!-- 用户信息区域（移动端） -->
+                {% if session.get('user_id') %}
+                    <!-- 已登录用户信息 -->
+                    <div class="mobile-user-section border-b border-slate-200 pb-4 mb-4">
+                        <div class="flex items-center space-x-3 px-4 py-3">
+                            <div class="relative">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                                    {% set display_name = session.get('username', session.get('email', '')) %}
+                                    {{ display_name[0].upper() if display_name else 'U' }}
+                                </div>
+                                <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="font-medium text-slate-800 truncate">
+                                    {{ session.get('username', session.get('email', '').split('@')[0]) }}
+                                </div>
+                                <div class="text-xs text-slate-500 truncate">
+                                    {{ session.get('email', '') }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 用户快捷操作 -->
+                        <div class="px-4 space-y-1">
+                            <a href="{{ url_for('user.dashboard') }}" 
+                               class="mobile-nav-link mobile-nav-link-inactive text-sm"
+                               onclick="layoutManager.toggleMobileMenu()">
+                                <i class="fas fa-tachometer-alt text-blue-500" aria-hidden="true"></i>
+                                <span>仪表板</span>
+                            </a>
+                            
+                            <a href="{{ url_for('user.profile') }}" 
+                               class="mobile-nav-link mobile-nav-link-inactive text-sm"
+                               onclick="layoutManager.toggleMobileMenu()">
+                                <i class="fas fa-user-cog text-green-500" aria-hidden="true"></i>
+                                <span>个人资料</span>
+                            </a>
+                            
+                            <a href="{{ url_for('user.watchlist') }}" 
+                               class="mobile-nav-link mobile-nav-link-inactive text-sm"
+                               onclick="layoutManager.toggleMobileMenu()">
+                                <i class="fas fa-star text-yellow-500" aria-hidden="true"></i>
+                                <span>关注列表</span>
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- 未登录用户操作 -->
+                    <div class="mobile-auth-section border-b border-slate-200 pb-4 mb-4">
+                        <div class="px-4">
+                            <div class="text-center py-4">
+                                <i class="fas fa-user-circle text-4xl text-slate-400 mb-2" aria-hidden="true"></i>
+                                <p class="text-sm text-slate-600 mb-3">登录以获得完整体验</p>
+                                <div class="space-y-2">
+                                    <a href="{{ url_for('auth.login') }}" 
+                                       class="block w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm text-center hover:bg-blue-700 transition-colors"
+                                       onclick="layoutManager.toggleMobileMenu()">
+                                        登录
+                                    </a>
+                                    <a href="{{ url_for('auth.register') }}" 
+                                       class="block w-full bg-white text-blue-600 border border-blue-600 py-2 px-4 rounded-lg text-sm text-center hover:bg-blue-50 transition-colors"
+                                       onclick="layoutManager.toggleMobileMenu()">
+                                        注册
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- 主导航菜单 -->
                 {% if primary_menu %}
                     {% for menu_item in primary_menu %}
                         {% set is_active = false %}
@@ -115,7 +367,8 @@
                         {% endif %}
                         <a href="{{ url_for(menu_item.default_url) }}" 
                            class="mobile-nav-link {% if is_active %}mobile-nav-link-active{% else %}mobile-nav-link-inactive{% endif %}"
-                           {% if is_active %}aria-current="page"{% endif %}>
+                           {% if is_active %}aria-current="page"{% endif %}
+                           onclick="layoutManager.toggleMobileMenu()">
                             <i class="{{ menu_item.icon }}" aria-hidden="true"></i>
                             <span>{{ menu_item.title }}</span>
                         </a>
@@ -124,6 +377,30 @@
                 
                 <!-- Mobile Nav Footer -->
                 <div class="mt-auto pt-6">
+                    {% if session.get('user_id') %}
+                        <!-- 已登录用户的退出选项 -->
+                        <div class="border-t border-slate-200 pt-4">
+                            {% if session.get('is_admin') %}
+                            <a href="{{ url_for('admin.dashboard') }}" 
+                               class="mobile-nav-link mobile-nav-link-inactive"
+                               onclick="layoutManager.toggleMobileMenu()">
+                                <i class="fas fa-crown text-red-500" aria-hidden="true"></i>
+                                <span>管理后台</span>
+                            </a>
+                            {% endif %}
+                            
+                            <button type="button" 
+                                    class="mobile-nav-link mobile-nav-link-inactive text-red-600 hover:bg-red-50 w-full text-left"
+                                    hx-post="/api/auth/logout"
+                                    hx-confirm="确定要退出登录吗？"
+                                    hx-swap="none"
+                                    hx-on:htmx:after-request="if(event.detail.successful) { layoutManager.toggleMobileMenu(); window.location.reload(); }">
+                                <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                                <span>退出登录</span>
+                            </button>
+                        </div>
+                    {% endif %}
+                    
                     <a href="https://github.com/sjzsdu/kronos-stock" 
                        target="_blank" 
                        rel="noopener noreferrer" 
@@ -141,6 +418,155 @@
     <script src="{{ url_for('static', filename='js/htmx-config.js') }}"></script>
     <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
     <script src="{{ url_for('static', filename='js/prediction-detail.js') }}"></script>
+    
+    <!-- 用户菜单交互脚本 -->
+    <script>
+    (function() {
+        'use strict';
+        
+        // 用户下拉菜单控制
+        const userMenuTrigger = document.getElementById('userMenuTrigger');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+        
+        if (userMenuTrigger && userDropdownMenu) {
+            // 点击头像切换菜单
+            userMenuTrigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isVisible = !userDropdownMenu.classList.contains('hidden');
+                if (isVisible) {
+                    userDropdownMenu.classList.add('hidden');
+                } else {
+                    userDropdownMenu.classList.remove('hidden');
+                }
+            });
+            
+            // 点击其他地方关闭菜单
+            document.addEventListener('click', function(e) {
+                if (!userMenuTrigger.contains(e.target)) {
+                    userDropdownMenu.classList.add('hidden');
+                }
+            });
+            
+            // ESC键关闭菜单
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    userDropdownMenu.classList.add('hidden');
+                }
+            });
+            
+            // 菜单项点击后关闭菜单
+            const menuLinks = userDropdownMenu.querySelectorAll('a, button');
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // 延迟关闭，让HTMX请求先完成
+                    setTimeout(() => {
+                        userDropdownMenu.classList.add('hidden');
+                    }, 100);
+                });
+            });
+        }
+        
+        // 用户状态监听和更新
+        function updateUserAuthSection() {
+            const authSection = document.getElementById('userAuthSection');
+            if (authSection) {
+                // 检查用户登录状态并更新UI
+                fetch('/api/user/status', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.authenticated) {
+                        // 用户已登录，更新状态指示器等
+                        updateUserStatus(data);
+                    }
+                })
+                .catch(error => {
+                    console.log('用户状态检查失败:', error);
+                });
+            }
+        }
+        
+        function updateUserStatus(userData) {
+            // 更新在线状态指示器
+            const statusIndicators = document.querySelectorAll('[data-status]');
+            statusIndicators.forEach(indicator => {
+                if (userData.is_online !== undefined) {
+                    indicator.setAttribute('data-status', userData.is_online ? 'online' : 'offline');
+                }
+            });
+            
+            // 更新用户统计数据
+            if (userData.stats) {
+                updateUserStats(userData.stats);
+            }
+        }
+        
+        function updateUserStats(stats) {
+            // 更新关注列表数量等统计信息
+            const watchlistCount = stats.watchlist_count;
+            const predictionCount = stats.prediction_count;
+            
+            // 这里可以更新相关的徽章显示
+            console.log('用户统计更新:', { watchlistCount, predictionCount });
+        }
+        
+        // 页面加载时更新用户状态
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUserAuthSection();
+        });
+        
+        // 定期检查用户状态（每5分钟）
+        setInterval(updateUserAuthSection, 5 * 60 * 1000);
+        
+        // 处理认证相关的HTMX事件
+        document.addEventListener('htmx:afterRequest', function(event) {
+            const xhr = event.detail.xhr;
+            
+            // 处理登出成功
+            if (xhr.responseURL && xhr.responseURL.includes('/api/auth/logout')) {
+                if (event.detail.successful) {
+                    // 显示登出成功消息
+                    console.log('用户已成功登出');
+                    
+                    // 短暂延迟后重新加载页面
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                }
+            }
+            
+            // 处理登录成功
+            if (xhr.responseURL && (xhr.responseURL.includes('/api/auth/login') || xhr.responseURL.includes('/auth/login'))) {
+                if (event.detail.successful) {
+                    // 登录成功后更新用户状态
+                    setTimeout(updateUserAuthSection, 500);
+                }
+            }
+        });
+        
+        // 全局暴露用户菜单控制函数
+        window.userMenu = {
+            close: function() {
+                if (userDropdownMenu) {
+                    userDropdownMenu.classList.add('hidden');
+                }
+            },
+            toggle: function() {
+                if (userDropdownMenu) {
+                    userDropdownMenu.classList.toggle('hidden');
+                }
+            },
+            updateStatus: updateUserStatus
+        };
+        
+    })();
+    </script>
 
     {% block scripts %}{% endblock %}
 </body>

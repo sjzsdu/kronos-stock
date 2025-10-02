@@ -1,0 +1,329 @@
+<!-- HTMX登录状态检查组件 -->
+<!-- 实现动态登录状态检查和UI更新，无需页面刷新 -->
+
+<div class="auth-status-monitor" 
+     hx-get="/api/user/auth-status" 
+     hx-trigger="load, auth-status-check from:body"
+     hx-swap="none"
+     hx-on:htmx:after-request="handleAuthStatusResponse(event)">
+</div>
+
+<!-- 用户状态更新组件 -->
+<div class="user-status-updater"
+     hx-get="/api/user/status" 
+     hx-trigger="every 30s[document.querySelector('#userAuthSection .user-menu-trigger')]"
+     hx-swap="none"
+     hx-on:htmx:after-request="handleUserStatusResponse(event)">
+</div>
+
+<!-- 在线状态心跳组件 -->
+<div class="heartbeat-component"
+     hx-post="/api/user/heartbeat"
+     hx-trigger="every 60s[document.querySelector('#userAuthSection .user-menu-trigger')]"
+     hx-swap="none"
+     hx-headers='{"Content-Type": "application/json"}'
+     hx-on:htmx:after-request="handleHeartbeatResponse(event)">
+</div>
+
+<script>
+(function() {
+    'use strict';
+    
+    // 认证状态响应处理
+    window.handleAuthStatusResponse = function(event) {
+        try {
+            const xhr = event.detail.xhr;
+            const response = JSON.parse(xhr.responseText);
+            
+            if (response.authenticated !== undefined) {
+                updateAuthenticationUI(response);
+            }
+        } catch (error) {
+            console.log('认证状态检查失败:', error);
+        }
+    };
+    
+    // 用户状态响应处理
+    window.handleUserStatusResponse = function(event) {
+        try {
+            const xhr = event.detail.xhr;
+            const response = JSON.parse(xhr.responseText);
+            
+            if (response.success && response.user) {
+                updateUserStatusUI(response.user);
+            }
+        } catch (error) {
+            console.log('用户状态更新失败:', error);
+        }
+    };
+    
+    // 心跳响应处理
+    window.handleHeartbeatResponse = function(event) {
+        try {
+            const xhr = event.detail.xhr;
+            const response = JSON.parse(xhr.responseText);
+            
+            if (response.success) {
+                // 心跳成功，更新最后活动时间
+                updateLastActivity();
+            }
+        } catch (error) {
+            console.log('心跳发送失败:', error);
+        }
+    };
+    
+    // 更新认证UI
+    function updateAuthenticationUI(authData) {
+        const authSection = document.getElementById('userAuthSection');
+        if (!authSection) return;
+        
+        if (authData.authenticated) {
+            // 用户已登录，显示用户菜单
+            showUserMenu(authData.user);
+        } else {
+            // 用户未登录，显示登录/注册按钮
+            showAuthButtons();
+        }
+    }
+    
+    // 显示用户菜单
+    function showUserMenu(userData) {
+        const authSection = document.getElementById('userAuthSection');
+        if (!authSection) return;
+        
+        // 检查是否已经有用户菜单
+        const existingMenu = authSection.querySelector('.user-menu-trigger');
+        if (existingMenu) {
+            // 更新现有菜单信息
+            updateExistingUserMenu(userData);
+            return;
+        }
+        
+        // 创建新的用户菜单
+        const userMenuHTML = createUserMenuHTML(userData);
+        authSection.innerHTML = userMenuHTML;
+        
+        // 重新绑定事件监听器
+        initUserMenuEvents();
+    }
+    
+    // 显示认证按钮
+    function showAuthButtons() {
+        const authSection = document.getElementById('userAuthSection');
+        if (!authSection) return;
+        
+        const authButtonsHTML = `
+            <div class="auth-buttons flex items-center space-x-2">
+                <a href="/auth/login" 
+                   class="auth-btn auth-btn-secondary"
+                   hx-boost="true">
+                    登录
+                </a>
+                <a href="/auth/register" 
+                   class="auth-btn auth-btn-primary"
+                   hx-boost="true">
+                    注册
+                </a>
+            </div>
+        `;
+        
+        authSection.innerHTML = authButtonsHTML;
+    }
+    
+    // 创建用户菜单HTML
+    function createUserMenuHTML(userData) {
+        const displayName = userData.username || userData.email.split('@')[0];
+        const avatarLetter = displayName[0].toUpperCase();
+        
+        return `
+            <div class="user-menu-trigger relative" id="userMenuTrigger">
+                <!-- 用户头像 -->
+                <div class="relative inline-block cursor-pointer">
+                    <div class="relative">
+                        <div class="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105">
+                            ${userData.avatar_url ? 
+                                `<img src="${userData.avatar_url}" alt="用户头像" class="w-full h-full object-cover">` :
+                                `<div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">${avatarLetter}</div>`
+                            }
+                            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${userData.is_online ? 'bg-green-500' : 'bg-gray-400'}"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 用户下拉菜单 -->
+                <div class="user-dropdown-menu absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border border-slate-200 z-50 hidden" id="userDropdownMenu">
+                    <div class="py-2">
+                        <div class="px-4 py-3 border-b border-slate-200">
+                            <p class="text-sm font-medium text-slate-800">${displayName}</p>
+                            <p class="text-xs text-slate-600">${userData.email}</p>
+                        </div>
+                        
+                        <a href="/user/dashboard" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                            <i class="fas fa-tachometer-alt mr-3 text-blue-500"></i>
+                            仪表板
+                        </a>
+                        
+                        <a href="/user/profile" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                            <i class="fas fa-user-cog mr-3 text-green-500"></i>
+                            个人资料
+                        </a>
+                        
+                        <a href="/user/watchlist" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                            <i class="fas fa-star mr-3 text-yellow-500"></i>
+                            关注列表
+                        </a>
+                        
+                        <div class="border-t border-slate-200 my-1"></div>
+                        
+                        ${userData.is_admin ? `
+                        <a href="/admin/dashboard" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                            <i class="fas fa-crown mr-3 text-red-500"></i>
+                            管理后台
+                        </a>
+                        <div class="border-t border-slate-200 my-1"></div>
+                        ` : ''}
+                        
+                        <button type="button" 
+                                class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                hx-post="/api/auth/logout"
+                                hx-confirm="确定要退出登录吗？"
+                                hx-swap="none"
+                                hx-on:htmx:after-request="if(event.detail.successful) window.location.reload()">
+                            <i class="fas fa-sign-out-alt mr-3"></i>
+                            退出登录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 更新现有用户菜单
+    function updateExistingUserMenu(userData) {
+        // 更新在线状态指示器
+        const statusIndicator = document.querySelector('.user-menu-trigger .w-3.h-3');
+        if (statusIndicator) {
+            statusIndicator.className = statusIndicator.className
+                .replace(/bg-(green|gray)-\d+/, userData.is_online ? 'bg-green-500' : 'bg-gray-400');
+        }
+        
+        // 更新用户信息
+        const userNameEl = document.querySelector('#userDropdownMenu .font-medium');
+        const userEmailEl = document.querySelector('#userDropdownMenu .text-xs');
+        
+        if (userNameEl && userEmailEl) {
+            const displayName = userData.username || userData.email.split('@')[0];
+            userNameEl.textContent = displayName;
+            userEmailEl.textContent = userData.email;
+        }
+    }
+    
+    // 更新用户状态UI
+    function updateUserStatusUI(userData) {
+        // 更新在线状态
+        const statusIndicators = document.querySelectorAll('[class*="bg-green-500"], [class*="bg-gray-400"]');
+        statusIndicators.forEach(indicator => {
+            if (indicator.classList.contains('w-3') || indicator.classList.contains('w-4')) {
+                indicator.className = indicator.className
+                    .replace(/bg-(green|gray)-\d+/, userData.is_online ? 'bg-green-500' : 'bg-gray-400');
+            }
+        });
+        
+        // 更新统计数据
+        if (userData.stats) {
+            updateUserStatsDisplay(userData.stats);
+        }
+    }
+    
+    // 更新用户统计数据显示
+    function updateUserStatsDisplay(stats) {
+        // 更新关注列表数量
+        const watchlistBadges = document.querySelectorAll('[href*="watchlist"] .ml-auto');
+        watchlistBadges.forEach(badge => {
+            if (stats.watchlist_count !== undefined) {
+                badge.textContent = stats.watchlist_count;
+                badge.style.display = stats.watchlist_count > 0 ? 'inline' : 'none';
+            }
+        });
+        
+        // 更新预测数量
+        const predictionBadges = document.querySelectorAll('[href*="predictions"] .ml-auto');
+        predictionBadges.forEach(badge => {
+            if (stats.prediction_count !== undefined) {
+                badge.textContent = stats.prediction_count;
+                badge.style.display = stats.prediction_count > 0 ? 'inline' : 'none';
+            }
+        });
+    }
+    
+    // 初始化用户菜单事件
+    function initUserMenuEvents() {
+        const userMenuTrigger = document.getElementById('userMenuTrigger');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+        
+        if (userMenuTrigger && userDropdownMenu) {
+            // 点击头像切换菜单
+            userMenuTrigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                userDropdownMenu.classList.toggle('hidden');
+            });
+            
+            // 点击其他地方关闭菜单
+            document.addEventListener('click', function(e) {
+                if (!userMenuTrigger.contains(e.target)) {
+                    userDropdownMenu.classList.add('hidden');
+                }
+            });
+        }
+    }
+    
+    // 更新最后活动时间
+    function updateLastActivity() {
+        localStorage.setItem('lastActivity', new Date().toISOString());
+    }
+    
+    // 触发认证状态检查
+    function triggerAuthStatusCheck() {
+        const event = new CustomEvent('auth-status-check');
+        document.body.dispatchEvent(event);
+    }
+    
+    // 监听认证相关事件
+    document.addEventListener('htmx:afterRequest', function(event) {
+        const xhr = event.detail.xhr;
+        
+        // 登录/登出后更新状态
+        if (xhr.responseURL && (
+            xhr.responseURL.includes('/api/auth/login') || 
+            xhr.responseURL.includes('/api/auth/logout') ||
+            xhr.responseURL.includes('/auth/login')
+        )) {
+            if (event.detail.successful) {
+                // 延迟触发状态检查
+                setTimeout(triggerAuthStatusCheck, 500);
+            }
+        }
+    });
+    
+    // 页面可见性变化时检查状态
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            triggerAuthStatusCheck();
+        }
+    });
+    
+    // 窗口焦点获得时检查状态
+    window.addEventListener('focus', function() {
+        triggerAuthStatusCheck();
+    });
+    
+    // 全局暴露函数
+    window.authStatusMonitor = {
+        check: triggerAuthStatusCheck,
+        updateAuth: updateAuthenticationUI,
+        updateUser: updateUserStatusUI
+    };
+    
+})();
+</script>

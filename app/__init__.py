@@ -34,6 +34,14 @@ def create_app(config_name='default'):
     # Initialize extensions
     CORS(app, origins=app.config['CORS_ORIGINS'])
     
+    # Initialize user cache service
+    from app.services.user_cache_service import init_user_cache_service
+    init_user_cache_service(app)
+    
+    # Initialize optimized auth middleware
+    from app.middleware.optimized_auth_middleware import init_optimized_auth_middleware
+    init_optimized_auth_middleware(app)
+    
     # Register custom template filters
     @app.template_filter('format_datetime')
     def format_datetime(value):

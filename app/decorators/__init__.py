@@ -4,27 +4,23 @@
 """
 
 from .auth_decorators import (
-    login_required,
+    token_required,
     admin_required,
-    verified_required,
-    role_required,
-    permission_required,
-    api_key_required,
-    jwt_required,
-    rate_limited,
-    api_auth_required,
-    conditional_auth
+    get_current_user,
+    get_current_session
+)
+
+# 从优化认证中间件导入登录相关装饰器
+from app.middleware.optimized_auth_middleware import (
+    login_required,
+    current_user_required
 )
 
 __all__ = [
-    'login_required',
+    'token_required',
     'admin_required', 
-    'verified_required',
-    'role_required',
-    'permission_required',
-    'api_key_required',
-    'jwt_required',
-    'rate_limited',
-    'api_auth_required',
-    'conditional_auth'
+    'login_required',
+    'current_user_required',
+    'get_current_user',
+    'get_current_session'
 ]

@@ -70,25 +70,25 @@
 - [x] T037 用户认证视图控制器 in app/views/auth.py
 - [x] T038 用户管理视图控制器 in app/views/user.py
 
-## Phase 3.7: 中间件和安全集成
-- [ ] T039 认证中间件实现 in app/middleware/auth_middleware.py
-- [ ] T040 会话管理中间件 in app/middleware/session_middleware.py
-- [ ] T041 速率限制配置（5次尝试/分钟）
-- [ ] T042 CSRF保护配置
-- [ ] T043 安全响应头配置
-- [ ] T044 用户权限装饰器 in app/decorators/auth_decorators.py
+## Phase 3.7: 中间件和安全集成 ✅
+- [x] T039 认证中间件实现 in app/middleware/auth_middleware.py
+- [x] T040 会话管理中间件 in app/middleware/session_middleware.py
+- [x] T041 速率限制配置（5次尝试/分钟）
+- [x] T042 CSRF保护配置
+- [x] T043 安全响应头配置
+- [x] T044 用户权限装饰器 in app/decorators/auth_decorators.py
 
-## Phase 3.8: 导航和UI集成
-- [ ] T045 更新主导航显示用户状态 in app/templates/layouts/base.html
-- [ ] T046 [P] 移动端用户菜单组件 in app/templates/components/user_menu.html
-- [ ] T047 [P] 用户头像和状态组件 in app/templates/components/user_avatar.html
-- [ ] T048 登录状态检查的HTMX组件更新
+## Phase 3.8: 导航和UI集成 ✅
+- [x] T045 更新主导航显示用户状态 in app/templates/layouts/base.html
+- [x] T046 [P] 移动端用户菜单组件 in app/templates/components/user_menu.html
+- [x] T047 [P] 用户头像和状态组件 in app/templates/components/user_avatar.html
+- [x] T048 登录状态检查的HTMX组件更新
 
-## Phase 3.9: 数据库优化和索引
-- [ ] T049 [P] 用户邮箱唯一索引优化
-- [ ] T050 [P] 会话令牌查询索引优化
-- [ ] T051 [P] 用户预测关联查询优化
-- [ ] T052 过期会话自动清理任务
+## Phase 3.9: 数据库优化和索引 ✅
+- [x] T049 [P] 用户邮箱唯一索引优化
+- [x] T050 [P] 会话令牌查询索引优化
+- [x] T051 [P] 用户预测关联查询优化
+- [x] T052 过期会话自动清理任务
 
 ## Phase 3.10: 性能优化和缓存
 - [ ] T053 [P] 用户会话数据缓存策略

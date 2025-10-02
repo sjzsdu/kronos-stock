@@ -1,0 +1,306 @@
+<!-- 移动端用户菜单组件 -->
+<!-- 响应式用户菜单，包含用户信息和操作选项 -->
+
+<div class="user-menu-container" id="userMenuContainer">
+    {% if current_user and current_user.id %}
+        <!-- 已登录用户菜单 -->
+        <div class="user-menu-header">
+            <!-- 用户基本信息 -->
+            <div class="flex items-center space-x-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-slate-200">
+                <!-- 用户头像 -->
+                <div class="relative">
+                    {% if current_user.avatar_url %}
+                        <img src="{{ current_user.avatar_url }}" 
+                             alt="{{ current_user.username or '用户头像' }}"
+                             class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
+                    {% else %}
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-semibold border-2 border-white shadow-sm">
+                            {% set display_name = current_user.username or current_user.email %}
+                            {{ display_name[0].upper() }}
+                        </div>
+                    {% endif %}
+                    <!-- 在线状态 -->
+                    <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 {{ 'bg-green-500' if current_user.is_online else 'bg-gray-400' }} rounded-full border-2 border-white"></div>
+                </div>
+                
+                <!-- 用户信息 -->
+                <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-slate-800 truncate">
+                        {{ current_user.username or current_user.email.split('@')[0] }}
+                    </div>
+                    <div class="text-sm text-slate-600 truncate">
+                        {{ current_user.email }}
+                    </div>
+                    {% if current_user.is_verified %}
+                        <div class="flex items-center text-xs text-green-600 mt-1">
+                            <i class="fas fa-check-circle mr-1" aria-hidden="true"></i>
+                            已验证
+                        </div>
+                    {% else %}
+                        <div class="flex items-center text-xs text-orange-600 mt-1">
+                            <i class="fas fa-exclamation-triangle mr-1" aria-hidden="true"></i>
+                            待验证
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- 菜单选项 -->
+        <div class="user-menu-content">
+            <nav class="py-2">
+                <!-- 用户操作 -->
+                <div class="user-menu-section">
+                    <a href="{{ url_for('user.dashboard') }}" 
+                       class="user-menu-item {{ 'active' if request.endpoint == 'user.dashboard' else '' }}"
+                       hx-boost="true">
+                        <i class="fas fa-tachometer-alt mr-3 text-blue-500" aria-hidden="true"></i>
+                        <span>仪表板</span>
+                    </a>
+                    
+                    <a href="{{ url_for('user.profile') }}" 
+                       class="user-menu-item {{ 'active' if request.endpoint == 'user.profile' else '' }}"
+                       hx-boost="true">
+                        <i class="fas fa-user-cog mr-3 text-green-500" aria-hidden="true"></i>
+                        <span>个人资料</span>
+                    </a>
+                    
+                    <a href="{{ url_for('user.watchlist') }}" 
+                       class="user-menu-item {{ 'active' if request.endpoint == 'user.watchlist' else '' }}"
+                       hx-boost="true">
+                        <i class="fas fa-star mr-3 text-yellow-500" aria-hidden="true"></i>
+                        <span>关注列表</span>
+                        {% if current_user.watchlist_count %}
+                            <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                {{ current_user.watchlist_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                    
+                    <a href="{{ url_for('user.predictions') }}" 
+                       class="user-menu-item {{ 'active' if request.endpoint == 'user.predictions' else '' }}"
+                       hx-boost="true">
+                        <i class="fas fa-chart-line mr-3 text-purple-500" aria-hidden="true"></i>
+                        <span>我的预测</span>
+                        {% if current_user.prediction_count %}
+                            <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
+                                {{ current_user.prediction_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                </div>
+                
+                <!-- 分隔线 -->
+                <div class="border-t border-slate-200 my-2"></div>
+                
+                <!-- 设置和帮助 -->
+                <div class="user-menu-section">
+                    <a href="{{ url_for('user.settings') }}" 
+                       class="user-menu-item {{ 'active' if request.endpoint == 'user.settings' else '' }}"
+                       hx-boost="true">
+                        <i class="fas fa-cog mr-3 text-slate-500" aria-hidden="true"></i>
+                        <span>设置</span>
+                    </a>
+                    
+                    <a href="{{ url_for('main.help') }}" 
+                       class="user-menu-item"
+                       hx-boost="true">
+                        <i class="fas fa-question-circle mr-3 text-slate-500" aria-hidden="true"></i>
+                        <span>帮助中心</span>
+                    </a>
+                </div>
+                
+                <!-- 分隔线 -->
+                <div class="border-t border-slate-200 my-2"></div>
+                
+                <!-- 管理员选项（如果是管理员） -->
+                {% if current_user.is_admin %}
+                <div class="user-menu-section">
+                    <a href="{{ url_for('admin.dashboard') }}" 
+                       class="user-menu-item {{ 'active' if request.blueprint == 'admin' else '' }}"
+                       hx-boost="true">
+                        <i class="fas fa-crown mr-3 text-red-500" aria-hidden="true"></i>
+                        <span>管理后台</span>
+                    </a>
+                </div>
+                
+                <div class="border-t border-slate-200 my-2"></div>
+                {% endif %}
+                
+                <!-- 登出 -->
+                <div class="user-menu-section">
+                    <button type="button" 
+                            class="user-menu-item text-red-600 hover:bg-red-50 w-full text-left"
+                            hx-post="/api/auth/logout"
+                            hx-confirm="确定要退出登录吗？"
+                            hx-swap="none"
+                            hx-on:htmx:after-request="if(event.detail.successful) window.location.reload()">
+                        <i class="fas fa-sign-out-alt mr-3" aria-hidden="true"></i>
+                        <span>退出登录</span>
+                    </button>
+                </div>
+            </nav>
+        </div>
+        
+        <!-- 用户统计信息（可选） -->
+        <div class="user-menu-footer border-t border-slate-200 p-3 bg-slate-50 text-xs text-slate-500">
+            <div class="flex justify-between items-center">
+                <span>账户创建于</span>
+                <span>{{ current_user.created_at | format_date }}</span>
+            </div>
+            {% if current_user.last_login_at %}
+            <div class="flex justify-between items-center mt-1">
+                <span>最后登录</span>
+                <span>{{ current_user.last_login_at | format_datetime }}</span>
+            </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- 未登录状态菜单 -->
+        <div class="user-menu-guest">
+            <div class="p-4 text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center">
+                    <i class="fas fa-user-circle text-3xl text-slate-400" aria-hidden="true"></i>
+                </div>
+                
+                <h3 class="font-semibold text-slate-800 mb-2">欢迎使用 Kronos</h3>
+                <p class="text-sm text-slate-600 mb-4">登录以获得完整的股票预测体验</p>
+                
+                <div class="space-y-2">
+                    <a href="{{ url_for('auth.login') }}" 
+                       class="block w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-center"
+                       hx-boost="true">
+                        登录
+                    </a>
+                    
+                    <a href="{{ url_for('auth.register') }}" 
+                       class="block w-full bg-white text-blue-600 py-2 px-4 rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors duration-200 text-center"
+                       hx-boost="true">
+                        注册账户
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 访客功能 -->
+            <div class="border-t border-slate-200 p-3">
+                <p class="text-xs text-slate-500 mb-2">无需登录即可体验：</p>
+                <div class="space-y-1">
+                    <a href="{{ url_for('views.index') }}" 
+                       class="block text-sm text-blue-600 hover:text-blue-800"
+                       hx-boost="true">
+                        • 查看股票预测演示
+                    </a>
+                    <a href="{{ url_for('views.market_overview') }}" 
+                       class="block text-sm text-blue-600 hover:text-blue-800"
+                       hx-boost="true">
+                        • 浏览市场概况
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+/* 用户菜单样式 */
+.user-menu-container {
+    min-width: 280px;
+    max-width: 320px;
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    color: rgb(51 65 85);
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.user-menu-item.active {
+    background-color: rgb(239 246 255);
+    color: rgb(29 78 216);
+    border-right: 2px solid rgb(59 130 246);
+}
+
+.user-menu-item:hover {
+    background-color: rgb(248 250 252);
+}
+
+.user-menu-item.active:hover {
+    background-color: rgb(219 234 254);
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+    .user-menu-container {
+        min-width: 100%;
+        max-width: 100%;
+    }
+}
+</style>
+
+<script>
+// 用户菜单组件交互逻辑
+(function() {
+    'use strict';
+    
+    // 处理菜单项点击
+    const menuItems = document.querySelectorAll('.user-menu-item[hx-boost]');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // 关闭菜单（如果是移动端）
+            if (window.layoutManager && window.layoutManager.closeMobileMenu) {
+                window.layoutManager.closeMobileMenu();
+            }
+        });
+    });
+    
+    // 处理登出成功后的重定向
+    document.addEventListener('htmx:afterRequest', function(event) {
+        if (event.detail.xhr.responseURL && event.detail.xhr.responseURL.includes('/api/auth/logout')) {
+            if (event.detail.successful) {
+                // 延迟重定向，让用户看到确认消息
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            }
+        }
+    });
+    
+    // 定期更新用户状态
+    function updateUserStats() {
+        const userMenu = document.getElementById('userMenuContainer');
+        if (userMenu && window.fetch) {
+            fetch('/api/user/stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 更新关注列表数量
+                        const watchlistBadge = userMenu.querySelector('.user-menu-item[href*="watchlist"] .ml-auto');
+                        if (watchlistBadge && data.watchlist_count !== undefined) {
+                            watchlistBadge.textContent = data.watchlist_count;
+                            watchlistBadge.style.display = data.watchlist_count > 0 ? 'inline' : 'none';
+                        }
+                        
+                        // 更新预测数量
+                        const predictionBadge = userMenu.querySelector('.user-menu-item[href*="predictions"] .ml-auto');
+                        if (predictionBadge && data.prediction_count !== undefined) {
+                            predictionBadge.textContent = data.prediction_count;
+                            predictionBadge.style.display = data.prediction_count > 0 ? 'inline' : 'none';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('用户统计更新失败:', error);
+                });
+        }
+    }
+    
+    // 每5分钟更新一次用户统计
+    setInterval(updateUserStats, 5 * 60 * 1000);
+    
+    // 页面加载时立即更新一次
+    document.addEventListener('DOMContentLoaded', updateUserStats);
+})();
+</script>
