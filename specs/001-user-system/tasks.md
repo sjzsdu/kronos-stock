@@ -1,6 +1,36 @@
 # Tasks: 用户系统
 
-**Input**: Design documents from `/specs/001-user-system/`
+**Inp## Phase 3.1: 环境配置和项目结构 ✅
+- [x] T001 安装用户系统相关依赖（bcrypt, PyJWT, Flask-Login）
+- [x] T002 [P] 配置数据库连接（SQLite本地，MySQL生产环境）
+- [x] T003 [P] 创建用户系统目录结构（services, models, templates）
+- [x] T004 [P] 配置环境变量和密钥管理
+
+## Phase 3.2: 数据库设计和迁移 ✅
+**关键：数据模型必须先创建并测试通过**
+- [x] T005 [P] 创建User模型 in app/models/user.py
+- [x] T006 [P] 创建UserProfile模型 in app/models/user_profile.py
+- [x] T007 [P] 创建UserSession模型 in app/models/user_session.py
+- [x] T008 [P] 创建UserPrediction关联模型 in app/models/user_prediction.py
+- [x] T009 [P] 创建Watchlist模型 in app/models/watchlist.py
+- [x] T010 生成并测试数据库迁移脚本 in migrations/versions/
+
+## Phase 3.3: 测试优先开发 (TDD) ✅
+**关键：这些测试必须编写完成并失败，然后才能开始实现**
+- [x] T011 [P] 用户注册API合约测试 in tests/api/test_auth_register.py
+- [x] T012 [P] 用户登录API合约测试 in tests/api/test_auth_login.py
+- [x] T013 [P] 用户登出API合约测试 in tests/api/test_auth_logout.py
+- [x] T014 [P] 用户档案API合约测试 in tests/api/test_user_profile.py
+- [x] T015 [P] 密码重置流程集成测试 in tests/integration/test_password_reset.py
+- [x] T016 [P] 用户认证流程集成测试 in tests/integration/test_auth_flow.py
+- [x] T017 [P] 用户会话管理集成测试 in tests/integration/test_session_management.py
+
+## Phase 3.4: 服务层实现 ✅
+- [x] T018 [P] 用户认证服务 in app/services/auth_service.py
+- [x] T019 [P] 用户管理服务 in app/services/user_service.py
+- [x] T020 [P] 会话管理服务 in app/services/session_service.py
+- [x] T021 [P] 密码加密和验证服务 in app/services/password_service.py
+- [x] T022 用户输入验证和清理 in app/utils/validators.py Design documents from `/specs/001-user-system/`
 **Prerequisites**: plan.md (required), spec.md (required)
 
 ## 执行流程概述
@@ -18,37 +48,37 @@
 - **Tests**: `tests/` 目录
 - **Migrations**: `migrations/versions/`
 
-## Phase 3.1: 环境配置和项目结构
-- [ ] T001 安装用户系统相关依赖（bcrypt, PyJWT, Flask-Login）
-- [ ] T002 [P] 配置数据库连接（SQLite本地，MySQL生产环境）
-- [ ] T003 [P] 创建用户系统目录结构（services, models, templates）
-- [ ] T004 [P] 配置环境变量和密钥管理
+## Phase 3.1: 环境配置和项目结构 ✅
+- [x] T001 安装用户系统相关依赖（bcrypt, PyJWT, Flask-Login）
+- [x] T002 [P] 配置数据库连接（SQLite本地，MySQL生产环境）
+- [x] T003 [P] 创建用户系统目录结构（services, models, templates）
+- [x] T004 [P] 配置环境变量和密钥管理
 
-## Phase 3.2: 数据库设计和迁移 ⚠️ 必须在实现前完成
+## Phase 3.2: 数据库设计和迁移 ✅
 **关键：数据模型必须先创建并测试通过**
-- [ ] T005 [P] 创建User模型 in app/models/user.py
-- [ ] T006 [P] 创建UserProfile模型 in app/models/user_profile.py
-- [ ] T007 [P] 创建UserSession模型 in app/models/user_session.py
-- [ ] T008 [P] 创建UserPrediction关联模型 in app/models/user_prediction.py
-- [ ] T009 [P] 创建Watchlist模型 in app/models/watchlist.py
-- [ ] T010 生成并测试数据库迁移脚本 in migrations/versions/
+- [x] T005 [P] 创建User模型 in app/models/user.py
+- [x] T006 [P] 创建UserProfile模型 in app/models/user_profile.py
+- [x] T007 [P] 创建UserSession模型 in app/models/user_session.py
+- [x] T008 [P] 创建UserPrediction关联模型 in app/models/user_prediction.py
+- [x] T009 [P] 创建Watchlist模型 in app/models/watchlist.py
+- [x] T010 生成并测试数据库迁移脚本 in migrations/versions/
 
-## Phase 3.3: 测试优先开发 (TDD) ⚠️ 必须在实现前完成
+## Phase 3.3: 测试优先开发 (TDD) ✅
 **关键：这些测试必须编写完成并失败，然后才能开始实现**
-- [ ] T011 [P] 用户注册API合约测试 in tests/api/test_auth_register.py
-- [ ] T012 [P] 用户登录API合约测试 in tests/api/test_auth_login.py
-- [ ] T013 [P] 用户登出API合约测试 in tests/api/test_auth_logout.py
-- [ ] T014 [P] 用户档案API合约测试 in tests/api/test_user_profile.py
-- [ ] T015 [P] 密码重置流程集成测试 in tests/integration/test_password_reset.py
-- [ ] T016 [P] 用户认证流程集成测试 in tests/integration/test_auth_flow.py
-- [ ] T017 [P] 用户会话管理集成测试 in tests/integration/test_session_management.py
+- [x] T011 [P] 用户注册API合约测试 in tests/api/test_auth_register.py
+- [x] T012 [P] 用户登录API合约测试 in tests/api/test_auth_login.py
+- [x] T013 [P] 用户登出API合约测试 in tests/api/test_auth_logout.py
+- [x] T014 [P] 用户档案API合约测试 in tests/api/test_user_profile.py
+- [x] T015 [P] 密码重置流程集成测试 in tests/integration/test_password_reset.py
+- [x] T016 [P] 用户认证流程集成测试 in tests/integration/test_auth_flow.py
+- [x] T017 [P] 用户会话管理集成测试 in tests/integration/test_session_management.py
 
-## Phase 3.4: 服务层实现（仅在测试失败后进行）
-- [ ] T018 [P] 用户认证服务 in app/services/auth_service.py
-- [ ] T019 [P] 用户管理服务 in app/services/user_service.py
-- [ ] T020 [P] 会话管理服务 in app/services/session_service.py
-- [ ] T021 [P] 密码加密和验证服务 in app/services/password_service.py
-- [ ] T022 用户输入验证和清理 in app/utils/validators.py
+## Phase 3.4: 服务层实现 ✅
+- [x] T018 [P] 用户认证服务 in app/services/auth_service.py
+- [x] T019 [P] 用户管理服务 in app/services/user_service.py
+- [x] T020 [P] 会话管理服务 in app/services/session_service.py
+- [x] T021 [P] 密码加密和验证服务 in app/services/password_service.py
+- [x] T022 用户输入验证和清理 in app/utils/validators.py
 
 ## Phase 3.5: API端点实现 ✅ 已完成
 - [x] T023 POST /api/auth/register 用户注册端点 in app/api/auth.py
@@ -96,13 +126,13 @@
 - [x] T055 登录性能测试（目标<2秒）
 - [x] T056 仪表板加载性能测试（目标<3秒）
 
-## Phase 3.11: 单元测试和文档
-- [ ] T057 [P] 用户服务单元测试 in tests/unit/test_user_service.py
-- [ ] T058 [P] 认证服务单元测试 in tests/unit/test_auth_service.py
-- [ ] T059 [P] 密码验证单元测试 in tests/unit/test_password_service.py
-- [ ] T060 [P] 验证器单元测试 in tests/unit/test_validators.py
-- [ ] T061 [P] API文档更新 in docs/api/auth-endpoints.md
-- [ ] T062 [P] 用户系统使用文档 in docs/user-system.md
+## Phase 3.11: 单元测试和文档 ✅
+- [x] T057 [P] 用户服务单元测试 in tests/unit/test_user_service.py
+- [x] T058 [P] 认证服务单元测试 in tests/unit/test_auth_service.py
+- [x] T059 [P] 密码验证单元测试 in tests/unit/test_password_service.py
+- [x] T060 [P] 验证器单元测试 in tests/unit/test_validators.py
+- [x] T061 [P] API文档更新 in docs/api/auth-endpoints.md
+- [x] T062 [P] 用户系统使用文档 in docs/user-system.md
 
 ## 依赖关系
 
