@@ -1,0 +1,819 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}关注列表 - Kronos 智能投资平台{% endblock %}
+
+{% block head %}
+<style>
+    /* 关注列表页面专用样式 */
+    .watchlist-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .watchlist-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stock-item {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+        cursor: pointer;
+    }
+    
+    .stock-item:hover {
+        background-color: #f8fafc;
+        border-left-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stock-item.dragging {
+        opacity: 0.5;
+        transform: rotate(5deg);
+    }
+    
+    .price-up {
+        color: #10b981;
+        background-color: rgba(16, 185, 129, 0.1);
+    }
+    
+    .price-down {
+        color: #ef4444;
+        background-color: rgba(239, 68, 68, 0.1);
+    }
+    
+    .price-neutral {
+        color: #6b7280;
+        background-color: rgba(107, 114, 128, 0.1);
+    }
+    
+    .add-stock-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    
+    .add-stock-btn:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .search-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-top: none;
+        border-radius: 0 0 0.5rem 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .suggestion-item {
+        padding: 0.75rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f3f4f6;
+        transition: background-color 0.2s ease;
+    }
+    
+    .suggestion-item:hover {
+        background-color: #f8fafc;
+    }
+    
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6b7280;
+    }
+    
+    .drag-handle {
+        cursor: grab;
+        color: #d1d5db;
+        transition: color 0.2s ease;
+    }
+    
+    .drag-handle:hover {
+        color: #9ca3af;
+    }
+    
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+    
+    .batch-actions {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        border: 1px solid #d1d5db;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="watchlist-container">
+    <!-- 页面标题和操作 -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">我的关注列表</h1>
+                <p class="text-gray-600">管理您关注的股票，快速访问预测和分析</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="/user/dashboard" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回仪表板
+                </a>
+                <button onclick="showBulkActions()" 
+                        id="bulk-actions-btn"
+                        class="hidden items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                        style="display: none;">
+                    <i class="fas fa-tasks mr-2"></i>
+                    批量操作
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加股票区域 -->
+    <div class="watchlist-card rounded-xl p-6 mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-plus-circle mr-2 text-blue-500"></i>
+            添加关注股票
+        </h2>
+        
+        <div class="relative">
+            <div class="flex space-x-3">
+                <div class="flex-1 relative">
+                    <input type="text" 
+                           id="stock-search" 
+                           placeholder="请输入股票代码或名称（如：000001、平安银行）"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                           oninput="searchStocks(this.value)"
+                           onkeydown="handleSearchKeydown(event)">
+                    
+                    <!-- 搜索建议 -->
+                    <div id="search-suggestions" class="search-suggestions hidden"></div>
+                </div>
+                
+                <button onclick="addToWatchlist()" 
+                        id="add-stock-btn"
+                        class="add-stock-btn px-6 py-3 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="add-text">
+                        <i class="fas fa-plus mr-2"></i>
+                        添加
+                    </span>
+                    <span id="add-loading" class="hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        添加中...
+                    </span>
+                </button>
+            </div>
+            
+            <div class="mt-3 text-sm text-gray-500">
+                <i class="fas fa-lightbulb mr-1 text-yellow-500"></i>
+                支持沪深股市股票代码，如：000001（平安银行）、600036（招商银行）
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量操作工具栏（隐藏状态） -->
+    <div id="batch-actions-toolbar" class="batch-actions hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="flex items-center space-x-4">
+                <span class="text-sm font-medium text-gray-700">
+                    已选择 <span id="selected-count">0</span> 只股票
+                </span>
+                <button onclick="selectAllStocks()" 
+                        class="text-sm text-blue-600 hover:text-blue-500">
+                    全选
+                </button>
+                <button onclick="clearSelection()" 
+                        class="text-sm text-gray-600 hover:text-gray-500">
+                    取消选择
+                </button>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="batchPredict()" 
+                        class="inline-flex items-center px-3 py-2 border border-green-300 rounded-lg text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    批量预测
+                </button>
+                <button onclick="batchRemove()" 
+                        class="inline-flex items-center px-3 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors">
+                    <i class="fas fa-trash mr-2"></i>
+                    批量删除
+                </button>
+                <button onclick="hideBulkActions()" 
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 消息区域 -->
+    <div id="watchlist-messages" class="hidden mb-6"></div>
+
+    <!-- 关注列表 -->
+    <div class="watchlist-card rounded-xl">
+        <!-- 列表头部 -->
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div class="flex items-center space-x-4">
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        我的关注 
+                        <span class="text-sm font-normal text-gray-500">
+                            (共 <span id="watchlist-total">--</span> 只)
+                        </span>
+                    </h2>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <!-- 排序选项 -->
+                    <div class="relative">
+                        <select id="sort-options" 
+                                onchange="sortWatchlist(this.value)"
+                                class="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="default">默认排序</option>
+                            <option value="code">按代码排序</option>
+                            <option value="name">按名称排序</option>
+                            <option value="change">按涨跌幅排序</option>
+                            <option value="added">按添加时间排序</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                    </div>
+                    
+                    <!-- 视图切换 -->
+                    <div class="flex bg-gray-100 rounded-lg p-1">
+                        <button onclick="switchView('list')" 
+                                id="view-list"
+                                class="px-3 py-1 rounded-md text-sm font-medium transition-colors bg-white text-gray-900 shadow-sm">
+                            <i class="fas fa-list"></i>
+                        </button>
+                        <button onclick="switchView('grid')" 
+                                id="view-grid"
+                                class="px-3 py-1 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                    </div>
+                    
+                    <button onclick="refreshWatchlist()" 
+                            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        刷新
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 列表内容 -->
+        <div id="watchlist-content"
+             hx-get="/api/user/watchlist"
+             hx-headers='{"Authorization": "Bearer " + localStorage.getItem("auth_token")}'
+             hx-trigger="load, watchlist-refresh from:body"
+             hx-target="this"
+             hx-swap="innerHTML">
+            <!-- 关注列表内容将通过HTMX加载 -->
+            <div class="p-12 text-center">
+                <i class="fas fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">加载中...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 股票详情模态框 -->
+<div id="stock-detail-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl max-w-lg w-full mx-4 shadow-xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900" id="modal-stock-name">股票详情</h3>
+                    <button onclick="hideStockModal()" 
+                            class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="modal-stock-content">
+                    <!-- 股票详细信息 -->
+                </div>
+                
+                <div class="mt-6 flex space-x-3">
+                    <button onclick="quickPredict()" 
+                            class="flex-1 px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        预测走势
+                    </button>
+                    <button onclick="removeFromModal()" 
+                            class="px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors">
+                        <i class="fas fa-trash mr-2"></i>
+                        移除关注
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 关注列表数据
+let watchlistData = {
+    stocks: [],
+    selectedStocks: new Set(),
+    currentView: 'list',
+    currentSort: 'default'
+};
+
+// 股票搜索缓存
+let searchCache = {};
+let searchTimeout = null;
+
+// 页面初始化
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuthentication();
+    setupEventListeners();
+    loadWatchlist();
+});
+
+// 检查认证状态
+function checkAuthentication() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        window.location.href = '/auth/login';
+        return;
+    }
+}
+
+// 设置事件监听器
+function setupEventListeners() {
+    // 搜索框失去焦点时隐藏建议
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#stock-search') && !e.target.closest('#search-suggestions')) {
+            document.getElementById('search-suggestions').classList.add('hidden');
+        }
+    });
+    
+    // ESC键关闭模态框
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideStockModal();
+        }
+    });
+}
+
+// 搜索股票
+function searchStocks(query) {
+    clearTimeout(searchTimeout);
+    
+    if (!query || query.length < 2) {
+        document.getElementById('search-suggestions').classList.add('hidden');
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        // 检查缓存
+        if (searchCache[query]) {
+            showSearchSuggestions(searchCache[query]);
+            return;
+        }
+        
+        // 模拟股票搜索（实际项目中应该调用API）
+        const mockResults = [
+            { code: '000001', name: '平安银行', market: '深A' },
+            { code: '600036', name: '招商银行', market: '沪A' },
+            { code: '000002', name: '万科A', market: '深A' },
+            { code: '600519', name: '贵州茅台', market: '沪A' },
+            { code: '000858', name: '五粮液', market: '深A' }
+        ].filter(stock => 
+            stock.code.includes(query) || 
+            stock.name.includes(query)
+        ).slice(0, 5);
+        
+        searchCache[query] = mockResults;
+        showSearchSuggestions(mockResults);
+    }, 300);
+}
+
+// 显示搜索建议
+function showSearchSuggestions(results) {
+    const container = document.getElementById('search-suggestions');
+    
+    if (results.length === 0) {
+        container.innerHTML = `
+            <div class="suggestion-item text-center text-gray-500">
+                <i class="fas fa-search mr-2"></i>
+                未找到匹配的股票
+            </div>
+        `;
+    } else {
+        container.innerHTML = results.map(stock => `
+            <div class="suggestion-item" onclick="selectStock('${stock.code}', '${stock.name}')">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="font-medium">${stock.code}</span>
+                        <span class="text-gray-600 ml-2">${stock.name}</span>
+                    </div>
+                    <span class="text-xs text-gray-500">${stock.market}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    container.classList.remove('hidden');
+}
+
+// 选择股票
+function selectStock(code, name) {
+    document.getElementById('stock-search').value = `${code} ${name}`;
+    document.getElementById('search-suggestions').classList.add('hidden');
+}
+
+// 处理搜索框键盘事件
+function handleSearchKeydown(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        addToWatchlist();
+    } else if (event.key === 'Escape') {
+        document.getElementById('search-suggestions').classList.add('hidden');
+    }
+}
+
+// 添加到关注列表
+function addToWatchlist() {
+    const input = document.getElementById('stock-search');
+    const stockInput = input.value.trim();
+    
+    if (!stockInput) {
+        showMessage('请输入股票代码', 'error');
+        return;
+    }
+    
+    // 提取股票代码（支持 "000001" 或 "000001 平安银行" 格式）
+    const stockCode = stockInput.split(' ')[0];
+    
+    if (!/^\d{6}$/.test(stockCode)) {
+        showMessage('请输入正确的6位股票代码', 'error');
+        return;
+    }
+    
+    // 设置加载状态
+    const button = document.getElementById('add-stock-btn');
+    const addText = document.getElementById('add-text');
+    const addLoading = document.getElementById('add-loading');
+    
+    button.disabled = true;
+    addText.classList.add('hidden');
+    addLoading.classList.remove('hidden');
+    
+    // 调用API添加
+    const token = localStorage.getItem('auth_token');
+    fetch('/api/user/watchlist', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            stock_code: stockCode
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showMessage(data.message || '添加成功', 'success');
+            input.value = '';
+            // 刷新关注列表
+            htmx.trigger(document.body, 'watchlist-refresh');
+        } else {
+            showMessage(data.message || '添加失败', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Add to watchlist failed:', error);
+        showMessage('网络错误，请稍后重试', 'error');
+    })
+    .finally(() => {
+        // 恢复按钮状态
+        button.disabled = false;
+        addText.classList.remove('hidden');
+        addLoading.classList.add('hidden');
+    });
+}
+
+// 从关注列表移除
+function removeFromWatchlist(stockCode) {
+    if (!confirm('确定要移除这只股票吗？')) {
+        return;
+    }
+    
+    const token = localStorage.getItem('auth_token');
+    fetch(`/api/user/watchlist/${stockCode}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showMessage(data.message || '移除成功', 'success');
+            // 刷新关注列表
+            htmx.trigger(document.body, 'watchlist-refresh');
+        } else {
+            showMessage(data.message || '移除失败', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Remove from watchlist failed:', error);
+        showMessage('网络错误，请稍后重试', 'error');
+    });
+}
+
+// 快速预测
+function quickPredict(stockCode) {
+    if (!stockCode) {
+        // 从模态框中获取股票代码
+        stockCode = document.getElementById('modal-stock-name').dataset.stockCode;
+    }
+    
+    if (stockCode) {
+        window.location.href = `/prediction?stock_code=${stockCode}`;
+    }
+}
+
+// 显示股票详情模态框
+function showStockDetail(stockCode, stockName) {
+    const modal = document.getElementById('stock-detail-modal');
+    const title = document.getElementById('modal-stock-name');
+    const content = document.getElementById('modal-stock-content');
+    
+    title.textContent = `${stockCode} ${stockName}`;
+    title.dataset.stockCode = stockCode;
+    
+    // 加载股票详细信息
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <i class="fas fa-spinner fa-spin text-gray-400"></i>
+            <p class="text-gray-500 text-sm mt-2">加载中...</p>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    
+    // 模拟加载股票数据（实际项目中应调用API）
+    setTimeout(() => {
+        content.innerHTML = `
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                        <div class="text-sm text-gray-600">当前价格</div>
+                        <div class="text-lg font-semibold">¥12.34</div>
+                        <div class="text-xs text-green-600">+0.56 (+4.75%)</div>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                        <div class="text-sm text-gray-600">成交量</div>
+                        <div class="text-lg font-semibold">1.23万手</div>
+                        <div class="text-xs text-gray-600">昨日: 0.98万手</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>今开: ¥12.05</div>
+                    <div>昨收: ¥11.78</div>
+                    <div>最高: ¥12.48</div>
+                    <div>最低: ¥11.95</div>
+                </div>
+                <div class="text-xs text-gray-500">
+                    <i class="fas fa-clock mr-1"></i>
+                    数据更新时间: ${new Date().toLocaleString()}
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+// 隐藏股票详情模态框
+function hideStockModal() {
+    document.getElementById('stock-detail-modal').classList.add('hidden');
+}
+
+// 从模态框移除股票
+function removeFromModal() {
+    const stockCode = document.getElementById('modal-stock-name').dataset.stockCode;
+    if (stockCode) {
+        hideStockModal();
+        removeFromWatchlist(stockCode);
+    }
+}
+
+// 排序关注列表
+function sortWatchlist(sortType) {
+    watchlistData.currentSort = sortType;
+    // 这里可以添加排序逻辑或重新请求数据
+    htmx.trigger(document.body, 'watchlist-refresh');
+}
+
+// 切换视图模式
+function switchView(viewType) {
+    watchlistData.currentView = viewType;
+    
+    // 更新按钮状态
+    document.getElementById('view-list').className = viewType === 'list' ? 
+        'px-3 py-1 rounded-md text-sm font-medium transition-colors bg-white text-gray-900 shadow-sm' :
+        'px-3 py-1 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-900';
+    
+    document.getElementById('view-grid').className = viewType === 'grid' ? 
+        'px-3 py-1 rounded-md text-sm font-medium transition-colors bg-white text-gray-900 shadow-sm' :
+        'px-3 py-1 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-900';
+    
+    // 重新渲染列表
+    htmx.trigger(document.body, 'watchlist-refresh');
+}
+
+// 刷新关注列表
+function refreshWatchlist() {
+    htmx.trigger(document.body, 'watchlist-refresh');
+}
+
+// 加载关注列表
+function loadWatchlist() {
+    htmx.trigger(document.getElementById('watchlist-content'), 'load');
+}
+
+// 批量操作相关
+function showBulkActions() {
+    document.getElementById('batch-actions-toolbar').classList.remove('hidden');
+    document.getElementById('bulk-actions-btn').classList.add('hidden');
+    
+    // 显示所有复选框
+    document.querySelectorAll('.stock-checkbox').forEach(checkbox => {
+        checkbox.classList.remove('hidden');
+    });
+}
+
+function hideBulkActions() {
+    document.getElementById('batch-actions-toolbar').classList.add('hidden');
+    document.getElementById('bulk-actions-btn').classList.remove('hidden');
+    
+    // 隐藏所有复选框并清除选择
+    document.querySelectorAll('.stock-checkbox').forEach(checkbox => {
+        checkbox.classList.add('hidden');
+        checkbox.checked = false;
+    });
+    
+    watchlistData.selectedStocks.clear();
+    updateSelectedCount();
+}
+
+function toggleStockSelection(stockCode, checkbox) {
+    if (checkbox.checked) {
+        watchlistData.selectedStocks.add(stockCode);
+    } else {
+        watchlistData.selectedStocks.delete(stockCode);
+    }
+    updateSelectedCount();
+}
+
+function selectAllStocks() {
+    document.querySelectorAll('.stock-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+        const stockCode = checkbox.dataset.stockCode;
+        watchlistData.selectedStocks.add(stockCode);
+    });
+    updateSelectedCount();
+}
+
+function clearSelection() {
+    document.querySelectorAll('.stock-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    watchlistData.selectedStocks.clear();
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    document.getElementById('selected-count').textContent = watchlistData.selectedStocks.size;
+}
+
+function batchPredict() {
+    if (watchlistData.selectedStocks.size === 0) {
+        showMessage('请先选择要预测的股票', 'error');
+        return;
+    }
+    
+    const stockCodes = Array.from(watchlistData.selectedStocks).join(',');
+    window.location.href = `/prediction?stock_codes=${stockCodes}`;
+}
+
+function batchRemove() {
+    if (watchlistData.selectedStocks.size === 0) {
+        showMessage('请先选择要移除的股票', 'error');
+        return;
+    }
+    
+    if (!confirm(`确定要移除选中的 ${watchlistData.selectedStocks.size} 只股票吗？`)) {
+        return;
+    }
+    
+    const token = localStorage.getItem('auth_token');
+    const promises = Array.from(watchlistData.selectedStocks).map(stockCode =>
+        fetch(`/api/user/watchlist/${stockCode}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+    );
+    
+    Promise.all(promises)
+        .then(responses => Promise.all(responses.map(r => r.json())))
+        .then(results => {
+            const successCount = results.filter(r => r.success).length;
+            showMessage(`成功移除 ${successCount} 只股票`, 'success');
+            hideBulkActions();
+            htmx.trigger(document.body, 'watchlist-refresh');
+        })
+        .catch(error => {
+            console.error('Batch remove failed:', error);
+            showMessage('批量移除失败，请稍后重试', 'error');
+        });
+}
+
+// 消息显示函数
+function showMessage(message, type = 'info') {
+    const container = document.getElementById('watchlist-messages');
+    const typeStyles = {
+        success: 'bg-green-50 border-green-200 text-green-800',
+        error: 'bg-red-50 border-red-200 text-red-800',
+        info: 'bg-blue-50 border-blue-200 text-blue-800'
+    };
+    
+    const icons = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        info: 'fas fa-info-circle'
+    };
+    
+    container.innerHTML = `
+        <div class="${typeStyles[type]} border rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="${icons[type]}"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="font-medium">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.classList.remove('hidden');
+    
+    // 自动隐藏消息
+    setTimeout(() => {
+        container.classList.add('hidden');
+    }, 5000);
+}
+
+// HTMX配置
+document.body.addEventListener('htmx:configRequest', function(evt) {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        evt.detail.headers['Authorization'] = `Bearer ${token}`;
+    }
+});
+
+// HTMX加载完成后的处理
+document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.target.id === 'watchlist-content') {
+        // 更新股票总数
+        const stockItems = document.querySelectorAll('.stock-item');
+        document.getElementById('watchlist-total').textContent = stockItems.length;
+        
+        // 如果有股票，显示批量操作按钮
+        if (stockItems.length > 0) {
+            document.getElementById('bulk-actions-btn').classList.remove('hidden');
+        } else {
+            document.getElementById('bulk-actions-btn').classList.add('hidden');
+        }
+    }
+});
+</script>
+{% endblock %}

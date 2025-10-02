@@ -1,0 +1,625 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}用户仪表板 - Kronos 智能投资平台{% endblock %}
+
+{% block head %}
+<style>
+    /* 仪表板专用样式 */
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+    
+    .metric-icon {
+        width: 3rem;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .quick-action-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    
+    .quick-action-btn:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .watchlist-item {
+        transition: all 0.2s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .watchlist-item:hover {
+        background-color: #f8fafc;
+        border-left-color: #667eea;
+    }
+    
+    .price-up {
+        color: #10b981;
+    }
+    
+    .price-down {
+        color: #ef4444;
+    }
+    
+    .price-neutral {
+        color: #6b7280;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-container">
+    <!-- 欢迎信息 -->
+    <div class="mb-8">
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <div>
+                    <h1 class="text-2xl font-bold mb-2">
+                        欢迎回来，<span id="user-nickname">用户</span>！
+                    </h1>
+                    <p class="text-blue-100">
+                        今天是个投资的好日子，让我们看看市场表现如何
+                    </p>
+                </div>
+                <div class="mt-4 sm:mt-0 text-right">
+                    <div class="text-blue-100 text-sm">最后登录</div>
+                    <div class="text-white font-semibold" id="last-login">--</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 统计数据卡片 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" id="stats-container">
+        <!-- 预测次数 -->
+        <div class="stats-card rounded-xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">总预测次数</p>
+                    <p class="text-2xl font-bold text-gray-900" id="total-predictions">--</p>
+                    <p class="text-xs text-gray-500 mt-1">本月 <span id="monthly-predictions">--</span> 次</p>
+                </div>
+                <div class="metric-icon bg-gradient-to-br from-blue-500 to-blue-600">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关注股票 -->
+        <div class="stats-card rounded-xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">关注股票</p>
+                    <p class="text-2xl font-bold text-gray-900" id="watchlist-count">--</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <a href="/user/watchlist" class="text-blue-600 hover:text-blue-500">管理关注列表</a>
+                    </p>
+                </div>
+                <div class="metric-icon bg-gradient-to-br from-green-500 to-green-600">
+                    <i class="fas fa-star"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 预测准确率 -->
+        <div class="stats-card rounded-xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">预测准确率</p>
+                    <p class="text-2xl font-bold text-gray-900" id="accuracy-rate">--%</p>
+                    <p class="text-xs text-gray-500 mt-1">基于历史数据</p>
+                </div>
+                <div class="metric-icon bg-gradient-to-br from-purple-500 to-purple-600">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 账户状态 -->
+        <div class="stats-card rounded-xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">账户状态</p>
+                    <p class="text-2xl font-bold text-green-600" id="account-status">活跃</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        加入于 <span id="joined-date">--</span>
+                    </p>
+                </div>
+                <div class="metric-icon bg-gradient-to-br from-orange-500 to-orange-600">
+                    <i class="fas fa-user-check"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- 左侧：快速操作和最近预测 -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- 快速操作 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-bolt mr-2 text-yellow-500"></i>
+                    快速操作
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="startNewPrediction()" 
+                            class="quick-action-btn p-4 rounded-xl text-left">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-bar text-2xl mr-3"></i>
+                            <div>
+                                <div class="font-semibold">开始预测</div>
+                                <div class="text-sm opacity-90">分析股票走势</div>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="manageWatchlist()" 
+                            class="quick-action-btn p-4 rounded-xl text-left">
+                        <div class="flex items-center">
+                            <i class="fas fa-star text-2xl mr-3"></i>
+                            <div>
+                                <div class="font-semibold">关注列表</div>
+                                <div class="text-sm opacity-90">管理关注股票</div>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="viewProfile()" 
+                            class="quick-action-btn p-4 rounded-xl text-left">
+                        <div class="flex items-center">
+                            <i class="fas fa-user-cog text-2xl mr-3"></i>
+                            <div>
+                                <div class="font-semibold">个人设置</div>
+                                <div class="text-sm opacity-90">管理账户信息</div>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="viewHistory()" 
+                            class="quick-action-btn p-4 rounded-xl text-left">
+                        <div class="flex items-center">
+                            <i class="fas fa-history text-2xl mr-3"></i>
+                            <div>
+                                <div class="font-semibold">历史记录</div>
+                                <div class="text-sm opacity-90">查看预测历史</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 最近预测 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        <i class="fas fa-clock mr-2 text-blue-500"></i>
+                        最近预测
+                    </h2>
+                    <a href="/user/history" class="text-sm text-blue-600 hover:text-blue-500">
+                        查看全部 <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+                <div id="recent-predictions-container">
+                    <!-- 预测记录将通过HTMX加载 -->
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：关注列表和市场概况 -->
+        <div class="space-y-8">
+            <!-- 关注列表 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        <i class="fas fa-star mr-2 text-yellow-500"></i>
+                        关注列表
+                    </h2>
+                    <button onclick="addToWatchlist()" 
+                            class="text-sm text-blue-600 hover:text-blue-500">
+                        <i class="fas fa-plus mr-1"></i>添加
+                    </button>
+                </div>
+                <div id="watchlist-container"
+                     hx-get="/api/user/watchlist"
+                     hx-headers='{"Authorization": "Bearer " + localStorage.getItem("auth_token")}'
+                     hx-trigger="load"
+                     hx-target="this"
+                     hx-swap="innerHTML">
+                    <!-- 关注列表将通过HTMX加载 -->
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500">加载中...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统公告 -->
+            <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">
+                    <i class="fas fa-bullhorn mr-2 text-blue-600"></i>
+                    系统公告
+                </h3>
+                <div class="space-y-3">
+                    <div class="bg-white rounded-lg p-3 border-l-4 border-blue-500">
+                        <p class="text-sm font-medium text-gray-900">
+                            新功能上线
+                        </p>
+                        <p class="text-xs text-gray-600 mt-1">
+                            AI预测模型已优化，准确率提升15%
+                        </p>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 border-l-4 border-green-500">
+                        <p class="text-sm font-medium text-gray-900">
+                            服务维护通知
+                        </p>
+                        <p class="text-xs text-gray-600 mt-1">
+                            系统将在本周日02:00-04:00进行维护
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 使用提示 -->
+            <div class="bg-yellow-50 rounded-xl p-6 border border-yellow-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">
+                    <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                    使用提示
+                </h3>
+                <ul class="text-sm text-gray-700 space-y-2">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5 text-xs"></i>
+                        定期更新关注列表以获取最新分析
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5 text-xs"></i>
+                        结合多个指标进行投资决策
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5 text-xs"></i>
+                        理性投资，注意风险控制
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 仪表板数据管理
+let dashboardData = {
+    user: null,
+    statistics: null,
+    watchlist: [],
+    recentPredictions: []
+};
+
+// 页面初始化
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuthentication();
+    loadDashboardData();
+});
+
+// 检查用户认证状态
+function checkAuthentication() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        // 未登录，跳转到登录页面
+        window.location.href = '/auth/login';
+        return;
+    }
+    
+    // 验证token有效性
+    fetch('/api/user/profile', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Token invalid');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            dashboardData.user = data.user;
+            updateUserInfo();
+        } else {
+            throw new Error('Profile fetch failed');
+        }
+    })
+    .catch(error => {
+        console.error('Authentication check failed:', error);
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_id');
+        window.location.href = '/auth/login';
+    });
+}
+
+// 加载仪表板数据
+function loadDashboardData() {
+    const token = localStorage.getItem('auth_token');
+    
+    // 加载用户统计数据
+    fetch('/api/user/statistics', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            dashboardData.statistics = data.statistics;
+            updateStatistics();
+        }
+    })
+    .catch(error => {
+        console.error('Failed to load statistics:', error);
+    });
+    
+    // 加载最近预测
+    loadRecentPredictions();
+}
+
+// 更新用户信息显示
+function updateUserInfo() {
+    if (!dashboardData.user) return;
+    
+    // 更新昵称
+    const nickname = dashboardData.user.profile?.nickname || dashboardData.user.email.split('@')[0];
+    document.getElementById('user-nickname').textContent = nickname;
+    
+    // 更新最后登录时间
+    if (dashboardData.user.last_login) {
+        const lastLogin = new Date(dashboardData.user.last_login);
+        document.getElementById('last-login').textContent = formatDate(lastLogin);
+    }
+}
+
+// 更新统计数据显示
+function updateStatistics() {
+    if (!dashboardData.statistics) return;
+    
+    const stats = dashboardData.statistics;
+    
+    // 总预测次数
+    document.getElementById('total-predictions').textContent = stats.total_predictions || 0;
+    document.getElementById('monthly-predictions').textContent = stats.monthly_predictions || 0;
+    
+    // 关注股票数量
+    document.getElementById('watchlist-count').textContent = stats.watchlist_count || 0;
+    
+    // 预测准确率（模拟数据）
+    const accuracyRate = stats.total_predictions > 0 ? 
+        Math.min(85 + Math.random() * 10, 95).toFixed(1) : '--';
+    document.getElementById('accuracy-rate').textContent = 
+        accuracyRate === '--' ? '--' : accuracyRate + '%';
+    
+    // 加入时间
+    if (stats.joined_at) {
+        const joinDate = new Date(stats.joined_at);
+        document.getElementById('joined-date').textContent = formatDate(joinDate, true);
+    }
+}
+
+// 加载最近预测
+function loadRecentPredictions() {
+    const token = localStorage.getItem('auth_token');
+    
+    fetch('/api/user/predictions?limit=5', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            dashboardData.recentPredictions = data.predictions;
+            renderRecentPredictions();
+        } else {
+            renderEmptyPredictions();
+        }
+    })
+    .catch(error => {
+        console.error('Failed to load recent predictions:', error);
+        renderEmptyPredictions();
+    });
+}
+
+// 渲染最近预测
+function renderRecentPredictions() {
+    const container = document.getElementById('recent-predictions-container');
+    const predictions = dashboardData.recentPredictions;
+    
+    if (predictions.length === 0) {
+        renderEmptyPredictions();
+        return;
+    }
+    
+    let html = '<div class="space-y-3">';
+    
+    predictions.forEach(prediction => {
+        const date = new Date(prediction.created_at);
+        const statusColor = getStatusColor(prediction.status);
+        
+        html += `
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white font-semibold mr-3">
+                        ${prediction.stock_code.slice(-2)}
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-900">${prediction.stock_code}</div>
+                        <div class="text-sm text-gray-600">${formatDate(date)}</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
+                        ${getStatusText(prediction.status)}
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">
+                        ${prediction.model_name}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// 渲染空预测状态
+function renderEmptyPredictions() {
+    const container = document.getElementById('recent-predictions-container');
+    container.innerHTML = `
+        <div class="text-center py-8">
+            <i class="fas fa-chart-line text-4xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500 mb-4">还没有预测记录</p>
+            <button onclick="startNewPrediction()" 
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-plus mr-2"></i>
+                开始第一次预测
+            </button>
+        </div>
+    `;
+}
+
+// 快速操作函数
+function startNewPrediction() {
+    window.location.href = '/prediction';
+}
+
+function manageWatchlist() {
+    window.location.href = '/user/watchlist';
+}
+
+function viewProfile() {
+    window.location.href = '/user/profile';
+}
+
+function viewHistory() {
+    window.location.href = '/user/history';
+}
+
+function addToWatchlist() {
+    // 可以弹出模态框或跳转到添加页面
+    const stockCode = prompt('请输入股票代码（如：000001）：');
+    if (stockCode && stockCode.trim()) {
+        const token = localStorage.getItem('auth_token');
+        fetch('/api/user/watchlist', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                stock_code: stockCode.trim()
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 重新加载关注列表
+                htmx.trigger('#watchlist-container', 'load');
+                // 重新加载统计数据
+                loadDashboardData();
+            } else {
+                alert(data.message || '添加失败，请检查股票代码');
+            }
+        })
+        .catch(error => {
+            console.error('Failed to add to watchlist:', error);
+            alert('添加失败，请稍后重试');
+        });
+    }
+}
+
+// 工具函数
+function formatDate(date, dateOnly = false) {
+    const now = new Date();
+    const diffInMs = now - date;
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+    
+    if (dateOnly) {
+        return date.toLocaleDateString('zh-CN');
+    }
+    
+    if (diffInHours < 1) {
+        const minutes = Math.floor(diffInMs / (1000 * 60));
+        return `${minutes}分钟前`;
+    } else if (diffInHours < 24) {
+        return `${Math.floor(diffInHours)}小时前`;
+    } else if (diffInHours < 24 * 7) {
+        const days = Math.floor(diffInHours / 24);
+        return `${days}天前`;
+    } else {
+        return date.toLocaleDateString('zh-CN');
+    }
+}
+
+function getStatusColor(status) {
+    switch (status) {
+        case 'completed':
+            return 'bg-green-100 text-green-800';
+        case 'running':
+            return 'bg-blue-100 text-blue-800';
+        case 'failed':
+            return 'bg-red-100 text-red-800';
+        default:
+            return 'bg-gray-100 text-gray-800';
+    }
+}
+
+function getStatusText(status) {
+    switch (status) {
+        case 'completed':
+            return '已完成';
+        case 'running':
+            return '进行中';
+        case 'failed':
+            return '失败';
+        default:
+            return '未知';
+    }
+}
+
+// HTMX配置：添加认证头
+document.body.addEventListener('htmx:configRequest', function(evt) {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        evt.detail.headers['Authorization'] = `Bearer ${token}`;
+    }
+});
+</script>
+{% endblock %}

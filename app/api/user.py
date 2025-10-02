@@ -12,7 +12,7 @@ from app.utils.validators import sanitize_input
 from app.decorators.auth_decorators import token_required, get_current_user
 
 
-user_bp = Blueprint('user', __name__, url_prefix='/api/user')
+user_bp = Blueprint('user_api', __name__, url_prefix='/api/user')
 
 
 @user_bp.route('/profile', methods=['GET'])

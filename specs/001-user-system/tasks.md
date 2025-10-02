@@ -60,15 +60,15 @@
 - [x] T029 GET /api/user/watchlist 获取关注列表端点 in app/api/user.py
 - [x] T030 POST /api/user/watchlist 添加股票到关注列表 in app/api/user.py
 
-## Phase 3.6: 用户界面实现
-- [ ] T031 [P] 用户登录页面模板 in app/templates/auth/login.html
-- [ ] T032 [P] 用户注册页面模板 in app/templates/auth/register.html  
-- [ ] T033 [P] 密码重置页面模板 in app/templates/auth/reset_password.html
-- [ ] T034 [P] 用户仪表板模板 in app/templates/user/dashboard.html
-- [ ] T035 [P] 用户档案页面模板 in app/templates/user/profile.html
-- [ ] T036 [P] 用户关注列表页面模板 in app/templates/user/watchlist.html
-- [ ] T037 用户认证视图控制器 in app/views/auth.py
-- [ ] T038 用户管理视图控制器 in app/views/user.py
+## Phase 3.6: 用户界面模板 ✅
+- [x] T031 用户登录页面 in app/templates/auth/login.html
+- [x] T032 用户注册页面 in app/templates/auth/register.html
+- [x] T033 密码重置页面 in app/templates/auth/reset_password.html
+- [x] T034 用户仪表板页面 in app/templates/user/dashboard.html
+- [x] T035 用户资料页面 in app/templates/user/profile.html
+- [x] T036 关注列表页面 in app/templates/user/watchlist.html
+- [x] T037 用户认证视图控制器 in app/views/auth.py
+- [x] T038 用户管理视图控制器 in app/views/user.py
 
 ## Phase 3.7: 中间件和安全集成
 - [ ] T039 认证中间件实现 in app/middleware/auth_middleware.py

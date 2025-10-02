@@ -12,7 +12,7 @@ from app.decorators.auth_decorators import token_required
 from app.utils.validators import sanitize_input, validate_email
 
 
-auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+auth_bp = Blueprint('auth_api', __name__, url_prefix='/api/auth')
 
 
 @auth_bp.route('/register', methods=['POST'])

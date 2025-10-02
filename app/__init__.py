@@ -79,10 +79,10 @@ def create_app(config_name='default'):
     from app.api.market import market_api
     
     # Register user system blueprints
-    from app.api.auth import auth_bp
-    from app.api.user import user_bp
-    from app.views.auth_views import auth_views
-    from app.views.user_views import user_views
+    from app.api.auth import auth_bp as api_auth_bp
+    from app.api.user import user_bp as api_user_bp
+    from app.views.auth import auth_bp
+    from app.views.user import user_bp
     
     app.register_blueprint(views_bp)
     app.register_blueprint(prediction_api, url_prefix='/api')
@@ -90,10 +90,10 @@ def create_app(config_name='default'):
     app.register_blueprint(api_bp, url_prefix='/api')
     
     # Register user system blueprints
+    app.register_blueprint(api_auth_bp)
+    app.register_blueprint(api_user_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
-    app.register_blueprint(auth_views)
-    app.register_blueprint(user_views)
     
     # Initialize model service with default model
     with app.app_context():

@@ -1,0 +1,980 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}个人档案 - Kronos 智能投资平台{% endblock %}
+
+{% block head %}
+<style>
+    /* 档案页面专用样式 */
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .profile-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .avatar-container {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .avatar-upload {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 2rem;
+        height: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .avatar-upload:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .tab-button {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        background: transparent;
+        border-bottom: 2px solid transparent;
+        font-weight: 500;
+        color: #6b7280;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .tab-button.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .tab-button:hover {
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+    
+    .form-section {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+    }
+    
+    .danger-zone {
+        background: linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%);
+        border: 1px solid #fecaca;
+    }
+    
+    .success-message {
+        background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);
+        border: 1px solid #bbf7d0;
+        color: #166534;
+    }
+    
+    .error-message {
+        background: linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%);
+        border: 1px solid #fecaca;
+        color: #dc2626;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="profile-container">
+    <!-- 页面标题 -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">个人档案</h1>
+                <p class="text-gray-600">管理您的账户信息和个人设置</p>
+            </div>
+            <div>
+                <a href="/user/dashboard" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回仪表板
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- 左侧导航 -->
+        <div class="lg:col-span-1">
+            <div class="profile-card rounded-xl p-6 sticky top-4">
+                <!-- 用户头像和基本信息 -->
+                <div class="text-center mb-6">
+                    <div class="avatar-container">
+                        <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto" id="user-avatar">
+                            U
+                        </div>
+                        <div class="avatar-upload" onclick="triggerAvatarUpload()">
+                            <i class="fas fa-camera text-xs"></i>
+                        </div>
+                        <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mt-3" id="profile-nickname">加载中...</h3>
+                    <p class="text-sm text-gray-600" id="profile-email">--</p>
+                </div>
+
+                <!-- 导航菜单 -->
+                <nav class="space-y-2">
+                    <button onclick="showTab('basic')" 
+                            class="tab-nav-button w-full text-left px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors active"
+                            id="tab-nav-basic">
+                        <i class="fas fa-user mr-3 w-4"></i>
+                        基本信息
+                    </button>
+                    <button onclick="showTab('security')" 
+                            class="tab-nav-button w-full text-left px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                            id="tab-nav-security">
+                        <i class="fas fa-shield-alt mr-3 w-4"></i>
+                        安全设置
+                    </button>
+                    <button onclick="showTab('preferences')" 
+                            class="tab-nav-button w-full text-left px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                            id="tab-nav-preferences">
+                        <i class="fas fa-cog mr-3 w-4"></i>
+                        偏好设置
+                    </button>
+                    <button onclick="showTab('danger')" 
+                            class="tab-nav-button w-full text-left px-3 py-2 rounded-lg text-red-700 hover:bg-red-50 transition-colors"
+                            id="tab-nav-danger">
+                        <i class="fas fa-exclamation-triangle mr-3 w-4"></i>
+                        账户管理
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 右侧内容区域 -->
+        <div class="lg:col-span-3">
+            <!-- 全局消息区域 -->
+            <div id="global-messages" class="hidden mb-6"></div>
+
+            <!-- 基本信息标签页 -->
+            <div id="tab-basic" class="profile-card rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">基本信息</h2>
+                
+                <form id="basic-info-form" 
+                      hx-put="/api/user/profile"
+                      hx-ext="json-enc"
+                      hx-target="#basic-messages"
+                      hx-swap="innerHTML"
+                      hx-on:htmx:after-request="handleBasicInfoUpdate(event)">
+                    
+                    <div id="basic-messages" class="hidden mb-6"></div>
+
+                    <div class="space-y-6">
+                        <!-- 昵称 -->
+                        <div class="form-section">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">个人资料</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="nickname" class="block text-sm font-medium text-gray-700 mb-2">
+                                        昵称
+                                    </label>
+                                    <input type="text" 
+                                           id="nickname" 
+                                           name="nickname" 
+                                           maxlength="20"
+                                           pattern="^[a-zA-Z0-9\u4e00-\u9fa5_-]{2,20}$"
+                                           class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                           placeholder="请输入昵称">
+                                    <p class="text-xs text-gray-500 mt-1">2-20个字符，支持中英文、数字、下划线和连字符</p>
+                                </div>
+
+                                <div>
+                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                                        手机号码
+                                    </label>
+                                    <input type="tel" 
+                                           id="phone" 
+                                           name="phone" 
+                                           pattern="^1[3-9]\d{9}$"
+                                           class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                           placeholder="请输入手机号码">
+                                    <p class="text-xs text-gray-500 mt-1">用于账户安全验证</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 个人简介 -->
+                        <div class="form-section">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">个人简介</h3>
+                            <div>
+                                <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">
+                                    自我介绍
+                                </label>
+                                <textarea id="bio" 
+                                          name="bio" 
+                                          rows="4" 
+                                          maxlength="500"
+                                          class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                          placeholder="介绍一下您的投资经验和兴趣..."></textarea>
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>可以包含投资偏好、经验年限等信息</span>
+                                    <span id="bio-count">0/500</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button type="button" 
+                                onclick="resetBasicForm()"
+                                class="mr-3 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                            重置
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            <span id="basic-save-text">保存更改</span>
+                            <span id="basic-save-loading" class="hidden">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>
+                                保存中...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 安全设置标签页 -->
+            <div id="tab-security" class="profile-card rounded-xl p-6 hidden">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">安全设置</h2>
+                
+                <!-- 修改密码 -->
+                <div class="form-section">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">修改密码</h3>
+                    <form id="password-form" 
+                          hx-put="/api/auth/change-password"
+                          hx-ext="json-enc"
+                          hx-target="#password-messages"
+                          hx-swap="innerHTML"
+                          hx-on:htmx:after-request="handlePasswordChange(event)"
+                          class="space-y-4">
+                        
+                        <div id="password-messages" class="hidden"></div>
+
+                        <div>
+                            <label for="current-password" class="block text-sm font-medium text-gray-700 mb-2">
+                                当前密码
+                            </label>
+                            <input type="password" 
+                                   id="current-password" 
+                                   name="current_password" 
+                                   required
+                                   class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                   placeholder="请输入当前密码">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="new-password" class="block text-sm font-medium text-gray-700 mb-2">
+                                    新密码
+                                </label>
+                                <input type="password" 
+                                       id="new-password" 
+                                       name="new_password" 
+                                       required
+                                       minlength="8"
+                                       oninput="checkNewPasswordStrength(this.value)"
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                       placeholder="请输入新密码">
+                                <div class="mt-2">
+                                    <div class="password-strength w-full bg-gray-200" id="new-password-strength-bar"></div>
+                                    <div class="text-xs text-gray-500 mt-1" id="new-password-strength-text">请输入密码</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="confirm-new-password" class="block text-sm font-medium text-gray-700 mb-2">
+                                    确认新密码
+                                </label>
+                                <input type="password" 
+                                       id="confirm-new-password" 
+                                       name="confirm_new_password" 
+                                       required
+                                       oninput="validateNewPasswordMatch()"
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                       placeholder="请再次输入新密码">
+                                <div id="new-password-match-error" class="hidden text-sm text-red-600 mt-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" 
+                                    class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                                <span id="password-change-text">修改密码</span>
+                                <span id="password-change-loading" class="hidden">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                                    修改中...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 登录设备管理 -->
+                <div class="form-section">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">登录设备</h3>
+                        <button onclick="refreshSessions()" 
+                                class="text-sm text-blue-600 hover:text-blue-500">
+                            <i class="fas fa-sync-alt mr-1"></i>刷新
+                        </button>
+                    </div>
+                    <div id="sessions-container">
+                        <!-- 会话列表将通过HTMX加载 -->
+                        <div class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin text-gray-400"></i>
+                            <p class="text-gray-500 text-sm mt-2">加载中...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 偏好设置标签页 -->
+            <div id="tab-preferences" class="profile-card rounded-xl p-6 hidden">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">偏好设置</h2>
+                
+                <form id="preferences-form" 
+                      hx-put="/api/user/preferences"
+                      hx-ext="json-enc"
+                      hx-target="#preferences-messages"
+                      hx-swap="innerHTML"
+                      hx-on:htmx:after-request="handlePreferencesUpdate(event)">
+                    
+                    <div id="preferences-messages" class="hidden mb-6"></div>
+
+                    <div class="space-y-6">
+                        <!-- 通知设置 -->
+                        <div class="form-section">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">通知设置</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-900">邮件通知</label>
+                                        <p class="text-xs text-gray-600">接收预测完成和重要更新通知</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="email-notifications" name="email_notifications" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-900">市场提醒</label>
+                                        <p class="text-xs text-gray-600">关注股票的重要价格变动提醒</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="market-alerts" name="market_alerts" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 默认设置 -->
+                        <div class="form-section">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">默认设置</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="default-model" class="block text-sm font-medium text-gray-700 mb-2">
+                                        默认预测模型
+                                    </label>
+                                    <select id="default-model" 
+                                            name="default_model"
+                                            class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                        <option value="kronos-mini">Kronos Mini（快速）</option>
+                                        <option value="kronos-small">Kronos Small（平衡）</option>
+                                        <option value="kronos-base">Kronos Base（准确）</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="prediction-days" class="block text-sm font-medium text-gray-700 mb-2">
+                                        默认预测天数
+                                    </label>
+                                    <select id="prediction-days" 
+                                            name="prediction_days"
+                                            class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                        <option value="3">3天</option>
+                                        <option value="5">5天</option>
+                                        <option value="7">7天</option>
+                                        <option value="14">14天</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" 
+                                class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            <span id="preferences-save-text">保存设置</span>
+                            <span id="preferences-save-loading" class="hidden">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>
+                                保存中...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 账户管理标签页（危险区域） -->
+            <div id="tab-danger" class="hidden">
+                <div class="danger-zone rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-red-800 mb-6">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        危险操作
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- 注销账户 -->
+                        <div class="bg-white rounded-lg p-6 border border-red-200">
+                            <h3 class="text-lg font-medium text-red-800 mb-2">注销账户</h3>
+                            <p class="text-sm text-red-600 mb-4">
+                                注销后将永久删除您的账户和所有相关数据，此操作不可恢复。
+                            </p>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="showDeleteAccountModal()" 
+                                        class="px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50 transition-colors">
+                                    <i class="fas fa-trash mr-2"></i>
+                                    注销账户
+                                </button>
+                                <span class="text-xs text-gray-500">请谨慎操作</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除账户确认模态框 -->
+<div id="delete-account-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">确认注销账户</h3>
+            <p class="text-sm text-gray-600">
+                此操作将永久删除您的账户和所有数据，包括预测历史、关注列表等，无法恢复。
+            </p>
+        </div>
+
+        <form id="delete-account-form" 
+              hx-delete="/api/user/account"
+              hx-ext="json-enc"
+              hx-target="#delete-messages"
+              hx-swap="innerHTML"
+              hx-on:htmx:after-request="handleAccountDeletion(event)">
+            
+            <div id="delete-messages" class="hidden mb-4"></div>
+
+            <div class="mb-4">
+                <label for="delete-password" class="block text-sm font-medium text-gray-700 mb-2">
+                    请输入密码确认
+                </label>
+                <input type="password" 
+                       id="delete-password" 
+                       name="password" 
+                       required
+                       class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                       placeholder="请输入当前密码">
+            </div>
+
+            <div class="flex space-x-3">
+                <button type="button" 
+                        onclick="hideDeleteAccountModal()"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <button type="submit" 
+                        class="flex-1 px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                    <span id="delete-account-text">确认注销</span>
+                    <span id="delete-account-loading" class="hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        处理中...
+                    </span>
+                </button>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// 档案页面数据
+let profileData = {
+    user: null,
+    profile: null,
+    originalData: null
+};
+
+// 页面初始化
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuthentication();
+    loadProfileData();
+    setupFormValidation();
+});
+
+// 检查认证状态
+function checkAuthentication() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        window.location.href = '/auth/login';
+        return;
+    }
+}
+
+// 加载档案数据
+function loadProfileData() {
+    const token = localStorage.getItem('auth_token');
+    
+    fetch('/api/user/profile', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            profileData.user = data.user;
+            profileData.profile = data.profile;
+            profileData.originalData = JSON.parse(JSON.stringify(data));
+            updateProfileDisplay();
+        } else {
+            showGlobalError('加载用户档案失败');
+        }
+    })
+    .catch(error => {
+        console.error('Failed to load profile:', error);
+        showGlobalError('网络错误，请稍后重试');
+    });
+}
+
+// 更新档案显示
+function updateProfileDisplay() {
+    if (!profileData.user) return;
+
+    const user = profileData.user;
+    const profile = profileData.profile;
+
+    // 更新头像和基本信息
+    const nickname = profile?.nickname || user.email.split('@')[0];
+    document.getElementById('profile-nickname').textContent = nickname;
+    document.getElementById('profile-email').textContent = user.email;
+    
+    // 更新头像
+    const avatar = document.getElementById('user-avatar');
+    if (profile?.avatar_url) {
+        avatar.innerHTML = `<img src="${profile.avatar_url}" alt="头像" class="w-full h-full rounded-full object-cover">`;
+    } else {
+        avatar.textContent = nickname.charAt(0).toUpperCase();
+    }
+
+    // 填充表单数据
+    if (profile) {
+        document.getElementById('nickname').value = profile.nickname || '';
+        document.getElementById('phone').value = profile.phone || '';
+        document.getElementById('bio').value = profile.bio || '';
+        
+        // 更新字符计数
+        updateBioCount();
+    }
+}
+
+// 标签页切换
+function showTab(tabName) {
+    // 隐藏所有标签页
+    document.getElementById('tab-basic').classList.add('hidden');
+    document.getElementById('tab-security').classList.add('hidden');
+    document.getElementById('tab-preferences').classList.add('hidden');
+    document.getElementById('tab-danger').classList.add('hidden');
+
+    // 显示指定标签页
+    document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+    // 更新导航状态
+    document.querySelectorAll('.tab-nav-button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.classList.contains('text-red-700')) {
+            btn.classList.remove('bg-red-100');
+        } else {
+            btn.classList.remove('bg-blue-100', 'text-blue-700');
+        }
+    });
+
+    const activeBtn = document.getElementById(`tab-nav-${tabName}`);
+    activeBtn.classList.add('active');
+    if (tabName === 'danger') {
+        activeBtn.classList.add('bg-red-100');
+    } else {
+        activeBtn.classList.add('bg-blue-100', 'text-blue-700');
+    }
+}
+
+// 设置表单验证
+function setupFormValidation() {
+    // 昵称实时验证
+    document.getElementById('nickname').addEventListener('input', function() {
+        validateNickname(this);
+    });
+
+    // 手机号实时验证
+    document.getElementById('phone').addEventListener('input', function() {
+        validatePhone(this);
+    });
+
+    // 简介字符计数
+    document.getElementById('bio').addEventListener('input', function() {
+        updateBioCount();
+    });
+}
+
+// 验证昵称
+function validateNickname(input) {
+    const pattern = /^[a-zA-Z0-9\u4e00-\u9fa5_-]{2,20}$/;
+    
+    if (input.value && !pattern.test(input.value)) {
+        input.classList.add('border-red-500');
+        return false;
+    } else {
+        input.classList.remove('border-red-500');
+        return true;
+    }
+}
+
+// 验证手机号
+function validatePhone(input) {
+    const pattern = /^1[3-9]\d{9}$/;
+    
+    if (input.value && !pattern.test(input.value)) {
+        input.classList.add('border-red-500');
+        return false;
+    } else {
+        input.classList.remove('border-red-500');
+        return true;
+    }
+}
+
+// 更新简介字符计数
+function updateBioCount() {
+    const bio = document.getElementById('bio');
+    const count = document.getElementById('bio-count');
+    count.textContent = `${bio.value.length}/500`;
+    
+    if (bio.value.length > 450) {
+        count.classList.add('text-yellow-600');
+    } else if (bio.value.length > 480) {
+        count.classList.add('text-red-600');
+    } else {
+        count.classList.remove('text-yellow-600', 'text-red-600');
+    }
+}
+
+// 处理基本信息更新
+function handleBasicInfoUpdate(event) {
+    const xhr = event.detail.xhr;
+    
+    try {
+        const response = JSON.parse(xhr.responseText);
+        
+        if (xhr.status === 200 && response.success) {
+            showBasicSuccess('个人信息更新成功');
+            // 重新加载数据
+            setTimeout(() => {
+                loadProfileData();
+            }, 1000);
+        } else {
+            showBasicError(response.message || '更新失败，请稍后重试');
+        }
+    } catch (error) {
+        showBasicError('更新失败，请检查网络连接');
+    }
+}
+
+// 重置基本信息表单
+function resetBasicForm() {
+    if (profileData.profile) {
+        document.getElementById('nickname').value = profileData.profile.nickname || '';
+        document.getElementById('phone').value = profileData.profile.phone || '';
+        document.getElementById('bio').value = profileData.profile.bio || '';
+        updateBioCount();
+    }
+}
+
+// 检查新密码强度
+function checkNewPasswordStrength(password) {
+    const strengthBar = document.getElementById('new-password-strength-bar');
+    const strengthText = document.getElementById('new-password-strength-text');
+    
+    if (!password) {
+        strengthBar.className = 'password-strength w-full bg-gray-200';
+        strengthText.textContent = '请输入密码';
+        return;
+    }
+    
+    let score = 0;
+    const checks = {
+        length: password.length >= 8,
+        lowercase: /[a-z]/.test(password),
+        uppercase: /[A-Z]/.test(password),
+        number: /\d/.test(password),
+        special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+    
+    // 计算得分
+    Object.values(checks).forEach(check => {
+        if (check) score++;
+    });
+    
+    // 长度加分
+    if (password.length >= 12) score += 1;
+    
+    // 设置强度显示
+    let strengthClass = 'password-strength w-full ';
+    let strengthLabel = '';
+    
+    if (score <= 2) {
+        strengthClass += 'strength-weak';
+        strengthLabel = '弱';
+    } else if (score <= 4) {
+        strengthClass += 'strength-fair';
+        strengthLabel = '一般';
+    } else if (score <= 6) {
+        strengthClass += 'strength-good';
+        strengthLabel = '良好';
+    } else {
+        strengthClass += 'strength-strong';
+        strengthLabel = '强';
+    }
+    
+    strengthBar.className = strengthClass;
+    strengthText.textContent = `密码强度：${strengthLabel}`;
+}
+
+// 验证新密码匹配
+function validateNewPasswordMatch() {
+    const password = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-new-password').value;
+    const errorDiv = document.getElementById('new-password-match-error');
+    
+    if (!confirmPassword) {
+        errorDiv.classList.add('hidden');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        errorDiv.textContent = '两次输入的密码不一致';
+        errorDiv.classList.remove('hidden');
+        return false;
+    }
+    
+    errorDiv.classList.add('hidden');
+    return true;
+}
+
+// 处理密码修改
+function handlePasswordChange(event) {
+    // 实现密码修改响应处理
+    const xhr = event.detail.xhr;
+    
+    try {
+        const response = JSON.parse(xhr.responseText);
+        
+        if (xhr.status === 200 && response.success) {
+            showPasswordSuccess('密码修改成功');
+            // 清空表单
+            document.getElementById('password-form').reset();
+        } else {
+            showPasswordError(response.message || '密码修改失败');
+        }
+    } catch (error) {
+        showPasswordError('请求失败，请稍后重试');
+    }
+}
+
+// 头像上传相关函数
+function triggerAvatarUpload() {
+    document.getElementById('avatar-input').click();
+}
+
+function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        // 这里可以实现头像上传逻辑
+        console.log('Avatar upload:', file);
+    }
+}
+
+// 删除账户模态框
+function showDeleteAccountModal() {
+    document.getElementById('delete-account-modal').classList.remove('hidden');
+}
+
+function hideDeleteAccountModal() {
+    document.getElementById('delete-account-modal').classList.add('hidden');
+    document.getElementById('delete-account-form').reset();
+}
+
+// 处理账户删除
+function handleAccountDeletion(event) {
+    const xhr = event.detail.xhr;
+    
+    try {
+        const response = JSON.parse(xhr.responseText);
+        
+        if (xhr.status === 200 && response.success) {
+            // 删除成功，清除本地数据并跳转
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_id');
+            alert('账户已成功注销');
+            window.location.href = '/';
+        } else {
+            showDeleteError(response.message || '账户删除失败');
+        }
+    } catch (error) {
+        showDeleteError('请求失败，请稍后重试');
+    }
+}
+
+// 消息显示函数
+function showGlobalError(message) {
+    const div = document.getElementById('global-messages');
+    div.innerHTML = `
+        <div class="error-message rounded-lg p-4">
+            <div class="flex">
+                <i class="fas fa-exclamation-circle mr-3 mt-0.5"></i>
+                <div>
+                    <p class="font-medium">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    div.classList.remove('hidden');
+}
+
+function showBasicSuccess(message) {
+    const div = document.getElementById('basic-messages');
+    div.innerHTML = `
+        <div class="success-message rounded-lg p-4">
+            <div class="flex">
+                <i class="fas fa-check-circle mr-3 mt-0.5"></i>
+                <div>
+                    <p class="font-medium">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    div.classList.remove('hidden');
+    setTimeout(() => div.classList.add('hidden'), 3000);
+}
+
+function showBasicError(message) {
+    const div = document.getElementById('basic-messages');
+    div.innerHTML = `
+        <div class="error-message rounded-lg p-4">
+            <div class="flex">
+                <i class="fas fa-exclamation-circle mr-3 mt-0.5"></i>
+                <div>
+                    <p class="font-medium">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    div.classList.remove('hidden');
+}
+
+function showPasswordSuccess(message) {
+    const div = document.getElementById('password-messages');
+    div.innerHTML = `
+        <div class="success-message rounded-lg p-4">
+            <div class="flex">
+                <i class="fas fa-check-circle mr-3 mt-0.5"></i>
+                <div>
+                    <p class="font-medium">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    div.classList.remove('hidden');
+    setTimeout(() => div.classList.add('hidden'), 3000);
+}
+
+function showPasswordError(message) {
+    const div = document.getElementById('password-messages');
+    div.innerHTML = `
+        <div class="error-message rounded-lg p-4">
+            <div class="flex">
+                <i class="fas fa-exclamation-circle mr-3 mt-0.5"></i>
+                <div>
+                    <p class="font-medium">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    div.classList.remove('hidden');
+}
+
+function showDeleteError(message) {
+    const div = document.getElementById('delete-messages');
+    div.innerHTML = `
+        <div class="error-message rounded-lg p-4">
+            <div class="flex">
+                <i class="fas fa-exclamation-circle mr-3 mt-0.5"></i>
+                <div>
+                    <p class="font-medium">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    div.classList.remove('hidden');
+}
+
+// HTMX配置
+document.body.addEventListener('htmx:configRequest', function(evt) {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        evt.detail.headers['Authorization'] = `Bearer ${token}`;
+    }
+});
+
+// 添加密码强度样式
+const style = document.createElement('style');
+style.textContent = `
+    .password-strength {
+        height: 4px;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+    .strength-weak { background-color: #ef4444; }
+    .strength-fair { background-color: #f59e0b; }
+    .strength-good { background-color: #10b981; }
+    .strength-strong { background-color: #059669; }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
