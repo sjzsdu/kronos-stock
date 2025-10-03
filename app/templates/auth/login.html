@@ -25,7 +25,7 @@
 </style>
 {% endblock %}
 
-{% block body %}
+{% block content %}
 <div class="login-container flex items-center justify-center p-4">
     <div class="max-w-md w-full space-y-8">
         <!-- 登录卡片 -->
@@ -87,8 +87,8 @@
                                    placeholder="请输入密码">
                             <button type="button" 
                                     onclick="togglePassword('password')"
-                                    class="absolute inset-y-0 right-0 flex items-center justify-center w-10 text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-eye" id="password-eye"></i>
+                                    class="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1">
+                                <i class="fas fa-eye text-sm" id="password-eye"></i>
                             </button>
                         </div>
                     </div>

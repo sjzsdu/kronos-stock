@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <title>{% block title %}仪表板 - Kronos 智能投资平台{% endblock %}</title>
+    
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tw.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/json-enc.js"></script>
+    
+    <!-- Charts -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+    <div class="flex h-screen">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="w-64 bg-white shadow-lg border-r border-gray-200 transition-transform duration-300 ease-in-out lg:translate-x-0 -translate-x-full fixed lg:relative z-30 h-full">
+            <!-- 侧边栏头部 -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-chart-line text-2xl text-blue-600"></i>
+                    <span class="text-xl font-bold text-gray-900">Kronos</span>
+                </div>
+                <button id="sidebar-close" class="lg:hidden text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- 用户信息 -->
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate">
+                            {% if current_user and current_user.is_authenticated %}
+                                {{ current_user.nickname or current_user.username }}
+                            {% else %}
+                                访客用户
+                            {% endif %}
+                        </p>
+                        <p class="text-xs text-gray-500 truncate">
+                            {% if current_user and current_user.is_authenticated %}
+                                {{ current_user.email }}
+                            {% else %}
+                                未登录
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 主导航菜单 -->
+            <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+                <!-- 仪表板 -->
+                <a href="{{ url_for('views.index') }}" class="nav-item {% if request.endpoint == 'views.index' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt w-5 h-5"></i>
+                    <span>仪表板</span>
+                </a>
+                
+                <!-- 智能预测 -->
+                <a href="{{ url_for('views.prediction') }}" class="nav-item {% if request.endpoint == 'views.prediction' %}active{% endif %}">
+                    <i class="fas fa-crystal-ball w-5 h-5"></i>
+                    <span>智能预测</span>
+                </a>
+                
+                <!-- 市场分析 -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle {% if request.endpoint and request.endpoint.startswith('views.market') %}active{% endif %}" onclick="toggleNavGroup('market-group')">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-bar w-5 h-5"></i>
+                            <span>市场分析</span>
+                        </div>
+                        <i class="fas fa-chevron-right transform transition-transform" id="market-group-icon"></i>
+                    </button>
+                    <div id="market-group" class="nav-submenu {% if request.endpoint and request.endpoint.startswith('views.market') %}show{% endif %}">
+                        <a href="{{ url_for('views.market_sse') }}" class="nav-subitem {% if request.endpoint == 'views.market_sse' %}active{% endif %}">
+                            市场概览
+                        </a>
+                        <a href="{{ url_for('views.market_sse') }}" class="nav-subitem {% if request.endpoint == 'views.market_sse' %}active{% endif %}">
+                            沪市行情
+                        </a>
+                        <a href="{{ url_for('views.market_szse') }}" class="nav-subitem {% if request.endpoint == 'views.market_szse' %}active{% endif %}">
+                            深市行情
+                        </a>
+                        <a href="{{ url_for('views.market_top_list') }}" class="nav-subitem {% if request.endpoint == 'views.market_top_list' %}active{% endif %}">
+                            涨跌排行
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 历史记录 -->
+                <a href="{{ url_for('views.history') }}" class="nav-item {% if request.endpoint == 'views.history' %}active{% endif %}">
+                    <i class="fas fa-history w-5 h-5"></i>
+                    <span>历史记录</span>
+                </a>
+                
+                <!-- 用户设置 -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle {% if request.endpoint and request.endpoint.startswith('user_views') %}active{% endif %}" onclick="toggleNavGroup('user-group')">
+                        <div class="flex items-center">
+                            <i class="fas fa-user-cog w-5 h-5"></i>
+                            <span>个人中心</span>
+                        </div>
+                        <i class="fas fa-chevron-right transform transition-transform" id="user-group-icon"></i>
+                    </button>
+                    <div id="user-group" class="nav-submenu {% if request.endpoint and request.endpoint.startswith('user_views') %}show{% endif %}">
+                        <a href="{{ url_for('user_views.profile') }}" class="nav-subitem {% if request.endpoint == 'user_views.profile' %}active{% endif %}">
+                            个人资料
+                        </a>
+                        <a href="{{ url_for('user_views.settings') }}" class="nav-subitem {% if request.endpoint == 'user_views.settings' %}active{% endif %}">
+                            系统设置
+                        </a>
+                        <a href="{{ url_for('user_views.security') }}" class="nav-subitem {% if request.endpoint == 'user_views.security' %}active{% endif %}">
+                            安全设置
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 分隔线 -->
+                <div class="border-t border-gray-200 my-4"></div>
+                
+                <!-- 帮助中心 -->
+                <a href="#" class="nav-item">
+                    <i class="fas fa-question-circle w-5 h-5"></i>
+                    <span>帮助中心</span>
+                </a>
+                
+                <!-- 退出登录 -->
+                <a href="{{ url_for('auth.logout') }}" class="nav-item text-red-600 hover:bg-red-50 hover:text-red-700">
+                    <i class="fas fa-sign-out-alt w-5 h-5"></i>
+                    <span>退出登录</span>
+                </a>
+            </nav>
+            
+            <!-- 侧边栏底部 -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="text-xs text-gray-500 text-center">
+                    <p>版本 v2.0.0</p>
+                    <p class="mt-1">© 2025 Kronos</p>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 侧边栏遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden hidden"></div>
+        
+        <!-- 主要内容区域 -->
+        <div class="flex-1 flex flex-col overflow-hidden lg:ml-0">
+            <!-- 顶部导航栏 -->
+            <header class="bg-white shadow-sm border-b border-gray-200 lg:pl-0">
+                <div class="flex items-center justify-between px-4 py-3">
+                    <!-- 移动端菜单按钮 -->
+                    <button id="sidebar-toggle" class="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
+                    
+                    <!-- 页面标题 -->
+                    <div class="flex-1 lg:flex-none">
+                        <h1 class="text-lg font-semibold text-gray-900">
+                            {% block page_title %}仪表板{% endblock %}
+                        </h1>
+                    </div>
+                    
+                    <!-- 右侧工具栏 -->
+                    <div class="flex items-center space-x-4">
+                        <!-- 通知 -->
+                        <button class="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <i class="fas fa-bell text-lg"></i>
+                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        
+                        <!-- 用户菜单 -->
+                        <div class="relative">
+                            <button class="flex items-center space-x-2 p-2 text-gray-700 hover:text-gray-900 focus:outline-none" onclick="toggleUserMenu()">
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-sm"></i>
+                                </div>
+                                <i class="fas fa-chevron-down text-xs hidden sm:block"></i>
+                            </button>
+                            <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible transition-all duration-200 z-50">
+                                <div class="py-1">
+                                    <a href="{{ url_for('user_views.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                        个人资料
+                                    </a>
+                                    <a href="{{ url_for('user_views.settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                        系统设置
+                                    </a>
+                                    <div class="border-t border-gray-100"></div>
+                                    <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        退出登录
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- 主要内容 -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+                <div class="container mx-auto px-4 py-6">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 通用脚本 -->
+    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/htmx-config.js') }}"></script>
+    
+    <!-- 仪表板布局脚本 -->
+    <script>
+        // 侧边栏控制
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebarClose = document.getElementById('sidebar-close');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            
+            function openSidebar() {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+            }
+            
+            function closeSidebar() {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            }
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', openSidebar);
+            }
+            
+            if (sidebarClose) {
+                sidebarClose.addEventListener('click', closeSidebar);
+            }
+            
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', closeSidebar);
+            }
+        });
+        
+        // 导航组展开/收起
+        function toggleNavGroup(groupId) {
+            const group = document.getElementById(groupId);
+            const icon = document.getElementById(groupId + '-icon');
+            
+            if (group && icon) {
+                group.classList.toggle('show');
+                icon.classList.toggle('rotate-90');
+            }
+        }
+        
+        // 用户菜单展开/收起
+        function toggleUserMenu() {
+            const userMenu = document.getElementById('user-menu');
+            if (userMenu) {
+                userMenu.classList.toggle('opacity-0');
+                userMenu.classList.toggle('invisible');
+            }
+        }
+        
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('user-menu');
+            const userMenuButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+            
+            if (userMenu && !userMenuButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('opacity-0');
+                userMenu.classList.add('invisible');
+            }
+        });
+        
+        // HTMX 全局配置
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            // 添加 CSRF Token
+            const csrfToken = document.querySelector('meta[name=csrf-token]');
+            if (csrfToken) {
+                evt.detail.headers['X-CSRFToken'] = csrfToken.getAttribute('content');
+            }
+        });
+        
+        // 处理认证错误
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            if (evt.detail.xhr.status === 401) {
+                window.location.href = '/auth/login';
+            } else if (evt.detail.xhr.status === 403) {
+                console.error('Access denied');
+            }
+        });
+    </script>
+    
+    <style>
+        /* 导航样式 */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgb(55 65 81);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item:hover {
+            background-color: rgb(243 244 246);
+            color: rgb(17 24 39);
+        }
+        
+        .nav-item.active {
+            background-color: rgb(239 246 255);
+            color: rgb(29 78 216);
+            border-right: 2px solid rgb(37 99 235);
+        }
+        
+        .nav-group-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgb(55 65 81);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            background: none;
+            border: none;
+            text-align: left;
+        }
+        
+        .nav-group-toggle:hover {
+            background-color: rgb(243 244 246);
+            color: rgb(17 24 39);
+        }
+        
+        .nav-group-toggle.active {
+            background-color: rgb(239 246 255);
+            color: rgb(29 78 216);
+        }
+        
+        .nav-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+            margin-left: 1.5rem;
+        }
+        
+        .nav-submenu.show {
+            max-height: 24rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-subitem {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            color: rgb(75 85 99);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .nav-subitem:hover {
+            background-color: rgb(243 244 246);
+            color: rgb(17 24 39);
+        }
+        
+        .nav-subitem.active {
+            background-color: rgb(239 246 255);
+            color: rgb(29 78 216);
+            font-weight: 500;
+        }
+    </style>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
