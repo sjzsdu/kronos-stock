@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/auth.html" %}
 
 {% block title %}用户登录 - Kronos 智能投资平台{% endblock %}
 
@@ -83,11 +83,11 @@
                                    type="password" 
                                    required
                                    autocomplete="current-password"
-                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-10"
+                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
                                    placeholder="请输入密码">
                             <button type="button" 
                                     onclick="togglePassword('password')"
-                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600">
+                                    class="absolute inset-y-0 right-0 flex items-center justify-center w-10 text-gray-400 hover:text-gray-600">
                                 <i class="fas fa-eye" id="password-eye"></i>
                             </button>
                         </div>
@@ -146,9 +146,9 @@
         <div class="text-center">
             <p class="text-xs text-white/80">
                 登录即表示您同意我们的
-                <a href="#" class="text-white underline hover:no-underline">服务条款</a>
+                <a href="{{ url_for('legal.terms') }}" target="_blank" class="text-white underline hover:no-underline">服务条款</a>
                 和
-                <a href="#" class="text-white underline hover:no-underline">隐私政策</a>
+                <a href="{{ url_for('legal.privacy') }}" target="_blank" class="text-white underline hover:no-underline">隐私政策</a>
             </p>
         </div>
     </div>

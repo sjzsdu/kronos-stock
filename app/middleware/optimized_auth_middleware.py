@@ -36,7 +36,8 @@ class OptimizedAuthMiddleware:
         app.config.setdefault('AUTH_EXEMPT_ROUTES', [
             'auth.login', 'auth.register', 'auth.forgot_password',
             'api.auth_login', 'api.auth_register',
-            'main.index', 'static'
+            'main.index', 'static',
+            'legal.terms', 'legal.privacy'  # 法律页面无需登录
         ])
         app.config.setdefault('AUTH_LOGIN_URL', '/auth/login')
         app.config.setdefault('AUTH_SESSION_KEY', 'user_id')

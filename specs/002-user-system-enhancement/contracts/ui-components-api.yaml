@@ -1,0 +1,536 @@
+openapi: 3.0.3
+info:
+  title: 用户系统优化 - UI组件API
+  description: UI组件管理和渲染相关的API端点定义
+  version: 1.0.0
+  contact:
+    name: Kronos Stock System
+    url: https://github.com/kronos-stock
+    
+servers:
+  - url: http://localhost:5001/api
+    description: 本地开发环境
+  - url: https://api.kronos-stock.com/api
+    description: 生产环境
+
+paths:
+  /ui/components/{component_name}:
+    get:
+      summary: 获取组件配置
+      description: 根据组件名称获取用户或全局组件配置
+      tags: [UI组件]
+      parameters:
+        - name: component_name
+          in: path
+          required: true
+          description: 组件名称
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+            maxLength: 100
+        - name: user_id
+          in: query
+          required: false
+          description: 用户ID，不提供则返回全局配置
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        200:
+          description: 成功获取组件配置
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentConfigResponse'
+        404:
+          description: 组件配置不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        400:
+          description: 请求参数无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      summary: 更新组件配置
+      description: 更新用户的组件个性化配置
+      tags: [UI组件]
+      parameters:
+        - name: component_name
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+            maxLength: 100
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentConfigRequest'
+      responses:
+        200:
+          description: 配置更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentConfigResponse'
+        400:
+          description: 请求数据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        401:
+          description: 未授权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ui/components/{component_name}/render:
+    post:
+      summary: 渲染组件
+      description: 根据配置和数据渲染组件HTML
+      tags: [UI组件]
+      parameters:
+        - name: component_name
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+            maxLength: 100
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentRenderRequest'
+      responses:
+        200:
+          description: 组件渲染成功
+          content:
+            text/html:
+              schema:
+                type: string
+                description: 渲染后的HTML内容
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentRenderResponse'
+        400:
+          description: 渲染参数无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: 渲染过程出错
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ui/preferences:
+    get:
+      summary: 获取用户UI偏好
+      description: 获取当前用户的UI偏好设置
+      tags: [用户偏好]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: 成功获取用户偏好
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUIPreferencesResponse'
+        401:
+          description: 未授权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      summary: 更新用户UI偏好
+      description: 更新当前用户的UI偏好设置
+      tags: [用户偏好]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUIPreferencesRequest'
+      responses:
+        200:
+          description: 偏好更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUIPreferencesResponse'
+        400:
+          description: 请求数据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        401:
+          description: 未授权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ui/performance/metrics:
+    post:
+      summary: 记录性能指标
+      description: 提交前端性能监控数据
+      tags: [性能监控]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformanceMetricsRequest'
+      responses:
+        201:
+          description: 性能数据记录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        400:
+          description: 数据格式无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ui/usage/track:
+    post:
+      summary: 记录组件使用统计
+      description: 记录用户的组件交互行为
+      tags: [使用统计]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsageTrackingRequest'
+      responses:
+        201:
+          description: 使用数据记录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        400:
+          description: 数据格式无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  schemas:
+    ComponentConfigResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 123
+            component_name:
+              type: string
+              example: "user_avatar"
+            component_type:
+              type: string
+              enum: [form, button, card, navigation, modal, notification]
+              example: "card"
+            config_data:
+              type: object
+              additionalProperties: true
+              example:
+                size: "medium"
+                theme: "primary"
+                show_status: true
+            version:
+              type: integer
+              example: 1
+            is_active:
+              type: boolean
+              example: true
+            updated_at:
+              type: string
+              format: date-time
+              example: "2024-12-28T10:30:00Z"
+        message:
+          type: string
+          example: "组件配置获取成功"
+
+    ComponentConfigRequest:
+      type: object
+      required:
+        - component_type
+        - config_data
+      properties:
+        component_type:
+          type: string
+          enum: [form, button, card, navigation, modal, notification]
+        config_data:
+          type: object
+          additionalProperties: true
+          maxProperties: 50
+          description: "组件配置JSON数据，不能超过10KB"
+        is_active:
+          type: boolean
+          default: true
+
+    ComponentRenderRequest:
+      type: object
+      required:
+        - template_data
+      properties:
+        template_data:
+          type: object
+          additionalProperties: true
+          description: "模板渲染所需的数据"
+        user_config:
+          type: object
+          additionalProperties: true
+          description: "用户个性化配置覆盖"
+        cache_key:
+          type: string
+          maxLength: 255
+          description: "可选的缓存键"
+
+    ComponentRenderResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            html:
+              type: string
+              description: "渲染后的HTML内容"
+            cache_hit:
+              type: boolean
+              description: "是否命中缓存"
+            render_time:
+              type: number
+              format: float
+              description: "渲染耗时(ms)"
+        message:
+          type: string
+          example: "组件渲染成功"
+
+    UserUIPreferencesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            theme:
+              type: string
+              enum: [default, dark, light, auto]
+              example: "default"
+            language:
+              type: string
+              enum: [zh-cn, en-us]
+              example: "zh-cn"
+            timezone:
+              type: string
+              example: "Asia/Shanghai"
+            layout_density:
+              type: string
+              enum: [compact, comfortable, spacious]
+              example: "comfortable"
+            sidebar_collapsed:
+              type: boolean
+              example: false
+            notification_settings:
+              type: object
+              properties:
+                email:
+                  type: boolean
+                push:
+                  type: boolean
+                in_app:
+                  type: boolean
+            dashboard_layout:
+              type: object
+              additionalProperties: true
+            accessibility_settings:
+              type: object
+              properties:
+                high_contrast:
+                  type: boolean
+                large_text:
+                  type: boolean
+                keyboard_navigation:
+                  type: boolean
+            updated_at:
+              type: string
+              format: date-time
+        message:
+          type: string
+          example: "用户偏好获取成功"
+
+    UserUIPreferencesRequest:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [default, dark, light, auto]
+        language:
+          type: string
+          enum: [zh-cn, en-us]
+        timezone:
+          type: string
+          pattern: '^[A-Za-z_]+/[A-Za-z_]+$'
+        layout_density:
+          type: string
+          enum: [compact, comfortable, spacious]
+        sidebar_collapsed:
+          type: boolean
+        notification_settings:
+          type: object
+          properties:
+            email:
+              type: boolean
+            push:
+              type: boolean
+            in_app:
+              type: boolean
+        dashboard_layout:
+          type: object
+          additionalProperties: true
+        accessibility_settings:
+          type: object
+          properties:
+            high_contrast:
+              type: boolean
+            large_text:
+              type: boolean
+            keyboard_navigation:
+              type: boolean
+
+    PerformanceMetricsRequest:
+      type: object
+      required:
+        - metric_type
+        - response_time
+      properties:
+        metric_type:
+          type: string
+          enum: [page_load, api_response, component_render, user_action]
+        endpoint:
+          type: string
+          maxLength: 200
+        response_time:
+          type: number
+          format: float
+          minimum: 0
+        memory_usage:
+          type: number
+          format: float
+          minimum: 0
+        db_queries:
+          type: integer
+          minimum: 0
+        cache_hits:
+          type: integer
+          minimum: 0
+        cache_misses:
+          type: integer
+          minimum: 0
+        error_count:
+          type: integer
+          minimum: 0
+
+    UsageTrackingRequest:
+      type: object
+      required:
+        - component_name
+        - action_type
+      properties:
+        component_name:
+          type: string
+          maxLength: 100
+        action_type:
+          type: string
+          enum: [render, click, submit, error, close]
+        page_url:
+          type: string
+          maxLength: 500
+        device_type:
+          type: string
+          enum: [desktop, tablet, mobile]
+        browser:
+          type: string
+          maxLength: 50
+        interaction_data:
+          type: object
+          additionalProperties: true
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "操作成功"
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "INVALID_PARAMETER"
+            message:
+              type: string
+              example: "请求参数无效"
+            details:
+              type: array
+              items:
+                type: string
+              example: ["component_name不能为空", "config_data格式错误"]
+        timestamp:
+          type: string
+          format: date-time

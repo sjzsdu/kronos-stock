@@ -1,0 +1,422 @@
+openapi: 3.0.3
+info:
+  title: 用户系统优化 - HTMX视图API
+  description: HTMX动态内容和组件视图相关的API端点定义
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5001
+    description: 本地开发环境
+
+paths:
+  /ui/views/components/{component_name}:
+    get:
+      summary: 获取组件HTML视图
+      description: 返回可直接插入页面的组件HTML内容
+      tags: [HTMX视图]
+      parameters:
+        - name: component_name
+          in: path
+          required: true
+          description: 组件名称
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+            maxLength: 100
+        - name: user_id
+          in: query
+          description: 用户ID，用于个性化渲染
+          schema:
+            type: integer
+            minimum: 1
+        - name: context
+          in: query
+          description: 组件上下文参数（JSON编码）
+          schema:
+            type: string
+      headers:
+        HX-Request:
+          required: true
+          description: HTMX请求标识
+          schema:
+            type: string
+            pattern: '^true$'
+      responses:
+        200:
+          description: 成功返回组件HTML
+          headers:
+            HX-Trigger:
+              description: 触发的客户端事件
+              schema:
+                type: string
+            HX-Swap:
+              description: 内容替换方式
+              schema:
+                type: string
+                enum: [innerHTML, outerHTML, beforeend, afterend, beforebegin, afterbegin]
+          content:
+            text/html:
+              schema:
+                type: string
+                description: 组件HTML内容
+              example: |
+                <div class="user-avatar w-8 h-8 rounded-full">
+                  <img src="/static/avatars/user123.jpg" alt="用户头像" />
+                  <span class="status-indicator bg-green-500"></span>
+                </div>
+        400:
+          description: 请求参数错误
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <div class="error-message text-red-500">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  参数错误：组件名称无效
+                </div>
+        404:
+          description: 组件不存在
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <div class="error-message text-gray-500">
+                  <i class="fas fa-question-circle"></i>
+                  找不到指定的组件
+                </div>
+
+  /ui/views/forms/{form_name}:
+    get:
+      summary: 获取表单HTML
+      description: 返回动态配置的表单HTML
+      tags: [HTMX视图]
+      parameters:
+        - name: form_name
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [login, register, user_profile, user_settings]
+        - name: prefill
+          in: query
+          description: 预填充数据（JSON编码）
+          schema:
+            type: string
+      headers:
+        HX-Request:
+          required: true
+          schema:
+            type: string
+            pattern: '^true$'
+      responses:
+        200:
+          description: 成功返回表单HTML
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <form hx-post="/auth/login" hx-target="#login-result" class="space-y-4">
+                  <div class="form-field">
+                    <label class="form-label">邮箱地址</label>
+                    <input type="email" name="email" class="form-input" required />
+                  </div>
+                  <div class="form-field">
+                    <label class="form-label">密码</label>
+                    <input type="password" name="password" class="form-input" required />
+                  </div>
+                  <button type="submit" class="btn btn-primary w-full">登录</button>
+                </form>
+    
+    post:
+      summary: 提交表单数据
+      description: 处理表单提交并返回响应HTML
+      tags: [HTMX视图]
+      parameters:
+        - name: form_name
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [login, register, user_profile, user_settings]
+      headers:
+        HX-Request:
+          required: true
+          schema:
+            type: string
+            pattern: '^true$'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        200:
+          description: 表单处理成功
+          headers:
+            HX-Trigger:
+              description: 成功事件触发
+              schema:
+                type: string
+              example: "form-submitted"
+            HX-Redirect:
+              description: 重定向URL（成功时）
+              schema:
+                type: string
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <div class="success-message text-green-600">
+                  <i class="fas fa-check-circle"></i>
+                  登录成功，正在跳转...
+                </div>
+        400:
+          description: 表单验证失败
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <div class="error-messages">
+                  <div class="field-error text-red-500">
+                    <span class="field-name">邮箱:</span>
+                    <span class="error-text">邮箱格式不正确</span>
+                  </div>
+                  <div class="field-error text-red-500">
+                    <span class="field-name">密码:</span>
+                    <span class="error-text">密码不能少于6位</span>
+                  </div>
+                </div>
+        422:
+          description: 业务逻辑错误
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <div class="error-message text-red-500">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  邮箱或密码错误，请重试
+                </div>
+
+  /ui/views/modals/{modal_name}:
+    get:
+      summary: 获取模态框内容
+      description: 返回模态框的HTML内容
+      tags: [HTMX视图]
+      parameters:
+        - name: modal_name
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [user_profile, settings, confirm_dialog, error_dialog]
+        - name: context_id
+          in: query
+          description: 上下文相关的ID（如用户ID）
+          schema:
+            type: string
+      headers:
+        HX-Request:
+          required: true
+          schema:
+            type: string
+            pattern: '^true$'
+      responses:
+        200:
+          description: 成功返回模态框内容
+          headers:
+            HX-Trigger:
+              description: 显示模态框事件
+              schema:
+                type: string
+              example: "show-modal"
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <div class="modal-overlay" id="user-profile-modal">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h3>用户资料</h3>
+                      <button class="modal-close" hx-delete="#user-profile-modal">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <!-- 用户资料表单内容 -->
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-secondary" hx-delete="#user-profile-modal">取消</button>
+                      <button class="btn btn-primary" type="submit">保存</button>
+                    </div>
+                  </div>
+                </div>
+
+  /ui/views/notifications:
+    get:
+      summary: 获取通知列表
+      description: 返回用户通知HTML列表
+      tags: [HTMX视图]
+      parameters:
+        - name: limit
+          in: query
+          description: 限制返回数量
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+        - name: unread_only
+          in: query
+          description: 只显示未读通知
+          schema:
+            type: boolean
+            default: false
+      headers:
+        HX-Request:
+          required: true
+          schema:
+            type: string
+            pattern: '^true$'
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: 成功返回通知列表
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <div class="notifications-list">
+                  <div class="notification-item unread">
+                    <div class="notification-icon">
+                      <i class="fas fa-info-circle text-blue-500"></i>
+                    </div>
+                    <div class="notification-content">
+                      <div class="notification-title">系统更新</div>
+                      <div class="notification-message">用户界面已优化，体验更流畅</div>
+                      <div class="notification-time">2分钟前</div>
+                    </div>
+                    <button class="notification-mark-read" hx-patch="/api/notifications/123/read">
+                      <i class="fas fa-check"></i>
+                    </button>
+                  </div>
+                </div>
+        401:
+          description: 未授权访问
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <div class="error-message text-red-500">
+                  <i class="fas fa-lock"></i>
+                  请先登录后查看通知
+                </div>
+
+  /ui/views/user/status:
+    get:
+      summary: 获取用户状态指示器
+      description: 返回用户在线状态和相关信息的HTML
+      tags: [HTMX视图]
+      headers:
+        HX-Request:
+          required: true
+          schema:
+            type: string
+            pattern: '^true$'
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: 成功返回用户状态
+          headers:
+            HX-Trigger:
+              description: 状态更新事件
+              schema:
+                type: string
+              example: "user-status-updated"
+          content:
+            text/html:
+              schema:
+                type: string
+              example: |
+                <div class="user-status online" title="在线">
+                  <div class="status-indicator bg-green-500"></div>
+                  <span class="status-text">在线</span>
+                </div>
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  parameters:
+    HXRequest:
+      name: HX-Request
+      in: header
+      required: true
+      description: HTMX请求标识
+      schema:
+        type: string
+        pattern: '^true$'
+
+  responses:
+    HTMLSuccessResponse:
+      description: 成功的HTML响应
+      content:
+        text/html:
+          schema:
+            type: string
+    
+    HTMLErrorResponse:
+      description: 错误的HTML响应
+      content:
+        text/html:
+          schema:
+            type: string
+            
+  examples:
+    UserAvatarComponent:
+      summary: 用户头像组件
+      value: |
+        <div class="user-avatar-container" data-user-id="123">
+          <div class="user-avatar w-10 h-10 rounded-full relative">
+            <img src="/static/avatars/default.png" alt="用户头像" class="w-full h-full object-cover" />
+            <div class="status-indicator absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+          </div>
+        </div>
+    
+    LoginFormComponent:
+      summary: 登录表单组件
+      value: |
+        <form hx-post="/auth/login" hx-target="#auth-result" hx-indicator="#login-spinner" class="login-form space-y-4">
+          <div class="form-field">
+            <label for="email" class="form-label">邮箱地址</label>
+            <input type="email" id="email" name="email" class="form-input" required autofocus />
+          </div>
+          <div class="form-field">
+            <label for="password" class="form-label">密码</label>
+            <input type="password" id="password" name="password" class="form-input" required />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary w-full">
+              <span class="btn-text">登录</span>
+              <span id="login-spinner" class="htmx-indicator spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+              </span>
+            </button>
+          </div>
+        </form>

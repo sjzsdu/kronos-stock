@@ -6,77 +6,94 @@
 // HTMX Global Configuration
 document.addEventListener('DOMContentLoaded', function() {
     // Configure HTMX defaults
-    htmx.config.globalViewTransitions = true;
-    htmx.config.defaultSwapStyle = 'innerHTML';
-    htmx.config.defaultSwapDelay = 100;
-    htmx.config.defaultSettleDelay = 100;
+    if (typeof htmx !== 'undefined') {
+        htmx.config.globalViewTransitions = true;
+        htmx.config.defaultSwapStyle = 'innerHTML';
+        htmx.config.defaultSwapDelay = 100;
+        htmx.config.defaultSettleDelay = 100;
+        
+        // Set up global request indicators
+        htmx.config.indicatorClass = 'htmx-indicator';
+        
+        // Configure timeout
+        htmx.config.timeout = 30000; // 30 seconds
+    }
     
-    // Set up global request indicators
-    htmx.config.indicatorClass = 'htmx-indicator';
-    
-    // Configure timeout
-    htmx.config.timeout = 30000; // 30 seconds
-});
-
-// Global HTMX Event Handlers
-document.body.addEventListener('htmx:beforeRequest', function(event) {
-    showGlobalLoading();
-    
-    const xhr = event.detail.xhr;
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-});
-
-document.body.addEventListener('htmx:afterRequest', function(event) {
-    hideGlobalLoading();
-    
-    const xhr = event.detail.xhr;
-    
-    if (xhr.status >= 400) {
-        handleHTMXError(event);
+    // Global HTMX Event Handlers - 确保在DOM加载完成后添加
+    if (document.body) {
+        setupHTMXEventHandlers();
+    } else {
+        // 如果body还未加载，等待body加载
+        document.addEventListener('DOMContentLoaded', setupHTMXEventHandlers);
     }
 });
 
-document.body.addEventListener('htmx:responseError', function(event) {
-    handleHTMXError(event);
-});
-
-document.body.addEventListener('htmx:sendError', function(event) {
-    console.error('HTMX Send Error:', event.detail);
-    showNotification('网络连接失败，请检查您的网络连接', 'error');
-    hideGlobalLoading();
-});
-
-document.body.addEventListener('htmx:timeout', function(event) {
-    console.error('HTMX Timeout:', event.detail);
-    showNotification('请求超时，请稍后重试', 'error');
-    hideGlobalLoading();
-});
-
-// Handle successful HTMX swaps
-document.body.addEventListener('htmx:afterSwap', function(event) {
-    // Reinitialize any JavaScript components after content swap
-    initializeSwappedContent(event.detail.target);
-});
-
-// Handle before content swap
-document.body.addEventListener('htmx:beforeSwap', function(event) {
-    // You can modify the response before it's swapped in
-    const xhr = event.detail.xhr;
+// 设置HTMX事件处理器的函数
+function setupHTMXEventHandlers() {
+    if (!document.body) {
+        console.warn('Document body not ready for HTMX event handlers');
+        return;
+    }
     
-    // Handle JSON responses that might need special treatment
-    if (xhr.getResponseHeader('Content-Type')?.includes('application/json')) {
-        try {
-            const data = JSON.parse(xhr.responseText);
-            if (data.success === false) {
-                event.detail.shouldSwap = false; // Prevent swap
-                showNotification(data.error || '操作失败', 'error');
-                return;
-            }
-        } catch (e) {
-            // Not JSON, continue normally
+    document.body.addEventListener('htmx:beforeRequest', function(event) {
+        showGlobalLoading();
+        
+        const xhr = event.detail.xhr;
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    });
+
+    document.body.addEventListener('htmx:afterRequest', function(event) {
+        hideGlobalLoading();
+        
+        const xhr = event.detail.xhr;
+        
+        if (xhr.status >= 400) {
+            handleHTMXError(event);
         }
-    }
-});
+    });
+
+    document.body.addEventListener('htmx:responseError', function(event) {
+        handleHTMXError(event);
+    });
+
+    document.body.addEventListener('htmx:sendError', function(event) {
+        console.error('HTMX Send Error:', event.detail);
+        showNotification('网络连接失败，请检查您的网络连接', 'error');
+        hideGlobalLoading();
+    });
+
+    document.body.addEventListener('htmx:timeout', function(event) {
+        console.error('HTMX Timeout:', event.detail);
+        showNotification('请求超时，请稍后重试', 'error');
+        hideGlobalLoading();
+    });
+
+    // Handle successful HTMX swaps
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        // Reinitialize any JavaScript components after content swap
+        initializeSwappedContent(event.detail.target);
+    });
+
+    // Handle before content swap
+    document.body.addEventListener('htmx:beforeSwap', function(event) {
+        // You can modify the response before it's swapped in
+        const xhr = event.detail.xhr;
+        
+        // Handle JSON responses that might need special treatment
+        if (xhr.getResponseHeader('Content-Type')?.includes('application/json')) {
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (data.success === false) {
+                    event.detail.shouldSwap = false; // Prevent swap
+                    showNotification(data.error || '操作失败', 'error');
+                    return;
+                }
+            } catch (e) {
+                // Not JSON, continue normally
+            }
+        }
+    });
+}
 
 // Global Loading Indicator Functions
 function showGlobalLoading() {

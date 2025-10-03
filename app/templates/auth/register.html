@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/auth.html" %}
 
 {% block title %}用户注册 - Kronos 智能投资平台{% endblock %}
 
@@ -117,11 +117,11 @@
                                    minlength="8"
                                    autocomplete="new-password"
                                    oninput="checkPasswordStrength(this.value)"
-                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-10"
+                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
                                    placeholder="请输入密码（至少8位）">
                             <button type="button" 
                                     onclick="togglePassword('password')"
-                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600">
+                                    class="absolute inset-y-0 right-0 flex items-center justify-center w-10 text-gray-400 hover:text-gray-600">
                                 <i class="fas fa-eye" id="password-eye"></i>
                             </button>
                         </div>
@@ -148,11 +148,11 @@
                                    required
                                    autocomplete="new-password"
                                    oninput="validatePasswordMatch()"
-                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-10"
+                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
                                    placeholder="请再次输入密码">
                             <button type="button" 
                                     onclick="togglePassword('confirm-password')"
-                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600">
+                                    class="absolute inset-y-0 right-0 flex items-center justify-center w-10 text-gray-400 hover:text-gray-600">
                                 <i class="fas fa-eye" id="confirm-password-eye"></i>
                             </button>
                         </div>
@@ -168,9 +168,9 @@
                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5">
                         <label for="agree-terms" class="ml-2 block text-sm text-gray-700">
                             我已阅读并同意
-                            <a href="#" class="text-blue-600 hover:text-blue-500 underline">服务条款</a>
+                            <a href="{{ url_for('legal.terms') }}" target="_blank" class="text-blue-600 hover:text-blue-500 underline">服务条款</a>
                             和
-                            <a href="#" class="text-blue-600 hover:text-blue-500 underline">隐私政策</a>
+                            <a href="{{ url_for('legal.privacy') }}" target="_blank" class="text-blue-600 hover:text-blue-500 underline">隐私政策</a>
                         </label>
                     </div>
                 </div>
@@ -207,7 +207,10 @@
         <!-- 底部链接 -->
         <div class="text-center">
             <p class="text-xs text-white/80">
-                注册即表示您同意我们的服务条款和隐私政策
+                注册即表示您同意我们的
+                <a href="{{ url_for('legal.terms') }}" target="_blank" class="text-white underline hover:no-underline">服务条款</a>
+                和
+                <a href="{{ url_for('legal.privacy') }}" target="_blank" class="text-white underline hover:no-underline">隐私政策</a>
             </p>
         </div>
     </div>
