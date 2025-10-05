@@ -121,13 +121,13 @@
                         <i class="fas fa-chevron-right transform transition-transform" id="user-group-icon"></i>
                     </button>
                     <div id="user-group" class="nav-submenu {% if request.endpoint and request.endpoint.startswith('user_views') %}show{% endif %}">
-                        <a href="{{ url_for('user_views.profile') }}" class="nav-subitem {% if request.endpoint == 'user_views.profile' %}active{% endif %}">
+                        <a href="{{ url_for('user_views.profile_page') }}" class="nav-subitem {% if request.endpoint == 'user_views.profile_page' %}active{% endif %}">
                             个人资料
                         </a>
-                        <a href="{{ url_for('user_views.settings') }}" class="nav-subitem {% if request.endpoint == 'user_views.settings' %}active{% endif %}">
+                        <a href="{{ url_for('user_views.settings_page') }}" class="nav-subitem {% if request.endpoint == 'user_views.settings_page' %}active{% endif %}">
                             系统设置
                         </a>
-                        <a href="{{ url_for('user_views.security') }}" class="nav-subitem {% if request.endpoint == 'user_views.security' %}active{% endif %}">
+                        <a href="{{ url_for('user_views.settings_page') }}" class="nav-subitem {% if request.endpoint == 'user_views.settings_page' %}active{% endif %}">
                             安全设置
                         </a>
                     </div>
@@ -196,10 +196,10 @@
                             </button>
                             <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible transition-all duration-200 z-50">
                                 <div class="py-1">
-                                    <a href="{{ url_for('user_views.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <a href="{{ url_for('user_views.profile_page') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         个人资料
                                     </a>
-                                    <a href="{{ url_for('user_views.settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <a href="{{ url_for('user_views.settings_page') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         系统设置
                                     </a>
                                     <div class="border-t border-gray-100"></div>

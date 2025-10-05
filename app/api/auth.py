@@ -19,29 +19,41 @@ auth_bp = Blueprint('auth_api', __name__, url_prefix='/api/auth')
 def register():
     """用户注册"""
     try:
-        # 检查Content-Type
-        if not request.is_json:
-            return jsonify({
-                'success': False,
-                'message': '请求必须是JSON格式',
-                'errors': {'content_type': ['Content-Type必须是application/json']}
-            }), 400
-        
-        try:
-            data = request.get_json(force=False)
-        except Exception as json_error:
-            return jsonify({
-                'success': False,
-                'message': 'JSON格式错误',
-                'errors': {'json': ['无效的JSON数据']}
-            }), 400
-        
-        if not data:
-            return jsonify({
-                'success': False,
-                'message': '请提供注册信息',
-                'errors': {'data': ['请求体不能为空']}
-            }), 400
+        # 调试信息
+        current_app.logger.info(f"收到注册请求 - Method: {request.method}, Path: {request.path}")
+        current_app.logger.info(f"Content-Type: {request.content_type}")
+        current_app.logger.info(f"Form data: {dict(request.form)}")
+        current_app.logger.info(f"JSON data: {request.get_json(silent=True)}")
+        # 获取数据：支持JSON和表单数据
+        if request.is_json:
+            try:
+                data = request.get_json(force=False)
+            except Exception as json_error:
+                return jsonify({
+                    'success': False,
+                    'message': 'JSON格式错误',
+                    'errors': {'json': ['无效的JSON数据']}
+                }), 400
+            
+            if not data:
+                return jsonify({
+                    'success': False,
+                    'message': '请提供注册信息',
+                    'errors': {'data': ['请求体不能为空']}
+                }), 400
+        else:
+            # 处理表单数据 (HTMX请求)
+            data = request.form.to_dict()
+            # 转换checkbox值
+            if 'agree_terms' in data:
+                data['agree_terms'] = data['agree_terms'] == 'on'
+            
+            if not data:
+                return jsonify({
+                    'success': False,
+                    'message': '请提供注册信息',
+                    'errors': {'data': ['表单数据不能为空']}
+                }), 400
         
         # 获取并验证输入
         email = sanitize_input(data.get('email', ''))
@@ -112,26 +124,95 @@ def register():
             }), 409
         
         # 执行注册
-        success, message, user = AuthService.register_user(email, password, full_name, nickname)
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': message,
-                'user': {
-                    'id': user.id,
-                    'email': user.email,
-                    'full_name': user.full_name,
-                    'nickname': nickname,
-                    'created_at': user.created_at.isoformat()
-                }
-            }), 201
-        else:
-            return jsonify({
-                'success': False,
-                'message': message,
-                'errors': {'registration': [message]}
-            }), 400
+        try:
+            success, message, user = AuthService.register_user(email, password, full_name, nickname)
+            
+            if success:
+                # 检查是否是HTMX请求
+                if request.headers.get('HX-Request'):
+                    # 返回成功的HTML片段
+                    success_html = f"""
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-green-800">
+                                    注册成功！{message} 正在跳转到登录页面...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        setTimeout(() => {{
+                            window.location.href = '/auth/login';
+                        }}, 2000);
+                    </script>
+                    """
+                    return success_html, 200
+                else:
+                    # API调用返回JSON
+                    return jsonify({
+                        'success': True,
+                        'message': message,
+                        'user': {
+                            'id': user.id,
+                            'email': user.email,
+                            'full_name': user.full_name,
+                            'nickname': nickname,
+                            'created_at': user.created_at.isoformat()
+                        }
+                    }), 201
+            else:
+                # 注册失败
+                if request.headers.get('HX-Request'):
+                    # 返回错误的HTML片段
+                    error_html = f"""
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">
+                                    {message}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    """
+                    return error_html, 200
+                else:
+                    return jsonify({
+                        'success': False,
+                        'message': message,
+                        'errors': {'registration': [message]}
+                    }), 400
+        except Exception as register_error:
+            current_app.logger.error(f"注册服务调用失败: {str(register_error)}")
+            if request.headers.get('HX-Request'):
+                error_html = f"""
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-red-800">
+                                注册过程出现错误，请稍后重试
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                """
+                return error_html, 200
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': '注册过程出现错误',
+                    'errors': {'registration': [str(register_error)]}
+                }), 500
             
     except Exception as e:
         current_app.logger.error(f"注册API错误: {str(e)}")
@@ -146,29 +227,36 @@ def register():
 def login():
     """用户登录"""
     try:
-        # 检查Content-Type
-        if not request.is_json:
-            return jsonify({
-                'success': False,
-                'message': '请求必须是JSON格式',
-                'errors': {'content_type': ['Content-Type必须是application/json']}
-            }), 400
-        
-        try:
-            data = request.get_json(force=False)
-        except Exception as json_error:
-            return jsonify({
-                'success': False,
-                'message': 'JSON格式错误',
-                'errors': {'json': ['无效的JSON数据']}
-            }), 400
-        
-        if not data:
-            return jsonify({
-                'success': False,
-                'message': '请提供登录信息',
-                'errors': {'data': ['请求体不能为空']}
-            }), 400
+        # 获取数据：支持JSON和表单数据
+        if request.is_json:
+            try:
+                data = request.get_json(force=False)
+            except Exception as json_error:
+                return jsonify({
+                    'success': False,
+                    'message': 'JSON格式错误',
+                    'errors': {'json': ['无效的JSON数据']}
+                }), 400
+            
+            if not data:
+                return jsonify({
+                    'success': False,
+                    'message': '请提供登录信息',
+                    'errors': {'data': ['请求体不能为空']}
+                }), 400
+        else:
+            # 处理表单数据 (HTMX请求)
+            data = request.form.to_dict()
+            # 转换checkbox值
+            if 'remember_me' in data:
+                data['remember'] = data.pop('remember_me') == 'on'
+            
+            if not data:
+                return jsonify({
+                    'success': False,
+                    'message': '请提供登录信息',
+                    'errors': {'data': ['表单数据不能为空']}
+                }), 400
         
         # 获取并验证输入
         email = sanitize_input(data.get('email', ''))
@@ -211,31 +299,57 @@ def login():
             from app.models.user import UserProfile
             profile = UserProfile.query.filter_by(user_id=user.id).first()
             
-            response_data = {
-                'success': True,
-                'message': message,
-                'user': {
-                    'id': user.id,
-                    'email': user.email,
-                    'full_name': user.full_name,
-                    'nickname': profile.nickname if profile else None,
-                    'role': user.role,
-                    'last_login': user.last_login.isoformat() if user.last_login else None
+            if request.headers.get('HX-Request'):
+                # HTMX请求，重定向到仪表盘
+                from flask import make_response
+                response = make_response('', 200)
+                response.headers['HX-Redirect'] = '/dashboard'
+                return response
+            else:
+                # API调用，返回用户信息
+                response_data = {
+                    'success': True,
+                    'message': message,
+                    'user': {
+                        'id': user.id,
+                        'email': user.email,
+                        'full_name': user.full_name,
+                        'nickname': profile.nickname if profile else None,
+                        'role': user.role,
+                        'last_login': user.last_login.isoformat() if user.last_login else None
+                    }
                 }
-            }
-            
-            if token:
-                response_data['token'] = token
-            
-            if expires_at:
-                response_data['expires_at'] = expires_at.isoformat()
                 
-            return jsonify(response_data), 200
+                if token:
+                    response_data['token'] = token
+                
+                if expires_at:
+                    response_data['expires_at'] = expires_at.isoformat()
+                    
+                return jsonify(response_data), 200
         else:
-            return jsonify({
-                'success': False,
-                'message': message
-            }), 401
+            if request.headers.get('HX-Request'):
+                # HTMX请求，返回错误消息
+                error_html = f"""
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-red-800">
+                                {message}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                """
+                return error_html, 200
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': message
+                }), 401
             
     except Exception as e:
         current_app.logger.error(f"登录API错误: {str(e)}")

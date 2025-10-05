@@ -11,7 +11,7 @@ from typing import Optional, Tuple, Dict, Any
 
 import bcrypt
 import jwt
-from flask import current_app, request
+from flask import current_app, request, session
 from flask_login import login_user, logout_user
 
 from app.models import db
@@ -112,15 +112,22 @@ class AuthService:
             # 使用 Flask-Login 登录用户
             login_user(user, remember=remember)
             
+            # 设置Flask session（中间件依赖）
+            session['user_id'] = user.id
+            session.permanent = remember
+            
+            # 记录登录时间用于会话验证
+            session['login_timestamp'] = datetime.now(timezone.utc).timestamp()
+            
             # 创建会话记录
-            session = AuthService._create_user_session(user)
+            user_session = AuthService._create_user_session(user)
             
             db.session.commit()
             
             # 返回会话token和过期时间
-            if session:
-                token = session.token
-                expires_at = session.expires_at
+            if user_session:
+                token = user_session.token
+                expires_at = user_session.expires_at
                 return True, "登录成功", user, token, expires_at
             else:
                 return True, "登录成功", user, None, None

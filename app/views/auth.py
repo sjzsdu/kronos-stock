@@ -24,7 +24,7 @@ def guest_required(f):
         
         if auth_token:
             # 用户已登录，重定向到仪表板
-            return redirect(url_for('user.dashboard'))
+            return redirect(url_for('user_views.dashboard'))
         
         return f(*args, **kwargs)
     return decorated_function

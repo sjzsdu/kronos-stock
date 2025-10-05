@@ -14,6 +14,15 @@ from app.utils.validators import sanitize_input
 
 user_views = Blueprint('user_views', __name__, url_prefix='/user')
 
+# 路由修复：已添加settings.html模板
+
+
+@user_views.route('/dashboard')
+@login_required
+def dashboard():
+    """用户仪表盘页面"""
+    return render_template('user/dashboard.html')
+
 
 @user_views.route('/profile')
 @login_required

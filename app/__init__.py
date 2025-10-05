@@ -24,6 +24,8 @@ def create_app(config_name='default'):
     login_manager.login_view = 'auth_views.login_page'
     login_manager.login_message = '请先登录以访问该页面'
     login_manager.login_message_category = 'info'
+    login_manager.remember_cookie_duration = app.config['PERMANENT_SESSION_LIFETIME']
+    login_manager.session_protection = 'strong'
     
     @login_manager.user_loader
     def load_user(user_id):
@@ -90,7 +92,7 @@ def create_app(config_name='default'):
     from app.api.auth import auth_bp as api_auth_bp
     from app.api.user import user_bp as api_user_bp
     from app.views.auth import auth_bp
-    from app.views.user import user_bp
+    from app.views.user_views import user_views
     from app.views.legal import legal_bp
     
     app.register_blueprint(views_bp)
@@ -102,7 +104,7 @@ def create_app(config_name='default'):
     app.register_blueprint(api_auth_bp)
     app.register_blueprint(api_user_bp)
     app.register_blueprint(auth_bp)
-    app.register_blueprint(user_bp)
+    app.register_blueprint(user_views)
     app.register_blueprint(legal_bp)
     
     # Initialize model service with default model

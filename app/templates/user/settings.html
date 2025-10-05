@@ -1,0 +1,302 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}用户设置{% endblock %}
+{% block page_title %}系统设置{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white rounded-lg shadow-sm">
+    <!-- 设置导航 -->
+    <div class="border-b border-gray-200">
+        <nav class="flex space-x-8 px-6" aria-label="设置选项">
+            <a href="#" class="border-b-2 border-blue-500 text-blue-600 py-4 px-1 text-sm font-medium" 
+               data-tab="general">
+                基本设置
+            </a>
+            <a href="#" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+               data-tab="security">
+                安全设置
+            </a>
+            <a href="#" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+               data-tab="notifications">
+                通知设置
+            </a>
+            <a href="#" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+               data-tab="preferences">
+                偏好设置
+            </a>
+        </nav>
+    </div>
+
+    <!-- 设置内容 -->
+    <div class="p-6">
+        <!-- 基本设置 -->
+        <div id="general-tab" class="tab-content">
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">基本信息</h3>
+                <form id="basic-info-form" 
+                      hx-post="{{ url_for('user_views.htmx_update_profile') }}" 
+                      hx-target="#form-feedback"
+                      hx-swap="innerHTML">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                显示名称
+                            </label>
+                            <input type="text" name="nickname" 
+                                   value="{{ profile.nickname if profile else user.username }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                真实姓名
+                            </label>
+                            <input type="text" name="full_name" 
+                                   value="{{ profile.full_name if profile else '' }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                邮箱地址
+                            </label>
+                            <input type="email" value="{{ user.email }}" disabled
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                手机号码
+                            </label>
+                            <input type="tel" name="phone" 
+                                   value="{{ profile.phone if profile else '' }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                个人简介
+                            </label>
+                            <textarea name="bio" rows="3" 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                      placeholder="介绍一下你的投资经验和风格...">{{ profile.bio if profile else '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            保存基本信息
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 安全设置 -->
+        <div id="security-tab" class="tab-content hidden">
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">密码管理</h3>
+                <form id="password-form" 
+                      hx-post="{{ url_for('user_views.htmx_change_password') }}" 
+                      hx-target="#form-feedback"
+                      hx-swap="innerHTML">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                当前密码
+                            </label>
+                            <input type="password" name="current_password" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                新密码
+                            </label>
+                            <input type="password" name="new_password" required
+                                   minlength="8"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                确认新密码
+                            </label>
+                            <input type="password" name="confirm_password" required
+                                   minlength="8"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            修改密码
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="border-t pt-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">账户安全</h3>
+                <div class="bg-gray-50 p-4 rounded-md">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">两步验证</h4>
+                            <p class="text-sm text-gray-600">增强账户安全性</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                            即将支持
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通知设置 -->
+        <div id="notifications-tab" class="tab-content hidden">
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">通知偏好</h3>
+                <form id="notifications-form" 
+                      hx-post="{{ url_for('user_views.htmx_update_preferences') }}" 
+                      hx-target="#form-feedback"
+                      hx-swap="innerHTML">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="text-sm font-medium text-gray-900">邮件通知</label>
+                                <p class="text-sm text-gray-600">接收重要更新和预测结果</p>
+                            </div>
+                            <input type="checkbox" name="email_notifications" 
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="text-sm font-medium text-gray-900">预测提醒</label>
+                                <p class="text-sm text-gray-600">股价预测完成时通知</p>
+                            </div>
+                            <input type="checkbox" name="prediction_alerts" 
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="text-sm font-medium text-gray-900">市场动态</label>
+                                <p class="text-sm text-gray-600">关注股票的重要消息</p>
+                            </div>
+                            <input type="checkbox" name="market_updates" 
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="text-sm font-medium text-gray-900">周报摘要</label>
+                                <p class="text-sm text-gray-600">每周投资报告</p>
+                            </div>
+                            <input type="checkbox" name="weekly_summary" 
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            保存通知设置
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 偏好设置 -->
+        <div id="preferences-tab" class="tab-content hidden">
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">界面偏好</h3>
+                <form id="preferences-form" 
+                      hx-post="{{ url_for('user_views.htmx_update_preferences') }}" 
+                      hx-target="#form-feedback"
+                      hx-swap="innerHTML">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                主题样式
+                            </label>
+                            <select name="theme" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="light">浅色主题</option>
+                                <option value="dark">深色主题</option>
+                                <option value="auto">跟随系统</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                默认模型
+                            </label>
+                            <select name="default_model" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="kronos-mini">Kronos Mini (快速)</option>
+                                <option value="kronos-small">Kronos Small (平衡)</option>
+                                <option value="kronos-base">Kronos Base (精确)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                图表样式
+                            </label>
+                            <select name="chart_style" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="candlestick">K线图</option>
+                                <option value="line">折线图</option>
+                                <option value="area">面积图</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" name="auto_refresh" id="auto_refresh"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="auto_refresh" class="ml-2 text-sm text-gray-700">
+                                自动刷新数据
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            保存偏好设置
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 反馈区域 -->
+    <div id="form-feedback" class="px-6 pb-6"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 标签页切换
+    const tabs = document.querySelectorAll('[data-tab]');
+    const contents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetTab = this.dataset.tab;
+            
+            // 更新标签状态
+            tabs.forEach(t => {
+                t.classList.remove('border-blue-500', 'text-blue-600');
+                t.classList.add('border-transparent', 'text-gray-500');
+            });
+            this.classList.remove('border-transparent', 'text-gray-500');
+            this.classList.add('border-blue-500', 'text-blue-600');
+            
+            // 显示对应内容
+            contents.forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(targetTab + '-tab').classList.remove('hidden');
+        });
+    });
+    
+    // 密码确认验证
+    const passwordForm = document.getElementById('password-form');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            const newPassword = this.querySelector('[name="new_password"]').value;
+            const confirmPassword = this.querySelector('[name="confirm_password"]').value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                document.getElementById('form-feedback').innerHTML = 
+                    '<div class="bg-red-50 border-l-4 border-red-400 p-4"><div class="text-red-700">两次输入的新密码不一致</div></div>';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,7 +1,11 @@
 <!-- 移动端用户菜单组件 -->
 <!-- 响应式用户菜单，包含用户信息和操作选项 -->
 
-<div class="user-menu-container" id="userMenuContainer">
+<div                                                 <a href="{{ url_for('user_views.predictions_page') }}" 
+                       class="user-menu-item {{ 'active' if request.endpoint == 'user_views.predictions_page' else '' }}">     <a href="{{ url_for('user_views.watchlist_page') }}" 
+                       class="user-menu-item {{ 'active' if request.endpoint == 'user_views.watchlist_page' else '' }}">          <a href="{{ url_for('user_views.profile_page') }}" 
+                       class="user-menu-item {{ 'active' if request.endpoint == 'user_views.profile_page' else '' }}">          <a href="{{ url_for('user_views.dashboard') }}" 
+                       class="user-menu-item {{ 'active' if request.endpoint == 'user_views.dashboard' else '' }}">lass="user-menu-container" id="userMenuContainer">
     {% if current_user and current_user.id %}
         <!-- 已登录用户菜单 -->
         <div class="user-menu-header">
