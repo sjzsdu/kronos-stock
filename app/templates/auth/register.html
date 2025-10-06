@@ -37,19 +37,19 @@
 {% endblock %}
 
 {% block content %}
-<div class="register-container flex items-center justify-center p-4">
-    <div class="max-w-md w-full space-y-8">
+<div class="auth-container">
+    <div class="auth__wrapper">
         <!-- 注册卡片 -->
-        <div class="register-card rounded-2xl shadow-xl p-8">
+        <div class="card register-card">
             <!-- Logo和标题 -->
-            <div class="text-center mb-8">
-                <div class="mx-auto h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
-                    <span class="text-white text-xl font-bold">K</span>
+            <div class="card__header text-center">
+                <div class="auth__logo">
+                    <span class="auth__logo-text">K</span>
                 </div>
-                <h2 class="text-3xl font-bold text-gray-900 brand-logo">
+                <h2 class="auth__title brand-logo">
                     Kronos
                 </h2>
-                <p class="mt-2 text-sm text-gray-600">
+                <p class="auth__subtitle">
                     创建您的智能投资账户
                 </p>
             </div>
@@ -61,16 +61,16 @@
                   hx-target="#register-messages"
                   hx-swap="innerHTML"
                   hx-on:htmx:after-request="handleRegisterResponse(event)"
-                  class="space-y-6">
+                  class="form">
                 
                 <!-- 错误/成功消息区域 -->
                 <div id="register-messages" class="hidden"></div>
 
-                <div class="space-y-4">
+                <div class="form__body">
                     <!-- 昵称输入 -->
-                    <div>
-                        <label for="nickname" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-user mr-1 text-gray-400"></i>
+                    <div class="form__group">
+                        <label for="nickname" class="form__label">
+                            <i class="fas fa-user form__icon"></i>
                             昵称
                         </label>
                         <input id="nickname" 
@@ -80,16 +80,16 @@
                                maxlength="20"
                                pattern="^[a-zA-Z0-9\u4e00-\u9fa5_-]{2,20}$"
                                oninput="validateNickname(this)"
-                               class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               class="form__input"
                                placeholder="请输入昵称（2-20个字符）">
-                        <div id="nickname-error" class="hidden text-sm text-red-600 mt-1"></div>
-                        <div class="text-xs text-gray-500 mt-1">支持中英文、数字、下划线和连字符</div>
+                        <div id="nickname-error" class="form__error hidden"></div>
+                        <div class="form__help">支持中英文、数字、下划线和连字符</div>
                     </div>
 
                     <!-- 邮箱输入 -->
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-envelope mr-1 text-gray-400"></i>
+                    <div class="form__group">
+                        <label for="email" class="form__label">
+                            <i class="fas fa-envelope form__icon"></i>
                             邮箱地址
                         </label>
                         <input id="email" 
@@ -98,18 +98,18 @@
                                required
                                autocomplete="email"
                                oninput="validateEmail(this)"
-                               class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               class="form__input"
                                placeholder="请输入邮箱地址">
-                        <div id="email-error" class="hidden text-sm text-red-600 mt-1"></div>
+                        <div id="email-error" class="form__error hidden"></div>
                     </div>
 
                     <!-- 密码输入 -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-lock mr-1 text-gray-400"></i>
+                    <div class="form__group">
+                        <label for="password" class="form__label">
+                            <i class="fas fa-lock form__icon"></i>
                             密码
                         </label>
-                        <div class="relative">
+                        <div class="form__input-group">
                             <input id="password" 
                                    name="password" 
                                    type="password" 
@@ -117,18 +117,18 @@
                                    minlength="8"
                                    autocomplete="new-password"
                                    oninput="checkPasswordStrength(this.value)"
-                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
+                                   class="form__input form__input--with-button"
                                    placeholder="请输入密码（至少8位）">
                             <button type="button" 
                                     onclick="togglePassword('password')"
-                                    class="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1">
-                                <i class="fas fa-eye text-sm" id="password-eye"></i>
+                                    class="form__input-button">
+                                <i class="fas fa-eye" id="password-eye"></i>
                             </button>
                         </div>
                         <!-- 密码强度指示器 -->
-                        <div class="mt-2">
+                        <div class="form__password-strength">
                             <div class="password-strength w-full bg-gray-200" id="password-strength-bar"></div>
-                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <div class="form__password-info">
                                 <span id="password-strength-text">请输入密码</span>
                                 <span id="password-requirements" class="text-right">至少8位，包含字母和数字</span>
                             </div>
@@ -136,56 +136,56 @@
                     </div>
 
                     <!-- 确认密码输入 -->
-                    <div>
-                        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-lock mr-1 text-gray-400"></i>
+                    <div class="form__group">
+                        <label for="confirm-password" class="form__label">
+                            <i class="fas fa-lock form__icon"></i>
                             确认密码
                         </label>
-                        <div class="relative">
+                        <div class="form__input-group">
                             <input id="confirm-password" 
                                    name="confirm_password" 
                                    type="password" 
                                    required
                                    autocomplete="new-password"
                                    oninput="validatePasswordMatch()"
-                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
+                                   class="form__input form__input--with-button"
                                    placeholder="请再次输入密码">
                             <button type="button" 
                                     onclick="togglePassword('confirm-password')"
-                                    class="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1">
-                                <i class="fas fa-eye text-sm" id="confirm-password-eye"></i>
+                                    class="form__input-button">
+                                <i class="fas fa-eye" id="confirm-password-eye"></i>
                             </button>
                         </div>
-                        <div id="password-match-error" class="hidden text-sm text-red-600 mt-1"></div>
+                        <div id="password-match-error" class="form__error hidden"></div>
                     </div>
 
                     <!-- 服务条款同意 -->
-                    <div class="flex items-start">
+                    <div class="form__agreement">
                         <input id="agree-terms" 
                                name="agree_terms" 
                                type="checkbox"
                                required
-                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5">
-                        <label for="agree-terms" class="ml-2 block text-sm text-gray-700">
+                               class="form__checkbox">
+                        <label for="agree-terms" class="form__agreement-label">
                             我已阅读并同意
-                            <a href="{{ url_for('legal.terms') }}" target="_blank" class="text-blue-600 hover:text-blue-500 underline">服务条款</a>
+                            <a href="{{ url_for('legal.terms') }}" target="_blank" class="link link--primary">服务条款</a>
                             和
-                            <a href="{{ url_for('legal.privacy') }}" target="_blank" class="text-blue-600 hover:text-blue-500 underline">隐私政策</a>
+                            <a href="{{ url_for('legal.privacy') }}" target="_blank" class="link link--primary">隐私政策</a>
                         </label>
                     </div>
                 </div>
 
                 <!-- 注册按钮 -->
-                <div>
+                <div class="form__submit">
                     <button type="submit" 
                             id="register-button"
-                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <i class="fas fa-user-plus group-hover:text-blue-300 transition-colors" aria-hidden="true"></i>
+                            class="btn btn--primary btn--full-width btn--with-icon">
+                        <span class="btn__icon">
+                            <i class="fas fa-user-plus" aria-hidden="true"></i>
                         </span>
                         <span id="register-text">创建账户</span>
                         <span id="register-loading" class="hidden">
-                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                            <i class="fas fa-spinner fa-spin"></i>
                             注册中...
                         </span>
                     </button>
@@ -193,10 +193,10 @@
 
                 <!-- 登录链接 -->
                 <div class="text-center">
-                    <p class="text-sm text-gray-600">
+                    <p class="text--secondary">
                         已有账户？
                         <a href="{{ url_for('auth.login') }}" 
-                           class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                           class="link link--primary">
                             立即登录
                         </a>
                     </p>
@@ -205,12 +205,12 @@
         </div>
 
         <!-- 底部链接 -->
-        <div class="text-center">
-            <p class="text-xs text-white/80">
+        <div class="auth__footer">
+            <p class="auth__footer-text">
                 注册即表示您同意我们的
-                <a href="{{ url_for('legal.terms') }}" target="_blank" class="text-white underline hover:no-underline">服务条款</a>
+                <a href="{{ url_for('legal.terms') }}" target="_blank" class="link link--light">服务条款</a>
                 和
-                <a href="{{ url_for('legal.privacy') }}" target="_blank" class="text-white underline hover:no-underline">隐私政策</a>
+                <a href="{{ url_for('legal.privacy') }}" target="_blank" class="link link--light">隐私政策</a>
             </p>
         </div>
     </div>

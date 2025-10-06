@@ -5,9 +5,38 @@ module.exports = {
     './app/templates/**/*.html',
     './app/views/**/*.py',
     './app/api/**/*.py',
-    './app/static/js/**/*.js'
+    './app/static/js/**/*.js',
+    './assets/css/**/*.css'
   ],
   darkMode: 'class',
+  // 确保自定义组件类不被purge移除
+  safelist: [
+    // 表单组件
+    { pattern: /^form-(input|textarea|select|checkbox|radio|switch|file|label|group|error|help|success)/ },
+    // 按钮组件
+    { pattern: /^btn(-primary|-secondary|-success|-danger|-warning|-info|-outline|-ghost)?/ },
+    { pattern: /^btn--(sm|lg|xl|loading)/ },
+    // 卡片组件
+    { pattern: /^card(__|--)?/ },
+    // 导航组件
+    { pattern: /^nav(-item|-subitem|-submenu)?/ },
+    { pattern: /^nav--(vertical|pills)/ },
+    { pattern: /^nav-item--(active|disabled)/ },
+    { pattern: /^sidebar(__|--)?/ },
+    { pattern: /^breadcrumb(__|__)?/ },
+    { pattern: /^tab(s|--active)?/ },
+    // 模态框组件
+    { pattern: /^modal(-backdrop|-dialog|-content)?/ },
+    { pattern: /^modal__(header|title|close|body|footer)/ },
+    { pattern: /^modal-dialog--(sm|md|lg|xl|2xl|fullscreen)/ },
+    // 通知组件
+    { pattern: /^alert(-success|-error|-warning|-info|-dismissible|-fixed)?/ },
+    { pattern: /^alert__(icon|content|title|message|close)/ },
+    { pattern: /^toast(__|--)?/ },
+    { pattern: /^notification-(list|item)/ },
+    { pattern: /^notification-item__(header|title|time|message|actions)/ },
+    { pattern: /^badge(-primary|-secondary|-success|-danger|-warning|-info)?(--sm|--lg)?/ }
+  ],
   theme: {
     container: { center: true, padding: '1rem' },
     extend: {
@@ -18,17 +47,30 @@ module.exports = {
         primary: {
           DEFAULT: '#2563eb',
           dark: '#1d4ed8',
-          light: '#3b82f6'
+          light: '#dbeafe',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a'
         },
         secondary: '#10b981',
         accent: '#f59e0b',
-        danger: '#22c55e',
+        danger: '#ef4444',
         warning: '#f97316',
         gold: '#ffd700',
-        success: '#ef4444',
+        success: '#22c55e',
         muted: '#64748b',
         up: '#22c55e',
-        down: '#dc3545'
+        down: '#dc3545',
+        gray: {
+          750: '#374151'
+        }
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],

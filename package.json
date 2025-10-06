@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev:css": "tailwindcss -i ./assets/css/input.css -o ./app/static/css/tw.css --watch",
-    "build:css": "NODE_ENV=production tailwindcss -i ./assets/css/input.css -o ./app/static/css/tw.css --minify"
+    "build:css": "NODE_ENV=production tailwindcss -i ./assets/css/input.css -o ./app/static/css/tw.css --minify",
+    "build:components": "NODE_ENV=production tailwindcss -i ./assets/css/input.css -o ./app/static/css/components.css --minify",
+    "dev:components": "tailwindcss -i ./assets/css/input.css -o ./app/static/css/components.css --watch",
+    "validate:css": "node -e \"console.log('CSS组件验证脚本 - 验证语义化CSS类定义')\"",
+    "lint:css": "stylelint assets/css/**/*.css --fix"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",

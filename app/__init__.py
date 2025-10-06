@@ -95,6 +95,16 @@ def create_app(config_name='default'):
     from app.views.user_views import user_views
     from app.views.legal import legal_bp
     
+    # Register UI enhancement blueprints
+    from app.api.ui_components import ui_components_bp
+    from app.api.user_preferences import user_preferences_bp
+    from app.api.performance import performance_bp
+    from app.api.usage_tracking import usage_tracking_bp
+    from app.views.ui_components import ui_components_views_bp
+    from app.views.ui_forms import ui_forms_views_bp
+    from app.views.ui_modals import ui_modals_views_bp
+    from app.views.ui_notifications import ui_notifications_views_bp
+    
     app.register_blueprint(views_bp)
     app.register_blueprint(prediction_api, url_prefix='/api')
     app.register_blueprint(market_api, url_prefix='/api')
@@ -106,6 +116,21 @@ def create_app(config_name='default'):
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_views)
     app.register_blueprint(legal_bp)
+    
+    # Register UI enhancement API blueprints
+    app.register_blueprint(ui_components_bp)
+    app.register_blueprint(user_preferences_bp)
+    app.register_blueprint(performance_bp)
+    app.register_blueprint(usage_tracking_bp)
+    
+    # Register UI enhancement view blueprints
+    app.register_blueprint(ui_components_views_bp)
+    app.register_blueprint(ui_forms_views_bp)
+    app.register_blueprint(ui_modals_views_bp)
+    app.register_blueprint(ui_notifications_views_bp)
+    
+    # Setup API error handlers
+    # Error handlers are now defined directly in the blueprint
     
     # Initialize model service with default model
     with app.app_context():

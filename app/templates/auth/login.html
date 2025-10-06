@@ -26,19 +26,19 @@
 {% endblock %}
 
 {% block content %}
-<div class="login-container flex items-center justify-center p-4">
-    <div class="max-w-md w-full space-y-8">
+<div class="auth-container">
+    <div class="auth__wrapper">
         <!-- 登录卡片 -->
-        <div class="login-card rounded-2xl shadow-xl p-8">
+        <div class="card login-card">
             <!-- Logo和标题 -->
-            <div class="text-center mb-8">
-                <div class="mx-auto h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
-                    <span class="text-white text-xl font-bold">K</span>
+            <div class="card__header text-center">
+                <div class="auth__logo">
+                    <span class="auth__logo-text">K</span>
                 </div>
-                <h2 class="text-3xl font-bold text-gray-900 brand-logo">
+                <h2 class="auth__title brand-logo">
                     Kronos
                 </h2>
-                <p class="mt-2 text-sm text-gray-600">
+                <p class="auth__subtitle">
                     登录您的智能投资账户
                 </p>
             </div>
@@ -50,16 +50,16 @@
                   hx-target="#login-messages"
                   hx-swap="innerHTML"
                   hx-on:htmx:after-request="handleLoginResponse(event)"
-                  class="space-y-6">
+                  class="form">
                 
                 <!-- 错误/成功消息区域 -->
                 <div id="login-messages" class="hidden"></div>
 
-                <div class="space-y-4">
+                <div class="form__body">
                     <!-- 邮箱输入 -->
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-envelope mr-1 text-gray-400"></i>
+                    <div class="form__group">
+                        <label for="email" class="form__label">
+                            <i class="fas fa-envelope form__icon"></i>
                             邮箱地址
                         </label>
                         <input id="email" 
@@ -67,46 +67,46 @@
                                type="email" 
                                required
                                autocomplete="email"
-                               class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               class="form__input"
                                placeholder="请输入邮箱地址">
                     </div>
 
                     <!-- 密码输入 -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-lock mr-1 text-gray-400"></i>
+                    <div class="form__group">
+                        <label for="password" class="form__label">
+                            <i class="fas fa-lock form__icon"></i>
                             密码
                         </label>
-                        <div class="relative">
+                        <div class="form__input-group">
                             <input id="password" 
                                    name="password" 
                                    type="password" 
                                    required
                                    autocomplete="current-password"
-                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12"
+                                   class="form__input form__input--with-button"
                                    placeholder="请输入密码">
                             <button type="button" 
                                     onclick="togglePassword('password')"
-                                    class="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1">
-                                <i class="fas fa-eye text-sm" id="password-eye"></i>
+                                    class="form__input-button">
+                                <i class="fas fa-eye" id="password-eye"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- 记住我和忘记密码 -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
+                    <div class="form__actions">
+                        <div class="form__checkbox-group">
                             <input id="remember-me" 
                                    name="remember_me" 
                                    type="checkbox"
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="remember-me" class="ml-2 block text-sm text-gray-700">
+                                   class="form__checkbox">
+                            <label for="remember-me" class="form__checkbox-label">
                                 记住我
                             </label>
                         </div>
-                        <div class="text-sm">
+                        <div>
                             <a href="{{ url_for('auth.reset_password') }}" 
-                               class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                               class="link link--primary">
                                 忘记密码？
                             </a>
                         </div>
@@ -114,16 +114,16 @@
                 </div>
 
                 <!-- 登录按钮 -->
-                <div>
+                <div class="form__submit">
                     <button type="submit" 
                             id="login-button"
-                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <i class="fas fa-sign-in-alt group-hover:text-blue-300 transition-colors" aria-hidden="true"></i>
+                            class="btn btn--primary btn--full-width btn--with-icon">
+                        <span class="btn__icon">
+                            <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
                         </span>
                         <span id="login-text">立即登录</span>
                         <span id="login-loading" class="hidden">
-                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                            <i class="fas fa-spinner fa-spin"></i>
                             登录中...
                         </span>
                     </button>
@@ -131,10 +131,10 @@
 
                 <!-- 注册链接 -->
                 <div class="text-center">
-                    <p class="text-sm text-gray-600">
+                    <p class="text--secondary">
                         还没有账户？
                         <a href="{{ url_for('auth.register') }}" 
-                           class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                           class="link link--primary">
                             立即注册
                         </a>
                     </p>
@@ -143,12 +143,12 @@
         </div>
 
         <!-- 底部链接 -->
-        <div class="text-center">
-            <p class="text-xs text-white/80">
+        <div class="auth__footer">
+            <p class="auth__footer-text">
                 登录即表示您同意我们的
-                <a href="{{ url_for('legal.terms') }}" target="_blank" class="text-white underline hover:no-underline">服务条款</a>
+                <a href="{{ url_for('legal.terms') }}" target="_blank" class="link link--light">服务条款</a>
                 和
-                <a href="{{ url_for('legal.privacy') }}" target="_blank" class="text-white underline hover:no-underline">隐私政策</a>
+                <a href="{{ url_for('legal.privacy') }}" target="_blank" class="link link--light">隐私政策</a>
             </p>
         </div>
     </div>

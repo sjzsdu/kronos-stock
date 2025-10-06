@@ -4,23 +4,23 @@
 {% block page_title %}系统设置{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto bg-white rounded-lg shadow-sm">
+<div class="card settings-container">
     <!-- 设置导航 -->
-    <div class="border-b border-gray-200">
-        <nav class="flex space-x-8 px-6" aria-label="设置选项">
-            <a href="#" class="border-b-2 border-blue-500 text-blue-600 py-4 px-1 text-sm font-medium" 
+    <div class="card__header">
+        <nav class="tabs" aria-label="设置选项">
+            <a href="#" class="tab tab--active" 
                data-tab="general">
                 基本设置
             </a>
-            <a href="#" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+            <a href="#" class="tab"
                data-tab="security">
                 安全设置
             </a>
-            <a href="#" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+            <a href="#" class="tab"
                data-tab="notifications">
                 通知设置
             </a>
-            <a href="#" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium"
+            <a href="#" class="tab"
                data-tab="preferences">
                 偏好设置
             </a>
@@ -28,26 +28,27 @@
     </div>
 
     <!-- 设置内容 -->
-    <div class="p-6">
+    <div class="card__body">
         <!-- 基本设置 -->
         <div id="general-tab" class="tab-content">
-            <div class="mb-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">基本信息</h3>
+            <div class="settings-section">
+                <h3 class="settings-section__title">基本信息</h3>
                 <form id="basic-info-form" 
                       hx-post="{{ url_for('user_views.htmx_update_profile') }}" 
                       hx-target="#form-feedback"
-                      hx-swap="innerHTML">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                      hx-swap="innerHTML"
+                      class="form">
+                    <div class="form-grid">
+                        <div class="form__group">
+                            <label class="form__label">
                                 显示名称
                             </label>
                             <input type="text" name="nickname" 
                                    value="{{ profile.nickname if profile else user.username }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                   class="form__input">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <div class="form__group">
+                            <label class="form__label">
                                 真实姓名
                             </label>
                             <input type="text" name="full_name" 

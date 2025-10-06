@@ -3,43 +3,52 @@
 {% block content %}
 <div class="relative">
 	<!-- Hero Section -->
-	<section class="relative overflow-hidden">
-		<div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-primary/5 to-purple-500/10"></div>
-		<div class="max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-28 relative">
-			<div class="max-w-3xl">
-				<div class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/70 backdrop-blur px-3 py-1 text-xs font-medium text-primary shadow-sm mb-6">
+	<section class="hero">
+		<div class="hero__background"></div>
+		<div class="hero__container">
+			<div class="hero__content">
+				<div class="badge badge--primary hero__badge">
 					<i class="fas fa-rocket"></i>
 					即将上线 · Kronos AI 投资引擎
 				</div>
-				<h1 class="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-					用 <span class="bg-gradient-to-r from-indigo-600 via-primary to-purple-600 bg-clip-text text-transparent">AI 驱动</span> 的洞察
+				<h1 class="hero__title">
+					用 <span class="text--gradient">AI 驱动</span> 的洞察
 					打造你的下一步投资决策
 				</h1>
-				<p class="mt-6 text-lg md:text-xl text-slate-600 leading-relaxed">
+				<p class="hero__subtitle">
 					Kronos 聚合多源市场数据、深度学习预测模型与智能事件分析，帮助你在复杂波动中快速形成结构化判断。
 				</p>
-				<div class="mt-8 flex flex-col sm:flex-row gap-4">
-					<a href="{{ url_for('views.prediction') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-primary text-white px-6 py-3 text-sm font-medium shadow-prediction-sm hover:bg-primary-dark transition">
+				<div class="hero__actions">
+					<a href="{{ url_for('views.prediction') }}" class="btn btn--primary btn--with-icon">
 						立即体验预测
 						<i class="fas fa-arrow-right"></i>
 					</a>
-					<button class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+					<button class="btn btn--secondary btn--with-icon">
 						加入内测名单
-						<i class="fas fa-envelope-open-text text-slate-500"></i>
+						<i class="fas fa-envelope-open-text"></i>
 					</button>
 				</div>
-				<div class="mt-10 flex items-center gap-6 text-xs text-slate-500">
-					<div class="flex items-center gap-2"><i class="fas fa-shield-alt text-primary"></i> 数据本地化</div>
-					<div class="flex items-center gap-2"><i class="fas fa-lock text-primary"></i> 隐私安全</div>
-					<div class="flex items-center gap-2"><i class="fas fa-brain text-primary"></i> 模型持续迭代</div>
+				<div class="hero__features">
+					<div class="feature-item">
+						<i class="fas fa-shield-alt feature-item__icon"></i> 
+						数据本地化
+					</div>
+					<div class="feature-item">
+						<i class="fas fa-lock feature-item__icon"></i> 
+						隐私安全
+					</div>
+					<div class="feature-item">
+						<i class="fas fa-brain feature-item__icon"></i> 
+						模型持续迭代
+					</div>
 				</div>
 			</div>
 		</div>
 	</section>
 
 	<!-- Stats Section -->
-	<section class="max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-20">
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+	<section class="stats-section">
+		<div class="stats-grid">
 			{% set stats = [
 				{'icon':'fa-database','label':'历史数据点','value':'120M+'},
 				{'icon':'fa-microchip','label':'已训练模型版本','value':'36'},
@@ -47,25 +56,27 @@
 				{'icon':'fa-clock','label':'平均响应毫秒','value':'<120ms'}
 			] %}
 			{% for s in stats %}
-			<div class="flex flex-col gap-2 rounded-lg bg-white p-5 shadow-prediction-sm border border-slate-200 hover:shadow-prediction transition">
-				<div class="flex items-center justify-between">
-					<span class="inline-grid h-10 w-10 place-items-center rounded-md bg-primary/10 text-primary"><i class="fas {{ s.icon }}"></i></span>
-					<i class="fas fa-signal text-slate-200"></i>
+			<div class="stats-card">
+				<div class="stats-card__header">
+					<span class="stats-card__icon">
+						<i class="fas {{ s.icon }}"></i>
+					</span>
+					<i class="fas fa-signal stats-card__indicator"></i>
 				</div>
-				<div class="text-2xl font-bold tracking-tight text-slate-900">{{ s.value }}</div>
-				<div class="text-xs font-medium text-slate-500">{{ s.label }}</div>
+				<div class="stats-card__value">{{ s.value }}</div>
+				<div class="stats-card__label">{{ s.label }}</div>
 			</div>
 			{% endfor %}
 		</div>
 	</section>
 
 	<!-- Feature Grid -->
-	<section class="max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24 border-t border-slate-100">
-		<div class="max-w-3xl mb-12">
-			<h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-4">核心能力矩阵</h2>
-			<p class="text-slate-600 leading-relaxed">从数据采集、特征工程、模型预测到事件监控与结果解释，Kronos 提供端到端的 Alpha 发现与风险管理增强。</p>
+	<section class="features-section">
+		<div class="features-header">
+			<h2 class="features-title">核心能力矩阵</h2>
+			<p class="features-subtitle">从数据采集、特征工程、模型预测到事件监控与结果解释，Kronos 提供端到端的 Alpha 发现与风险管理增强。</p>
 		</div>
-		<div class="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
+		<div class="features-grid">
 			{% set features = [
 				{'icon':'fa-brain','title':'多尺度预测引擎','desc':'融合序列建模与注意力结构，对短中期区间进行协同预测。','badge':'Model'},
 				{'icon':'fa-layer-group','title':'特征编排管线','desc':'自动衍生技术/资金/结构因子并监控漂移。','badge':'Data'},
