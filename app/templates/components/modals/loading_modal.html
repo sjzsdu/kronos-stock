@@ -1,0 +1,110 @@
+{# 加载模态框组件
+   参数:
+   - modal_id: 模态框ID (默认loading-modal)
+   - loading_text: 加载文本 (默认"处理中...")
+   - show_progress: 是否显示进度条 (boolean)
+   - progress_value: 进度值 (0-100)
+   - spinner_type: 加载动画类型 (spin, pulse, dots, bars)
+   - backdrop_close: 是否可点击背景关闭 (boolean, 默认false)
+#}
+
+{% set spinner_icons = {
+    'spin': 'fas fa-spinner fa-spin',
+    'pulse': 'fas fa-circle-notch fa-spin',
+    'dots': 'fas fa-ellipsis-h',
+    'bars': 'fas fa-bars'
+} %}
+
+{% set spinner_class = spinner_icons.get(spinner_type, 'fas fa-spinner fa-spin') %}
+
+<div id="{{ modal_id or 'loading-modal' }}" class="modal modal--loading modal--hidden">
+    <div class="modal__backdrop" 
+         {% if backdrop_close %}onclick="closeModal('{{ modal_id or 'loading-modal' }}')"{% endif %}>
+    </div>
+    
+    <div class="modal__container modal__container--small modal__container--loading">
+        <div class="modal__content modal__content--loading">
+            
+            <!-- 加载动画 -->
+            <div class="loading-spinner">
+                <i class="{{ spinner_class }} loading-spinner__icon"></i>
+            </div>
+            
+            <!-- 加载文本 -->
+            <div class="loading-text">
+                {{ loading_text or '处理中...' }}
+            </div>
+            
+            {% if show_progress %}
+            <!-- 进度条 -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-bar__fill" 
+                         {% if progress_value %}style="width: {{ progress_value }}%"{% endif %}>
+                    </div>
+                </div>
+                {% if progress_value %}
+                <div class="progress-text">{{ progress_value }}%</div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- 自定义内容 -->
+            {% if caller %}
+            <div class="loading-custom">
+                {{ caller() }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// 加载模态框管理
+window.LoadingModal = {
+    show: function(text, options = {}) {
+        const modalId = options.modalId || 'loading-modal';
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        
+        // 更新加载文本
+        if (text) {
+            const textEl = modal.querySelector('.loading-text');
+            if (textEl) textEl.textContent = text;
+        }
+        
+        // 更新进度
+        if (options.progress !== undefined) {
+            const progressFill = modal.querySelector('.progress-bar__fill');
+            const progressText = modal.querySelector('.progress-text');
+            if (progressFill) {
+                progressFill.style.width = options.progress + '%';
+            }
+            if (progressText) {
+                progressText.textContent = options.progress + '%';
+            }
+        }
+        
+        showModal(modalId);
+    },
+    
+    hide: function(modalId = 'loading-modal') {
+        closeModal(modalId);
+    },
+    
+    updateProgress: function(progress, modalId = 'loading-modal') {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        
+        const progressFill = modal.querySelector('.progress-bar__fill');
+        const progressText = modal.querySelector('.progress-text');
+        
+        if (progressFill) {
+            progressFill.style.width = progress + '%';
+        }
+        if (progressText) {
+            progressText.textContent = progress + '%';
+        }
+    }
+};
+</script>

@@ -1,0 +1,30 @@
+{# 复选框组件
+   参数:
+   - field_id: 字段ID
+   - field_name: 字段名称
+   - field_label: 字段标签
+   - field_value: 字段值
+   - checked: 是否选中 (boolean)
+   - required: 是否必填 (boolean)
+   - disabled: 是否禁用 (boolean)
+   - help_text: 帮助文本
+#}
+<div class="form-checkbox-group">
+    <input 
+        id="{{ field_id }}" 
+        name="{{ field_name }}" 
+        type="checkbox"
+        {% if field_value %}value="{{ field_value }}"{% endif %}
+        {% if checked %}checked{% endif %}
+        {% if required %}required{% endif %}
+        {% if disabled %}disabled{% endif %}
+        class="form-checkbox"
+    >
+    <label for="{{ field_id }}" class="form-checkbox-label">
+        {{ field_label }}
+    </label>
+    
+    {% if help_text %}
+    <p class="form-help mt-1">{{ help_text }}</p>
+    {% endif %}
+</div>

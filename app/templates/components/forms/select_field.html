@@ -1,0 +1,43 @@
+{# 下拉选择框组件
+   参数:
+   - field_id: 字段ID
+   - field_name: 字段名称
+   - field_label: 字段标签
+   - selected_value: 当前选中的值
+   - options: 选项列表 [{'value': 'val', 'text': 'display_text', 'selected': boolean}, ...]
+   - required: 是否必填 (boolean)
+   - disabled: 是否禁用 (boolean)
+   - icon: FontAwesome图标类名
+   - help_text: 帮助文本
+#}
+<div class="form-group">
+    {% if field_label %}
+    <label for="{{ field_id }}" class="form-label">
+        {% if icon %}
+        <i class="{{ icon }}"></i>
+        {% endif %}
+        {{ field_label }}
+    </label>
+    {% endif %}
+    
+    <select 
+        id="{{ field_id }}" 
+        name="{{ field_name }}" 
+        {% if required %}required{% endif %}
+        {% if disabled %}disabled{% endif %}
+        class="form-select"
+    >
+        {% for option in options %}
+        <option 
+            value="{{ option.value }}" 
+            {% if option.selected or (selected_value and option.value == selected_value) %}selected{% endif %}
+        >
+            {{ option.text }}
+        </option>
+        {% endfor %}
+    </select>
+    
+    {% if help_text %}
+    <p class="form-help">{{ help_text }}</p>
+    {% endif %}
+</div>

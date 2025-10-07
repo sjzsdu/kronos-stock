@@ -1,0 +1,40 @@
+{# 基础表单输入字段组件
+   参数:
+   - field_id: 字段ID
+   - field_name: 字段名称
+   - field_label: 字段标签
+   - field_type: 输入类型 (text, email, password, tel, etc.)
+   - field_value: 字段默认值
+   - placeholder: 占位符文本
+   - required: 是否必填 (boolean)
+   - disabled: 是否禁用 (boolean)
+   - autocomplete: 自动完成属性
+   - icon: FontAwesome图标类名
+   - help_text: 帮助文本
+#}
+<div class="form-group">
+    {% if field_label %}
+    <label for="{{ field_id }}" class="form-label">
+        {% if icon %}
+        <i class="{{ icon }}"></i>
+        {% endif %}
+        {{ field_label }}
+    </label>
+    {% endif %}
+    
+    <input 
+        id="{{ field_id }}" 
+        name="{{ field_name }}" 
+        type="{{ field_type or 'text' }}"
+        {% if field_value %}value="{{ field_value }}"{% endif %}
+        {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+        {% if required %}required{% endif %}
+        {% if disabled %}disabled{% endif %}
+        {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+        class="form-input"
+    >
+    
+    {% if help_text %}
+    <p class="form-help">{{ help_text }}</p>
+    {% endif %}
+</div>

@@ -1,0 +1,43 @@
+{# 通用按钮组件
+   参数:
+   - btn_id: 按钮ID
+   - btn_type: 按钮类型 (button, submit, reset)
+   - btn_text: 按钮文本
+   - btn_style: 按钮样式 (primary, secondary, success, warning, danger)
+   - btn_size: 按钮大小 (small, medium, large)
+   - icon: FontAwesome图标类名
+   - icon_position: 图标位置 (left, right)
+   - disabled: 是否禁用 (boolean)
+   - loading: 是否显示加载状态 (boolean)
+   - onclick: 点击事件处理
+   - htmx_attributes: HTMX属性字典 {'post': '/api/url', 'target': '#id', ...}
+   - additional_classes: 额外的CSS类
+#}
+<button 
+    {% if btn_id %}id="{{ btn_id }}"{% endif %}
+    type="{{ btn_type or 'button' }}" 
+    {% if disabled or loading %}disabled{% endif %}
+    {% if onclick %}onclick="{{ onclick }}"{% endif %}
+    {% if htmx_attributes %}
+        {% for attr, value in htmx_attributes.items() %}
+        hx-{{ attr }}="{{ value }}"
+        {% endfor %}
+    {% endif %}
+    class="btn 
+           {% if btn_style %}btn--{{ btn_style }}{% else %}btn--primary{% endif %}
+           {% if btn_size %}btn--{{ btn_size }}{% else %}btn--medium{% endif %}
+           {% if loading %}btn--loading{% endif %}
+           {{ additional_classes or '' }}"
+>
+    {% if loading %}
+    <i class="fas fa-spinner fa-spin"></i>
+    {% elif icon and (not icon_position or icon_position == 'left') %}
+    <i class="{{ icon }}"></i>
+    {% endif %}
+    
+    {{ btn_text }}
+    
+    {% if icon and icon_position == 'right' %}
+    <i class="{{ icon }}"></i>
+    {% endif %}
+</button>

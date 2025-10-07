@@ -184,6 +184,490 @@
     @apply text-sm text-green-600 flex items-center mt-1;
   }
   
+  /* 表单网格布局 */
+  .form-grid {
+    @apply grid gap-4;
+  }
+  
+  .form-grid--1-cols {
+    @apply grid-cols-1;
+  }
+  
+  .form-grid--2-cols {
+    @apply grid-cols-1 md:grid-cols-2;
+  }
+  
+  .form-grid--3-cols {
+    @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .form-grid--4-cols {
+    @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-4;
+  }
+  
+  .form-grid--gap-small {
+    @apply gap-2;
+  }
+  
+  .form-grid--gap-medium {
+    @apply gap-4;
+  }
+  
+  .form-grid--gap-large {
+    @apply gap-6;
+  }
+  
+  .form-grid--responsive .form-grid--2-cols {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+  
+  .form-grid--responsive .form-grid--3-cols {
+    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .form-grid--responsive .form-grid--4-cols {
+    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+
+  /* 表单分组 */
+  .form-section {
+    @apply mb-6;
+  }
+  
+  .form-section__header {
+    @apply flex items-center mb-4 pb-2 border-b border-gray-200;
+  }
+  
+  .form-section__toggle {
+    @apply mr-3 p-1 text-gray-400 hover:text-gray-600 transition-colors;
+  }
+  
+  .form-section__toggle--collapsed i {
+    @apply transform rotate-90;
+  }
+  
+  .form-section__title {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  
+  .form-section__subtitle {
+    @apply text-sm text-gray-600 ml-auto;
+  }
+  
+  .form-section__content {
+    @apply transition-all duration-200 overflow-hidden;
+  }
+  
+  .form-section__content--hidden {
+    @apply hidden;
+  }
+
+  /* 表单字符计数器 */
+  .form-counter {
+    @apply text-xs text-gray-500 text-right mt-1;
+  }
+
+  /* =================================
+   * 模态框组件语义化样式类
+   * ================================= */
+
+  /* 模态框基础样式 */
+  .modal {
+    @apply fixed inset-0 flex items-center justify-center z-50 transition-all duration-300;
+  }
+  
+  .modal--hidden {
+    @apply opacity-0 pointer-events-none;
+  }
+  
+  .modal--loading .modal__backdrop {
+    @apply bg-black bg-opacity-60;
+  }
+  
+  /* 模态框背景遮罩 */
+  .modal__backdrop {
+    @apply absolute inset-0 bg-black bg-opacity-50 transition-opacity;
+  }
+  
+  /* 模态框容器 */
+  .modal__container {
+    @apply relative bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 
+           transform transition-all duration-300 scale-100;
+  }
+  
+  .modal--hidden .modal__container {
+    @apply scale-95;
+  }
+  
+  .modal__container--small {
+    @apply max-w-sm;
+  }
+  
+  .modal__container--medium {
+    @apply max-w-md;
+  }
+  
+  .modal__container--large {
+    @apply max-w-2xl;
+  }
+  
+  .modal__container--full {
+    @apply max-w-6xl;
+  }
+  
+  .modal__container--loading {
+    @apply max-w-xs bg-gray-900 text-white;
+  }
+  
+  /* 模态框内容 */
+  .modal__content {
+    @apply overflow-hidden rounded-xl;
+  }
+  
+  .modal__content--loading {
+    @apply text-center py-8 px-6;
+  }
+  
+  /* 模态框头部 */
+  .modal__header {
+    @apply flex items-center justify-between px-6 py-4 border-b border-gray-200;
+  }
+  
+  .modal__header--primary {
+    @apply bg-primary text-white border-primary-700;
+  }
+  
+  .modal__header--success {
+    @apply bg-green-500 text-white border-green-600;
+  }
+  
+  .modal__header--warning {
+    @apply bg-yellow-500 text-white border-yellow-600;
+  }
+  
+  .modal__header--danger {
+    @apply bg-red-500 text-white border-red-600;
+  }
+  
+  .modal__header--info {
+    @apply bg-blue-500 text-white border-blue-600;
+  }
+  
+  /* 模态框标题区域 */
+  .modal__title-section {
+    @apply flex items-center gap-3;
+  }
+  
+  .modal__icon {
+    @apply p-2 bg-white bg-opacity-20 rounded-lg;
+  }
+  
+  .modal__icon--question {
+    @apply text-blue-500;
+  }
+  
+  .modal__icon--warning {
+    @apply text-yellow-500;
+  }
+  
+  .modal__icon--danger {
+    @apply text-red-500;
+  }
+  
+  .modal__icon--success {
+    @apply text-green-500;
+  }
+  
+  .modal__icon--info {
+    @apply text-blue-500;
+  }
+  
+  .modal__title {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  
+  .modal__header--primary .modal__title,
+  .modal__header--success .modal__title,
+  .modal__header--warning .modal__title,
+  .modal__header--danger .modal__title,
+  .modal__header--info .modal__title {
+    @apply text-white;
+  }
+  
+  /* 模态框关闭按钮 */
+  .modal__close {
+    @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 
+           rounded-lg transition-colors;
+  }
+  
+  .modal__header--primary .modal__close,
+  .modal__header--success .modal__close,
+  .modal__header--warning .modal__close,
+  .modal__header--danger .modal__close,
+  .modal__header--info .modal__close {
+    @apply text-white hover:bg-white hover:bg-opacity-20 hover:text-white;
+  }
+  
+  /* 模态框主体 */
+  .modal__body {
+    @apply px-6 py-4;
+  }
+  
+  /* 模态框底部 */
+  .modal__footer {
+    @apply flex items-center justify-end gap-3 px-6 py-4 
+           border-t border-gray-200 bg-gray-50;
+  }
+  
+  .modal__footer--center {
+    @apply justify-center;
+  }
+  
+  /* 消息内容 */
+  .confirm-message {
+    @apply text-gray-700 text-center;
+  }
+  
+  .message-content {
+    @apply p-4 rounded-lg;
+  }
+  
+  .message-content--info {
+    @apply bg-blue-50 border border-blue-200 text-blue-800;
+  }
+  
+  .message-content--success {
+    @apply bg-green-50 border border-green-200 text-green-800;
+  }
+  
+  .message-content--warning {
+    @apply bg-yellow-50 border border-yellow-200 text-yellow-800;
+  }
+  
+  .message-content--error {
+    @apply bg-red-50 border border-red-200 text-red-800;
+  }
+  
+  /* 加载动画 */
+  .loading-spinner {
+    @apply mb-4;
+  }
+  
+  .loading-spinner__icon {
+    @apply text-4xl text-white;
+  }
+  
+  .loading-text {
+    @apply text-lg font-medium text-white mb-4;
+  }
+  
+  /* 进度条 */
+  .progress-container {
+    @apply mt-4;
+  }
+  
+  .progress-bar {
+    @apply w-full bg-gray-200 rounded-full h-2 mb-2;
+  }
+  
+  .progress-bar__fill {
+    @apply bg-primary h-2 rounded-full transition-all duration-300;
+    width: 0%;
+  }
+  
+  .progress-text {
+    @apply text-sm text-gray-300 text-center;
+  }
+  
+  /* 表单模态框 */
+  .modal-form .form__messages {
+    @apply mb-4;
+  }
+  
+  .modal-form .form__messages--hidden {
+    @apply hidden;
+  }
+  
+  /* 按钮加载状态 */
+  .btn__text--hidden {
+    @apply hidden;
+  }
+  
+  .btn__loading--hidden {
+    @apply hidden;
+  }
+  
+  /* 防止背景滚动 */
+  .modal-open {
+    @apply overflow-hidden;
+  }
+
+  /* =================================
+   * HTMX组件语义化样式类
+   * ================================= */
+
+  /* HTMX表单 */
+  .htmx-form {
+    @apply transition-all duration-200;
+  }
+  
+  .htmx-form--success {
+    @apply ring-2 ring-green-500 ring-opacity-50;
+  }
+  
+  .htmx-form--error {
+    @apply ring-2 ring-red-500 ring-opacity-50;
+  }
+  
+  /* HTMX消息 */
+  .htmx-messages {
+    @apply mb-4 transition-all duration-200;
+  }
+  
+  .htmx-messages--hidden {
+    @apply hidden;
+  }
+  
+  .htmx-error {
+    @apply p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg;
+  }
+  
+  .htmx-success {
+    @apply p-3 bg-green-50 border border-green-200 text-green-800 rounded-lg;
+  }
+  
+  /* HTMX按钮 */
+  .htmx-btn {
+    @apply relative overflow-hidden transition-all duration-200;
+  }
+  
+  .htmx-btn--loading {
+    @apply cursor-not-allowed;
+  }
+  
+  .htmx-btn--success {
+    @apply ring-2 ring-green-500 ring-opacity-50;
+  }
+  
+  .htmx-btn--error {
+    @apply ring-2 ring-red-500 ring-opacity-50;
+  }
+  
+  .htmx-btn__content--hidden {
+    @apply opacity-0;
+  }
+  
+  .htmx-btn__loading--hidden {
+    @apply hidden;
+  }
+  
+  /* HTMX容器 */
+  .htmx-container {
+    @apply relative;
+  }
+  
+  .htmx-container--loading {
+    @apply opacity-75 pointer-events-none;
+  }
+  
+  .htmx-container--loaded {
+    @apply opacity-100;
+  }
+  
+  .htmx-container--error .htmx-container__loading {
+    @apply hidden;
+  }
+  
+  .htmx-container__loading {
+    @apply flex items-center justify-center py-8;
+  }
+  
+  /* HTMX加载动画 */
+  .htmx-loading {
+    @apply flex flex-col items-center gap-2 text-gray-500;
+  }
+  
+  .htmx-loading i {
+    @apply text-2xl;
+  }
+  
+  /* HTMX错误 */
+  .htmx-error__content {
+    @apply flex items-center gap-4 p-6 bg-red-50 border border-red-200 rounded-lg;
+  }
+  
+  .htmx-error__content i {
+    @apply text-red-500 text-3xl;
+  }
+  
+  .htmx-error__message h3 {
+    @apply text-lg font-semibold text-red-800 mb-2;
+  }
+  
+  .htmx-error__message p {
+    @apply text-red-600 mb-3;
+  }
+  
+  /* HTMX分页 */
+  .htmx-pagination {
+    @apply flex flex-wrap items-center justify-between gap-4 mt-6;
+  }
+  
+  .htmx-pagination--loading {
+    @apply opacity-75 pointer-events-none;
+  }
+  
+  .htmx-pagination__info {
+    @apply text-sm text-gray-600;
+  }
+  
+  .htmx-pagination__controls {
+    @apply flex items-center gap-2;
+  }
+  
+  .htmx-pagination__pages {
+    @apply flex items-center gap-1;
+  }
+  
+  .htmx-pagination__btn {
+    @apply px-3 py-2 text-sm border border-gray-300 rounded-lg 
+           hover:bg-gray-50 transition-colors disabled:opacity-50 
+           disabled:cursor-not-allowed;
+  }
+  
+  .htmx-pagination__btn--active {
+    @apply bg-primary text-white border-primary cursor-default;
+  }
+  
+  .htmx-pagination__btn--prev,
+  .htmx-pagination__btn--next {
+    @apply flex items-center gap-2 px-4;
+  }
+  
+  .htmx-pagination__ellipsis {
+    @apply px-2 text-gray-400;
+  }
+  
+  .htmx-pagination__size-selector {
+    @apply flex items-center gap-2 text-sm;
+  }
+  
+  .htmx-pagination__size-select {
+    @apply form-select text-sm py-1 px-2;
+  }
+  
+  .htmx-pagination__jump {
+    @apply flex items-center gap-2 text-sm;
+  }
+  
+  .htmx-pagination__jump-input {
+    @apply form-input text-sm py-1 px-2 w-16 text-center;
+  }
+  
+  .htmx-pagination__jump-btn {
+    @apply btn btn--secondary btn--small;
+  }
+
   /* 按钮组件 */
   .btn {
     @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium 
@@ -191,11 +675,15 @@
            focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
-  .btn--sm {
+  .btn--small {
     @apply px-3 py-1.5 text-xs;
   }
   
-  .btn--lg {
+  .btn--medium {
+    @apply px-4 py-2 text-sm;
+  }
+  
+  .btn--large {
     @apply px-6 py-3 text-base;
   }
   
@@ -203,34 +691,59 @@
     @apply px-8 py-4 text-lg;
   }
   
-  .btn-primary {
-    @apply btn bg-primary text-white border-primary hover:bg-primary-700 
+  .btn--primary {
+    @apply bg-primary text-white border-primary hover:bg-primary-700 
            hover:border-primary-700 focus:ring-primary;
   }
   
-  .btn-secondary {
-    @apply btn bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 
+  .btn--secondary {
+    @apply bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 
            hover:border-gray-400 focus:ring-gray-500;
   }
   
-  .btn-success {
-    @apply btn bg-green-600 text-white border-green-600 hover:bg-green-700 
+  .btn--success {
+    @apply bg-green-600 text-white border-green-600 hover:bg-green-700 
            hover:border-green-700 focus:ring-green-500;
   }
   
-  .btn-danger {
-    @apply btn bg-red-600 text-white border-red-600 hover:bg-red-700 
+  .btn--danger {
+    @apply bg-red-600 text-white border-red-600 hover:bg-red-700 
            hover:border-red-700 focus:ring-red-500;
   }
   
-  .btn-warning {
-    @apply btn bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600 
+  .btn--warning {
+    @apply bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600 
            hover:border-yellow-600 focus:ring-yellow-400;
   }
   
-  .btn-info {
-    @apply btn bg-blue-500 text-white border-blue-500 hover:bg-blue-600 
+  .btn--info {
+    @apply bg-blue-500 text-white border-blue-500 hover:bg-blue-600 
            hover:border-blue-600 focus:ring-blue-400;
+  }
+  
+  /* 向后兼容的按钮类 */
+  .btn-primary {
+    @apply btn btn--primary;
+  }
+  
+  .btn-secondary {
+    @apply btn btn--secondary;
+  }
+  
+  .btn-success {
+    @apply btn btn--success;
+  }
+  
+  .btn-danger {
+    @apply btn btn--danger;
+  }
+  
+  .btn-warning {
+    @apply btn btn--warning;
+  }
+  
+  .btn-info {
+    @apply btn btn--info;
   }
   
   .btn-outline {
@@ -865,12 +1378,41 @@
   
   /* Toast 通知 */
   .toast {
-    @apply fixed top-4 right-4 z-50 max-w-sm bg-white border border-gray-200 
-           rounded-lg shadow-lg transform transition-all duration-300;
+    @apply max-w-sm bg-white border border-gray-200 rounded-lg shadow-lg 
+           transform transition-all duration-300 relative;
   }
   
   .toast--hidden {
     @apply translate-x-full opacity-0;
+  }
+  
+  .toast--show {
+    @apply translate-x-0 opacity-100;
+  }
+  
+  .toast--hide {
+    @apply translate-x-full opacity-0;
+  }
+  
+  .toast--success {
+    @apply border-green-400;
+  }
+  
+  .toast--error {
+    @apply border-red-400;
+  }
+  
+  .toast--warning {
+    @apply border-yellow-400;
+  }
+  
+  .toast--info {
+    @apply border-blue-400;
+  }
+  
+  /* Toast容器 */
+  .toast-container {
+    @apply fixed top-4 right-4 z-50 space-y-2;
   }
   
   .toast__header {
@@ -893,9 +1435,23 @@
     @apply absolute bottom-0 left-0 h-1 bg-primary transition-all duration-100;
   }
   
+  /* 通知中心 */
+  .notification-center {
+    @apply fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md;
+  }
+  
   /* 通知列表 */
   .notification-list {
     @apply space-y-2;
+  }
+  
+  /* 通知动画状态 */
+  .alert--show {
+    @apply opacity-100 translate-y-0;
+  }
+  
+  .alert--hide {
+    @apply opacity-0 -translate-y-2 transition-all duration-300;
   }
   
   .notification-item {

@@ -1,0 +1,73 @@
+{# 表单网格布局组件
+   参数:
+   - grid_cols: 网格列数 (1, 2, 3, 4)
+   - gap: 间距 (small, medium, large)
+   - responsive: 是否启用响应式 (boolean)
+   
+   使用方式:
+   {% call form_grid(grid_cols=2, gap='medium', responsive=true) %}
+       <!-- 表单字段内容 -->
+       {% include 'components/forms/input_field.html' %}
+       {% include 'components/forms/select_field.html' %}
+   {% endcall %}
+#}
+{% macro form_grid(grid_cols=2, gap='medium', responsive=true) %}
+<div class="form-grid 
+           form-grid--{{ grid_cols or 2 }}-cols
+           {% if gap %}form-grid--gap-{{ gap }}{% endif %}
+           {% if responsive %}form-grid--responsive{% endif %}">
+    {{ caller() }}
+</div>
+{% endmacro %}
+
+{# 表单分组组件 #}
+{% macro form_section(title, subtitle=none, collapsible=false, collapsed=false) %}
+<div class="form-section {% if collapsible %}form-section--collapsible{% endif %}">
+    {% if title %}
+    <div class="form-section__header">
+        {% if collapsible %}
+        <button type="button" 
+                class="form-section__toggle {% if collapsed %}form-section__toggle--collapsed{% endif %}"
+                onclick="toggleFormSection(this)">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+        {% endif %}
+        
+        <h3 class="form-section__title">{{ title }}</h3>
+        
+        {% if subtitle %}
+        <p class="form-section__subtitle">{{ subtitle }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <div class="form-section__content {% if collapsed %}form-section__content--hidden{% endif %}">
+        {{ caller() }}
+    </div>
+</div>
+
+{% if collapsible %}
+<script>
+// 表单分组折叠功能
+if (typeof toggleFormSection === 'undefined') {
+    function toggleFormSection(toggleButton) {
+        const section = toggleButton.closest('.form-section');
+        const content = section.querySelector('.form-section__content');
+        const icon = toggleButton.querySelector('i');
+        
+        if (content.classList.contains('form-section__content--hidden')) {
+            content.classList.remove('form-section__content--hidden');
+            toggleButton.classList.remove('form-section__toggle--collapsed');
+            icon.classList.remove('fa-chevron-right');
+            icon.classList.add('fa-chevron-down');
+        } else {
+            content.classList.add('form-section__content--hidden');
+            toggleButton.classList.add('form-section__toggle--collapsed');
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-right');
+        }
+    }
+}
+</script>
+{% endif %}
+{% endmacro %}

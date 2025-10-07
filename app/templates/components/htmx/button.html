@@ -1,0 +1,102 @@
+{# HTMX增强按钮组件
+   参数:
+   - btn_id: 按钮ID
+   - btn_text: 按钮文本
+   - btn_class: 按钮CSS类
+   - btn_style: 按钮样式 (primary, secondary, success, warning, danger)
+   - method: HTTP方法 (get, post, put, delete, patch)
+   - endpoint: 请求端点URL
+   - target: 目标元素选择器
+   - swap: 交换策略
+   - indicator: 加载指示器选择器
+   - trigger: 触发事件
+   - confirm: 确认提示消息
+   - include: 包含的表单字段选择器
+   - vals: 额外提交的值
+   - headers: 自定义HTTP头
+   - disabled: 是否禁用
+   - icon: 按钮图标
+   - loading_text: 加载中文本
+   - on_click: 额外的点击处理
+#}
+
+<button type="button"
+        {% if btn_id %}id="{{ btn_id }}"{% endif %}
+        class="htmx-btn 
+               {% if btn_class %}{{ btn_class }}{% else %}btn btn--{{ btn_style or 'primary' }}{% endif %}"
+        {% if disabled %}disabled{% endif %}
+        {% if on_click %}onclick="{{ on_click }}"{% endif %}
+        
+        {# HTMX属性 #}
+        {% if method == 'get' or not method %}hx-get="{{ endpoint }}"
+        {% elif method == 'post' %}hx-post="{{ endpoint }}"
+        {% elif method == 'put' %}hx-put="{{ endpoint }}"
+        {% elif method == 'delete' %}hx-delete="{{ endpoint }}"
+        {% elif method == 'patch' %}hx-patch="{{ endpoint }}"
+        {% endif %}
+        
+        {% if target %}hx-target="{{ target }}"{% endif %}
+        {% if swap %}hx-swap="{{ swap }}"{% endif %}
+        {% if indicator %}hx-indicator="{{ indicator }}"{% endif %}
+        {% if trigger %}hx-trigger="{{ trigger }}"{% endif %}
+        {% if confirm %}hx-confirm="{{ confirm }}"{% endif %}
+        {% if include %}hx-include="{{ include }}"{% endif %}
+        {% if vals %}hx-vals="{{ vals | tojson | safe }}"{% endif %}
+        {% if headers %}hx-headers="{{ headers | tojson | safe }}"{% endif %}>
+    
+    <span class="htmx-btn__content">
+        {% if icon %}
+        <i class="{{ icon }}"></i>
+        {% endif %}
+        {{ btn_text }}
+    </span>
+    
+    <span class="htmx-btn__loading htmx-btn__loading--hidden">
+        <i class="fas fa-spinner fa-spin"></i>
+        {{ loading_text or '加载中...' }}
+    </span>
+</button>
+
+<script>
+// HTMX按钮增强功能
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.{% if btn_id %}getElementById('{{ btn_id }}'){% else %}querySelector('.htmx-btn'){% endif %};
+    if (!btn) return;
+    
+    btn.addEventListener('htmx:beforeRequest', function(e) {
+        const content = btn.querySelector('.htmx-btn__content');
+        const loading = btn.querySelector('.htmx-btn__loading');
+        
+        if (content) content.classList.add('htmx-btn__content--hidden');
+        if (loading) loading.classList.remove('htmx-btn__loading--hidden');
+        
+        btn.disabled = true;
+        btn.classList.add('htmx-btn--loading');
+    });
+    
+    btn.addEventListener('htmx:afterRequest', function(e) {
+        const content = btn.querySelector('.htmx-btn__content');
+        const loading = btn.querySelector('.htmx-btn__loading');
+        
+        if (content) content.classList.remove('htmx-btn__content--hidden');
+        if (loading) loading.classList.add('htmx-btn__loading--hidden');
+        
+        btn.disabled = false;
+        btn.classList.remove('htmx-btn--loading');
+        
+        // 添加成功/错误反馈
+        if (e.detail.xhr.status >= 200 && e.detail.xhr.status < 300) {
+            btn.classList.add('htmx-btn--success');
+            setTimeout(() => btn.classList.remove('htmx-btn--success'), 2000);
+        } else {
+            btn.classList.add('htmx-btn--error');
+            setTimeout(() => btn.classList.remove('htmx-btn--error'), 2000);
+        }
+    });
+    
+    btn.addEventListener('htmx:responseError', function(e) {
+        btn.classList.add('htmx-btn--error');
+        setTimeout(() => btn.classList.remove('htmx-btn--error'), 2000);
+    });
+});
+</script>

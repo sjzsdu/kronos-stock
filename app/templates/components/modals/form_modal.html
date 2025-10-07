@@ -1,0 +1,120 @@
+{# 表单模态框组件
+   参数:
+   - modal_id: 模态框ID
+   - form_id: 表单ID
+   - title: 标题
+   - icon: 头部图标
+   - form_action: 表单提交地址
+   - form_method: 表单提交方法 (POST, PUT, DELETE等)
+   - submit_text: 提交按钮文本 (默认"提交")
+   - cancel_text: 取消按钮文本 (默认"取消")
+   - submit_style: 提交按钮样式 (primary, success, warning, danger)
+   - modal_size: 模态框大小 (small, medium, large)
+   - htmx_attributes: HTMX属性字典
+   - on_submit: 提交回调函数名
+   - on_cancel: 取消回调函数名
+#}
+
+<div id="{{ modal_id }}" class="modal modal--hidden">
+    <div class="modal__backdrop" onclick="closeModal('{{ modal_id }}')"></div>
+    
+    <div class="modal__container modal__container--{{ modal_size or 'medium' }}">
+        <div class="modal__content">
+            
+            <!-- 表单头部 -->
+            <div class="modal__header">
+                <div class="modal__title-section">
+                    {% if icon %}
+                    <div class="modal__icon">
+                        <i class="{{ icon }}"></i>
+                    </div>
+                    {% endif %}
+                    <h3 class="modal__title">{{ title }}</h3>
+                </div>
+                <button class="modal__close" onclick="closeModal('{{ modal_id }}')" type="button">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- 表单内容 -->
+            <form id="{{ form_id }}" 
+                  {% if form_action %}action="{{ form_action }}"{% endif %}
+                  {% if form_method %}method="{{ form_method }}"{% endif %}
+                  {% if htmx_attributes %}
+                      {% for attr, value in htmx_attributes.items() %}
+                      hx-{{ attr }}="{{ value }}"
+                      {% endfor %}
+                  {% endif %}
+                  {% if on_submit %}onsubmit="{{ on_submit }}(event)"{% endif %}
+                  class="form modal-form">
+                
+                <div class="modal__body">
+                    <!-- 表单消息区域 -->
+                    <div id="{{ form_id }}-messages" class="form__messages form__messages--hidden"></div>
+                    
+                    <!-- 表单字段内容 -->
+                    {{ caller() }}
+                </div>
+                
+                <!-- 表单操作按钮 -->
+                <div class="modal__footer">
+                    <button type="button" 
+                            class="btn btn--secondary"
+                            onclick="{% if on_cancel %}{{ on_cancel }}();{% endif %}closeModal('{{ modal_id }}')">
+                        {{ cancel_text or '取消' }}
+                    </button>
+                    
+                    <button type="submit" 
+                            class="btn btn--{{ submit_style or 'primary' }}">
+                        <span class="btn__text">{{ submit_text or '提交' }}</span>
+                        <span class="btn__loading btn__loading--hidden">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            处理中...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// 表单模态框增强功能
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('{{ form_id }}');
+    const modal = document.getElementById('{{ modal_id }}');
+    
+    if (form && modal) {
+        // 表单提交状态管理
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const btnText = submitBtn.querySelector('.btn__text');
+            const btnLoading = submitBtn.querySelector('.btn__loading');
+            
+            if (btnText && btnLoading) {
+                btnText.classList.add('btn__text--hidden');
+                btnLoading.classList.remove('btn__loading--hidden');
+                submitBtn.disabled = true;
+            }
+        });
+        
+        // HTMX响应处理
+        form.addEventListener('htmx:afterRequest', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const btnText = submitBtn.querySelector('.btn__text');
+            const btnLoading = submitBtn.querySelector('.btn__loading');
+            
+            if (btnText && btnLoading) {
+                btnText.classList.remove('btn__text--hidden');
+                btnLoading.classList.add('btn__loading--hidden');
+                submitBtn.disabled = false;
+            }
+            
+            // 成功时关闭模态框
+            if (e.detail.xhr.status >= 200 && e.detail.xhr.status < 300) {
+                setTimeout(() => closeModal('{{ modal_id }}'), 1000);
+            }
+        });
+    }
+});
+</script>

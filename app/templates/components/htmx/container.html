@@ -1,0 +1,144 @@
+{# HTMX加载容器组件
+   参数:
+   - container_id: 容器ID
+   - container_class: 容器CSS类
+   - endpoint: 初始加载端点
+   - trigger: 触发加载事件 (load, intersect, etc.)
+   - swap: 交换策略
+   - indicator: 加载指示器选择器
+   - loading_template: 加载占位模板
+   - error_template: 错误占位模板
+   - auto_refresh: 自动刷新间隔(秒)
+   - refresh_endpoint: 刷新数据端点
+   - headers: 自定义HTTP头
+   - include: 包含的参数选择器
+#}
+
+<div id="{{ container_id }}" 
+     class="htmx-container {{ container_class or '' }}"
+     
+     {# HTMX属性 #}
+     {% if endpoint %}hx-get="{{ endpoint }}"{% endif %}
+     {% if trigger %}hx-trigger="{{ trigger }}"{% else %}hx-trigger="load"{% endif %}
+     {% if swap %}hx-swap="{{ swap }}"{% else %}hx-swap="innerHTML"{% endif %}
+     {% if indicator %}hx-indicator="{{ indicator }}"{% endif %}
+     {% if headers %}hx-headers="{{ headers | tojson | safe }}"{% endif %}
+     {% if include %}hx-include="{{ include }}"{% endif %}>
+    
+    <!-- 初始加载状态 -->
+    <div class="htmx-container__loading">
+        {% if loading_template %}
+        {{ loading_template | safe }}
+        {% else %}
+        <div class="htmx-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>加载中...</span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- 内容将由HTMX替换 -->
+    {{ caller() if caller }}
+</div>
+
+{% if auto_refresh %}
+<!-- 自动刷新功能 -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('{{ container_id }}');
+    if (!container) return;
+    
+    let refreshInterval;
+    
+    // 设置自动刷新
+    function startAutoRefresh() {
+        refreshInterval = setInterval(function() {
+            {% if refresh_endpoint %}
+            htmx.ajax('GET', '{{ refresh_endpoint }}', {
+                target: '#{{ container_id }}',
+                swap: '{{ swap or "innerHTML" }}'
+            });
+            {% else %}
+            htmx.trigger(container, 'refresh');
+            {% endif %}
+        }, {{ auto_refresh }} * 1000);
+    }
+    
+    // 停止自动刷新
+    function stopAutoRefresh() {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+        }
+    }
+    
+    // 页面可见时开始刷新，不可见时停止
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            stopAutoRefresh();
+        } else {
+            startAutoRefresh();
+        }
+    });
+    
+    // 容器加载完成后开始自动刷新
+    container.addEventListener('htmx:afterRequest', function(e) {
+        if (e.detail.xhr.status >= 200 && e.detail.xhr.status < 300) {
+            if (!document.hidden && !refreshInterval) {
+                startAutoRefresh();
+            }
+        }
+    });
+    
+    // 页面卸载时清理定时器
+    window.addEventListener('beforeunload', stopAutoRefresh);
+});
+</script>
+{% endif %}
+
+<!-- HTMX容器增强功能 -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('{{ container_id }}');
+    if (!container) return;
+    
+    // 错误处理
+    container.addEventListener('htmx:responseError', function(e) {
+        const errorContent = `
+            <div class="htmx-error">
+                {% if error_template %}
+                {{ error_template | safe }}
+                {% else %}
+                <div class="htmx-error__content">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="htmx-error__message">
+                        <h3>加载失败</h3>
+                        <p>网络连接异常，请检查网络后重试</p>
+                        <button class="btn btn--secondary btn--small" onclick="htmx.trigger(this.closest('.htmx-container'), 'refresh')">
+                            <i class="fas fa-redo"></i>
+                            重试
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        `;
+        container.innerHTML = errorContent;
+    });
+    
+    // 加载状态管理
+    container.addEventListener('htmx:beforeRequest', function(e) {
+        container.classList.add('htmx-container--loading');
+    });
+    
+    container.addEventListener('htmx:afterRequest', function(e) {
+        container.classList.remove('htmx-container--loading');
+        
+        if (e.detail.xhr.status >= 200 && e.detail.xhr.status < 300) {
+            container.classList.add('htmx-container--loaded');
+        } else {
+            container.classList.add('htmx-container--error');
+        }
+    });
+});
+</script>

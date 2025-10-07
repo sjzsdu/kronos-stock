@@ -1,0 +1,405 @@
+<!-- 通知组件模板 - 语义化CSS版本 -->
+
+<!-- 通知容器 -->
+<div id="notification-center" class="notification-center">
+    <!-- 通知列表容器 -->
+    <div id="notification-list" class="notification-list">
+        <!-- 动态通知将在此处渲染 -->
+    </div>
+</div>
+
+<!-- 通知模板 -->
+<template id="notification-template">
+    <div class="alert alert-dismissible" data-notification-id="">
+        <div class="alert__content">
+            <div class="alert__icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="alert__body">
+                <h5 class="alert__title"></h5>
+                <p class="alert__message"></p>
+            </div>
+        </div>
+        <button class="alert__close" onclick="dismissNotification(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</template>
+
+<!-- Toast 通知模板 -->
+<template id="toast-template">
+    <div class="toast" data-toast-id="">
+        <div class="toast__content">
+            <div class="toast__icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="toast__body">
+                <p class="toast__message"></p>
+            </div>
+        </div>
+        <button class="toast__close" onclick="dismissToast(this)">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="toast__progress">
+            <div class="toast__progress-bar"></div>
+        </div>
+    </div>
+</template>
+
+<!-- 通知JavaScript逻辑 -->
+<script>
+/**
+ * 通知管理器
+ */
+class NotificationManager {
+    constructor() {
+        this.notifications = new Map();
+        this.toasts = new Map();
+        this.notificationCounter = 0;
+        this.toastCounter = 0;
+        
+        // 初始化通知中心
+        this.initNotificationCenter();
+    }
+    
+    /**
+     * 初始化通知中心
+     */
+    initNotificationCenter() {
+        // 确保通知容器存在
+        let notificationCenter = document.getElementById('notification-center');
+        if (!notificationCenter) {
+            notificationCenter = document.createElement('div');
+            notificationCenter.id = 'notification-center';
+            notificationCenter.className = 'notification-center';
+            notificationCenter.innerHTML = '<div id="notification-list" class="notification-list"></div>';
+            document.body.appendChild(notificationCenter);
+        }
+        
+        // 创建Toast容器
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.className = 'toast-container';
+            document.body.appendChild(toastContainer);
+        }
+    }
+    
+    /**
+     * 显示通知
+     * @param {Object} options - 通知配置
+     * @param {string} options.type - 通知类型：success, error, warning, info
+     * @param {string} options.title - 通知标题
+     * @param {string} options.message - 通知内容
+     * @param {boolean} options.dismissible - 是否可关闭 
+     * @param {number} options.duration - 自动关闭时间(ms)，0为不自动关闭
+     */
+    showNotification(options = {}) {
+        const {
+            type = 'info',
+            title = '通知',
+            message = '',
+            dismissible = true,
+            duration = 0
+        } = options;
+        
+        const notificationId = `notification-${++this.notificationCounter}`;
+        const template = document.getElementById('notification-template');
+        
+        if (!template) {
+            console.error('通知模板不存在');
+            return null;
+        }
+        
+        // 克隆模板
+        const notification = template.content.cloneNode(true);
+        const alertElement = notification.querySelector('.alert');
+        
+        // 配置通知
+        alertElement.setAttribute('data-notification-id', notificationId);
+        alertElement.classList.add(`alert-${type}`);
+        
+        if (!dismissible) {
+            alertElement.classList.remove('alert-dismissible');
+            const closeBtn = alertElement.querySelector('.alert__close');
+            if (closeBtn) closeBtn.remove();
+        }
+        
+        // 设置内容
+        const iconElement = alertElement.querySelector('.alert__icon i');
+        const titleElement = alertElement.querySelector('.alert__title');
+        const messageElement = alertElement.querySelector('.alert__message');
+        
+        // 设置图标
+        this.setNotificationIcon(iconElement, type);
+        
+        titleElement.textContent = title;
+        messageElement.textContent = message;
+        
+        // 添加到页面
+        const notificationList = document.getElementById('notification-list');
+        notificationList.appendChild(notification);
+        
+        // 触发动画
+        setTimeout(() => {
+            alertElement.classList.add('alert--show');
+        }, 10);
+        
+        // 存储引用
+        this.notifications.set(notificationId, alertElement);
+        
+        // 自动关闭
+        if (duration > 0) {
+            setTimeout(() => {
+                this.dismissNotification(notificationId);
+            }, duration);
+        }
+        
+        return notificationId;
+    }
+    
+    /**
+     * 显示Toast通知
+     * @param {Object} options - Toast配置
+     */
+    showToast(options = {}) {
+        const {
+            type = 'success',
+            message = '',
+            duration = 3000,
+            position = 'top-right'
+        } = options;
+        
+        const toastId = `toast-${++this.toastCounter}`;
+        const template = document.getElementById('toast-template');
+        
+        if (!template) {
+            console.error('Toast模板不存在');
+            return null;
+        }
+        
+        // 克隆模板
+        const toast = template.content.cloneNode(true);
+        const toastElement = toast.querySelector('.toast');
+        
+        // 配置Toast
+        toastElement.setAttribute('data-toast-id', toastId);
+        toastElement.classList.add(`toast--${type}`);
+        
+        // 设置内容
+        const iconElement = toastElement.querySelector('.toast__icon i');
+        const messageElement = toastElement.querySelector('.toast__message');
+        
+        this.setNotificationIcon(iconElement, type);
+        messageElement.textContent = message;
+        
+        // 添加到页面
+        const toastContainer = document.getElementById('toast-container');
+        toastContainer.appendChild(toast);
+        
+        // 触发动画
+        setTimeout(() => {
+            toastElement.classList.add('toast--show');
+        }, 10);
+        
+        // 进度条动画
+        if (duration > 0) {
+            const progressBar = toastElement.querySelector('.toast__progress-bar');
+            if (progressBar) {
+                progressBar.style.transition = `width ${duration}ms linear`;
+                setTimeout(() => {
+                    progressBar.style.width = '0%';
+                }, 10);
+            }
+        }
+        
+        // 存储引用
+        this.toasts.set(toastId, toastElement);
+        
+        // 自动关闭
+        if (duration > 0) {
+            setTimeout(() => {
+                this.dismissToast(toastId);
+            }, duration);
+        }
+        
+        return toastId;
+    }
+    
+    /**
+     * 设置通知图标
+     */
+    setNotificationIcon(iconElement, type) {
+        if (!iconElement) return;
+        
+        // 清除现有类
+        iconElement.className = 'fas';
+        
+        switch (type) {
+            case 'success':
+                iconElement.classList.add('fa-check-circle');
+                break;
+            case 'error':
+                iconElement.classList.add('fa-exclamation-circle');
+                break;
+            case 'warning':
+                iconElement.classList.add('fa-exclamation-triangle');
+                break;
+            case 'info':
+            default:
+                iconElement.classList.add('fa-info-circle');
+                break;
+        }
+    }
+    
+    /**
+     * 关闭通知
+     */
+    dismissNotification(notificationId) {
+        const notification = this.notifications.get(notificationId);
+        if (notification) {
+            notification.classList.add('alert--hide');
+            setTimeout(() => {
+                notification.remove();
+                this.notifications.delete(notificationId);
+            }, 300);
+        }
+    }
+    
+    /**
+     * 关闭Toast
+     */
+    dismissToast(toastId) {
+        const toast = this.toasts.get(toastId);
+        if (toast) {
+            toast.classList.add('toast--hide');
+            setTimeout(() => {
+                toast.remove();
+                this.toasts.delete(toastId);
+            }, 300);
+        }
+    }
+    
+    /**
+     * 清除所有通知
+     */
+    clearAll() {
+        this.notifications.forEach((notification, id) => {
+            this.dismissNotification(id);
+        });
+        
+        this.toasts.forEach((toast, id) => {
+            this.dismissToast(id);
+        });
+    }
+}
+
+// 全局通知管理器实例
+let notificationManager;
+
+// 初始化通知管理器
+document.addEventListener('DOMContentLoaded', function() {
+    notificationManager = new NotificationManager();
+});
+
+/**
+ * 全局通知函数
+ */
+function showNotification(options) {
+    return notificationManager ? notificationManager.showNotification(options) : null;
+}
+
+function showToast(options) {
+    return notificationManager ? notificationManager.showToast(options) : null;
+}
+
+function dismissNotification(element) {
+    if (typeof element === 'string') {
+        // 传入的是ID
+        notificationManager?.dismissNotification(element);
+    } else {
+        // 传入的是DOM元素
+        const notification = element.closest('.alert');
+        if (notification) {
+            const id = notification.getAttribute('data-notification-id');
+            notificationManager?.dismissNotification(id);
+        }
+    }
+}
+
+function dismissToast(element) {
+    if (typeof element === 'string') {
+        // 传入的是ID
+        notificationManager?.dismissToast(element);
+    } else {
+        // 传入的是DOM元素
+        const toast = element.closest('.toast');
+        if (toast) {
+            const id = toast.getAttribute('data-toast-id');
+            notificationManager?.dismissToast(id);
+        }
+    }
+}
+
+/**
+ * 便捷函数
+ */
+function showSuccessToast(message) {
+    return showToast({ type: 'success', message });
+}
+
+function showErrorToast(message) {
+    return showToast({ type: 'error', message });
+}
+
+function showWarningToast(message) {
+    return showToast({ type: 'warning', message });
+}
+
+function showInfoToast(message) {
+    return showToast({ type: 'info', message });
+}
+
+/**
+ * HTMX集成
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // HTMX成功响应
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        const xhr = evt.detail.xhr;
+        if (xhr.status === 200) {
+            // 检查响应头中的通知信息
+            const notification = xhr.getResponseHeader('X-Notification');
+            if (notification) {
+                try {
+                    const data = JSON.parse(notification);
+                    showToast(data);
+                } catch (e) {
+                    showSuccessToast('操作成功');
+                }
+            }
+        }
+    });
+    
+    // HTMX错误响应
+    document.body.addEventListener('htmx:responseError', function(evt) {
+        const xhr = evt.detail.xhr;
+        let message = '操作失败';
+        
+        if (xhr.status === 400) {
+            message = '请求参数错误';
+        } else if (xhr.status === 401) {
+            message = '未授权，请重新登录';
+        } else if (xhr.status === 403) {
+            message = '权限不足';
+        } else if (xhr.status === 404) {
+            message = '请求的资源不存在';
+        } else if (xhr.status >= 500) {
+            message = '服务器内部错误';
+        }
+        
+        showErrorToast(message);
+    });
+});
+</script>

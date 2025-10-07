@@ -1,0 +1,236 @@
+<!-- 侧边栏导航组件 - 语义化CSS版本 -->
+<aside id="sidebar" class="sidebar">
+    <!-- 侧边栏头部 -->
+    <div class="sidebar__header">
+        <div class="brand-logo">
+            <i class="fas fa-chart-line brand-logo__icon"></i>
+            <span class="brand-logo__text">Kronos</span>
+        </div>
+        <button id="sidebar-close" class="sidebar__close lg:hidden">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- 用户信息 -->
+    <div class="sidebar__user">
+        <div class="user-info">
+            <div class="user-info__avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info__details">
+                <p class="user-info__name">
+                    {% if current_user and current_user.is_authenticated %}
+                        {{ current_user.nickname or current_user.username }}
+                    {% else %}
+                        访客用户
+                    {% endif %}
+                </p>
+                <p class="user-info__email">
+                    {% if current_user and current_user.is_authenticated %}
+                        {{ current_user.email }}
+                    {% else %}
+                        未登录
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主导航菜单 -->
+    <nav class="sidebar__content">
+        <!-- 仪表板 -->
+        <a href="{{ url_for('views.index') }}" 
+           class="nav-item {% if request.endpoint == 'views.index' %}nav-item--active{% endif %}">
+            <i class="nav-item__icon fas fa-tachometer-alt"></i>
+            <span>仪表板</span>
+        </a>
+        
+        <!-- 智能预测 -->
+        <a href="{{ url_for('views.prediction') }}" 
+           class="nav-item {% if request.endpoint == 'views.prediction' %}nav-item--active{% endif %}">
+            <i class="nav-item__icon fas fa-crystal-ball"></i>
+            <span>智能预测</span>
+        </a>
+        
+        <!-- 市场分析 -->
+        <div class="nav-group">
+            <button class="nav-item {% if request.endpoint and request.endpoint.startswith('views.market') %}nav-item--active{% endif %}" 
+                    onclick="toggleNavGroup('market-group')">
+                <div class="nav-group__header">
+                    <i class="nav-item__icon fas fa-chart-bar"></i>
+                    <span>市场分析</span>
+                </div>
+                <i class="nav-group__toggle fas fa-chevron-right" id="market-group-icon"></i>
+            </button>
+            <div id="market-group" 
+                 class="nav-submenu {% if request.endpoint and request.endpoint.startswith('views.market') %}nav-submenu--show{% endif %}">
+                <a href="{{ url_for('views.market_sse') }}" 
+                   class="nav-subitem {% if request.endpoint == 'views.market_sse' %}nav-subitem--active{% endif %}">
+                    市场概览
+                </a>
+                <a href="{{ url_for('views.market_sse') }}" 
+                   class="nav-subitem {% if request.endpoint == 'views.market_sse' %}nav-subitem--active{% endif %}">
+                    沪市行情
+                </a>
+                <a href="{{ url_for('views.market_szse') }}" 
+                   class="nav-subitem {% if request.endpoint == 'views.market_szse' %}nav-subitem--active{% endif %}">
+                    深市行情
+                </a>
+                <a href="{{ url_for('views.market_top_list') }}" 
+                   class="nav-subitem {% if request.endpoint == 'views.market_top_list' %}nav-subitem--active{% endif %}">
+                    涨跌排行
+                </a>
+            </div>
+        </div>
+        
+        <!-- 历史记录 -->
+        <a href="{{ url_for('views.history') }}" 
+           class="nav-item {% if request.endpoint == 'views.history' %}nav-item--active{% endif %}">
+            <i class="nav-item__icon fas fa-history"></i>
+            <span>历史记录</span>
+        </a>
+        
+        <!-- 用户设置 -->
+        <div class="nav-group">
+            <button class="nav-item {% if request.endpoint and request.endpoint.startswith('user_views') %}nav-item--active{% endif %}" 
+                    onclick="toggleNavGroup('user-group')">
+                <div class="nav-group__header">
+                    <i class="nav-item__icon fas fa-user-cog"></i>
+                    <span>个人中心</span>
+                </div>
+                <i class="nav-group__toggle fas fa-chevron-right" id="user-group-icon"></i>
+            </button>
+            <div id="user-group" 
+                 class="nav-submenu {% if request.endpoint and request.endpoint.startswith('user_views') %}nav-submenu--show{% endif %}">
+                <a href="{{ url_for('user_views.profile_page') }}" 
+                   class="nav-subitem {% if request.endpoint == 'user_views.profile_page' %}nav-subitem--active{% endif %}">
+                    个人资料
+                </a>
+                <a href="{{ url_for('user_views.settings_page') }}" 
+                   class="nav-subitem {% if request.endpoint == 'user_views.settings_page' %}nav-subitem--active{% endif %}">
+                    系统设置
+                </a>
+                <a href="{{ url_for('user_views.security_page') }}" 
+                   class="nav-subitem {% if request.endpoint == 'user_views.security_page' %}nav-subitem--active{% endif %}">
+                    安全设置
+                </a>
+            </div>
+        </div>
+        
+        <!-- 分隔线 -->
+        <div class="nav-divider"></div>
+        
+        <!-- 帮助中心 -->
+        <a href="#" class="nav-item">
+            <i class="nav-item__icon fas fa-question-circle"></i>
+            <span>帮助中心</span>
+        </a>
+        
+        <!-- 退出登录 -->
+        <a href="{{ url_for('auth.logout') }}" class="nav-item nav-item--danger">
+            <i class="nav-item__icon fas fa-sign-out-alt"></i>
+            <span>退出登录</span>
+        </a>
+    </nav>
+    
+    <!-- 侧边栏底部 -->
+    <div class="sidebar__footer">
+        <div class="sidebar__version">
+            <p>版本 v2.0.0</p>
+            <p>© 2025 Kronos</p>
+        </div>
+    </div>
+</aside>
+
+<!-- 侧边栏遮罩层 (移动端) -->
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+<!-- 侧边栏JavaScript控制逻辑 -->
+<script>
+/**
+ * 切换导航组状态
+ * @param {string} groupId 导航组ID
+ */
+function toggleNavGroup(groupId) {
+    const submenu = document.getElementById(groupId);
+    const icon = document.getElementById(groupId + '-icon');
+    const navGroup = submenu.closest('.nav-group');
+    
+    if (submenu && icon && navGroup) {
+        // 切换子菜单显示状态
+        submenu.classList.toggle('nav-submenu--show');
+        
+        // 更新导航组状态
+        navGroup.classList.toggle('nav-group--open');
+        
+        // 更新箭头图标
+        if (submenu.classList.contains('nav-submenu--show')) {
+            icon.classList.remove('fa-chevron-right');
+            icon.classList.add('fa-chevron-down');
+        } else {
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-right');
+        }
+    }
+}
+
+/**
+ * 切换侧边栏折叠状态 (移动端)
+ */
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    if (sidebar && overlay) {
+        sidebar.classList.toggle('sidebar--collapsed');
+        
+        if (sidebar.classList.contains('sidebar--collapsed')) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('block');
+        } else {
+            overlay.classList.remove('block');
+            overlay.classList.add('hidden');
+        }
+    }
+}
+
+// 初始化侧边栏事件监听器
+document.addEventListener('DOMContentLoaded', function() {
+    // 移动端侧边栏切换按钮
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', toggleSidebar);
+    }
+    
+    // 侧边栏关闭按钮
+    const sidebarClose = document.getElementById('sidebar-close');
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', toggleSidebar);
+    }
+    
+    // 遮罩层点击关闭
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+    }
+    
+    // 响应式处理：大屏幕自动显示侧边栏
+    function handleResize() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        if (window.innerWidth >= 1024) { // lg breakpoint
+            if (sidebar) {
+                sidebar.classList.remove('sidebar--collapsed');
+            }
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('block');
+            }
+        }
+    }
+    
+    window.addEventListener('resize', handleResize);
+    handleResize(); // 初始调用
+});
+</script>

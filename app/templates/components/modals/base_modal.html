@@ -1,0 +1,133 @@
+{# 基础模态框组件
+   参数:
+   - modal_id: 模态框ID
+   - modal_title: 模态框标题
+   - modal_size: 模态框大小 (small, medium, large, full)
+   - modal_type: 模态框类型 (default, success, warning, danger, info)
+   - dismissible: 是否可关闭 (boolean, 默认true)
+   - backdrop_close: 是否点击背景关闭 (boolean, 默认true)
+   - show_header: 是否显示头部 (boolean, 默认true)
+   - show_footer: 是否显示底部 (boolean, 默认true)
+   - header_icon: 头部图标类名
+   - z_index: 层级 (默认50)
+#}
+
+<div id="{{ modal_id }}" 
+     class="modal {% if not modal_visible %}modal--hidden{% endif %}"
+     {% if z_index %}style="z-index: {{ z_index }};"{% endif %}>
+    
+    <!-- 背景遮罩 -->
+    <div class="modal__backdrop" 
+         {% if backdrop_close != false %}onclick="closeModal('{{ modal_id }}')"{% endif %}>
+    </div>
+    
+    <!-- 模态框容器 -->
+    <div class="modal__container 
+                {% if modal_size %}modal__container--{{ modal_size }}{% else %}modal__container--medium{% endif %}"
+         onclick="event.stopPropagation()">
+        
+        <!-- 模态框内容 -->
+        <div class="modal__content 
+                    {% if modal_type %}modal__content--{{ modal_type }}{% endif %}">
+            
+            {% if show_header != false %}
+            <!-- 模态框头部 -->
+            <div class="modal__header 
+                        {% if modal_type %}modal__header--{{ modal_type }}{% endif %}">
+                
+                <div class="modal__title-section">
+                    {% if header_icon %}
+                    <div class="modal__icon">
+                        <i class="{{ header_icon }}"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <h3 class="modal__title">{{ modal_title or '提示' }}</h3>
+                </div>
+                
+                {% if dismissible != false %}
+                <button class="modal__close" 
+                        onclick="closeModal('{{ modal_id }}')"
+                        type="button">
+                    <i class="fas fa-times"></i>
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- 模态框主体 -->
+            <div class="modal__body">
+                {{ caller() }}
+            </div>
+            
+            {% if show_footer != false and footer_content %}
+            <!-- 模态框底部 -->
+            <div class="modal__footer">
+                {{ footer_content }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// 模态框管理器
+window.ModalManager = window.ModalManager || {
+    openModals: [],
+    
+    // 显示模态框
+    showModal: function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        
+        modal.classList.remove('modal--hidden');
+        this.openModals.push(modalId);
+        document.body.classList.add('modal-open');
+    },
+    
+    // 关闭模态框
+    closeModal: function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        
+        modal.classList.add('modal--hidden');
+        const index = this.openModals.indexOf(modalId);
+        if (index > -1) {
+            this.openModals.splice(index, 1);
+        }
+        
+        if (this.openModals.length === 0) {
+            document.body.classList.remove('modal-open');
+        }
+    },
+    
+    // 关闭所有模态框
+    closeAllModals: function() {
+        this.openModals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('modal--hidden');
+            }
+        });
+        this.openModals = [];
+        document.body.classList.remove('modal-open');
+    }
+};
+
+// 全局函数
+function showModal(modalId) {
+    window.ModalManager.showModal(modalId);
+}
+
+function closeModal(modalId) {
+    window.ModalManager.closeModal(modalId);
+}
+
+// ESC键关闭模态框
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && window.ModalManager.openModals.length > 0) {
+        const lastModal = window.ModalManager.openModals[window.ModalManager.openModals.length - 1];
+        closeModal(lastModal);
+    }
+});
+</script>

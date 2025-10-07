@@ -52,10 +52,10 @@
 - [x] T008 [P] UI组件配置GET合约测试 `tests/contract/test_ui_components_get.py` - ✅ 已失败
 - [x] T009 [P] UI组件配置PUT合约测试 `tests/contract/test_ui_components_put.py` - ✅ 已创建
 - [x] T010 [P] 组件渲染POST合约测试 `tests/contract/test_component_render_post.py` - ✅ 已创建
-- [ ] T011 [P] 用户偏好GET合约测试 `tests/contract/test_user_preferences_get.py`
-- [ ] T012 [P] 用户偏好PUT合约测试 `tests/contract/test_user_preferences_put.py`
-- [ ] T013 [P] 性能指标POST合约测试 `tests/contract/test_performance_metrics_post.py`
-- [ ] T014 [P] 使用统计POST合约测试 `tests/contract/test_usage_tracking_post.py`
+- [x] T011 [P] 用户偏好GET合约测试 `tests/contract/test_user_preferences_get.py` ✅
+- [x] T012 [P] 用户偏好PUT合约测试 `tests/contract/test_user_preferences_put.py` ✅
+- [x] T013 [P] 性能指标POST合约测试 `tests/contract/test_performance_metrics_post.py` ✅
+- [x] T014 [P] 使用统计POST合约测试 `tests/contract/test_usage_tracking_post.py` ✅
 
 ### HTMX视图合约测试 [P] - 核心测试已完成
 - [x] T015 [P] 组件HTML视图GET合约测试 `tests/contract/test_htmx_components_get.py` - ✅ 已创建
@@ -118,7 +118,7 @@
 ### API集成配置 ✅
 - [x] T049 注册新API蓝图到Flask应用 `app/__init__.py`
 - [x] T050 配置API错误处理中间件 `app/api/__init__.py`
-- [ ] T051 更新API路由文档 `docs/api.md`
+- [x] T051 更新API路由文档 `docs/api.md` ✅
 
 ## Phase 3.6: 语义化CSS组件系统 🎨 ✅ 已完成
 
@@ -198,7 +198,7 @@
   - 替换所有Flexbox/Grid直接类为语义化布局类
   - 确保主题切换和响应式行为通过组件类实现
 
-- [ ] T066 **重构导航侧边栏组件** `app/templates/components/sidebar.html`
+- [x] T066 **重构导航侧边栏组件** `app/templates/components/sidebar.html` ✅
   - 使用 `.sidebar`, `.nav`, `.nav-item`, `.nav-subitem` 结构
   - 应用导航状态类：`.nav-item-active`, `.nav-submenu-show`
   - 确保折叠/展开行为通过 `.sidebar-collapsed` 类控制
@@ -208,33 +208,33 @@
   - 使用 `.avatar-placeholder`, `.avatar-status` 状态指示
   - 应用下拉菜单：`.dropdown`, `.dropdown-menu`, `.dropdown-item`
 
-- [ ] T068 **重构通知组件模板** `app/templates/components/notifications.html`
+- [x] T068 **重构通知组件模板** `app/templates/components/notifications.html` ✅
   - 使用 `.alert`, `.alert-success`, `.alert-error`, `.alert-warning` 系统
   - 应用通知行为类：`.alert-dismissible`, `.toast`, `.notification-center`
   - 确保动画和过渡效果通过CSS组件类实现
 
 ### 表单和交互组件 - **完整语义化组件库**
-- [ ] T069 **重构表单组件模板目录** `app/templates/components/forms/` ✅
+- [x] T069 **重构表单组件模板目录** `app/templates/components/forms/` ✅
   - **input_field.html**: 使用 `.form-group`, `.form-input`, `.form-error` 结构
   - **textarea_field.html**: 应用 `.form-textarea`, `.form-label`, `.form-hint`
   - **select_field.html**: 使用 `.form-select`, `.form-option-group`
   - **checkbox_field.html**: 应用 `.form-checkbox`, `.checkbox-group`
   - **radio_field.html**: 使用 `.form-radio`, `.radio-group`
 
-- [ ] T070 **重构模态框组件模板目录** `app/templates/components/modals/`
+- [x] T070 **重构模态框组件模板目录** `app/templates/components/modals/` ✅
   - **base_modal.html**: 使用 `.modal`, `.modal-backdrop`, `.modal-dialog` 结构
   - **confirmation_modal.html**: 应用 `.modal-header`, `.modal-body`, `.modal-actions`
   - **form_modal.html**: 集成表单组件类和模态框类
   - **image_modal.html**: 使用 `.modal-fullscreen`, `.modal-media`
 
-- [ ] T071 **创建HTMX组件模板目录** `app/templates/components/htmx/`
+- [x] T071 **创建HTMX组件模板目录** `app/templates/components/htmx/` ✅
   - **loading_states.html**: 使用 `.loading`, `.spinner`, `.skeleton` 加载状态类
   - **form_submission.html**: 应用 `.form-submitting`, `.form-success` 状态
   - **dynamic_content.html**: 使用 `.content-loading`, `.content-loaded` 容器类
   - **live_updates.html**: 应用 `.live-indicator`, `.update-highlight` 反馈类
 
 ### 语义化类名验证和文档
-- [ ] T071.1 **创建模板CSS类使用审查系统** `docs/components/template-css-audit.md`
+- [x] T071.1 **创建模板CSS类使用审查系统** `docs/components/template-css-audit.md` ✅
   - 列出所有应该被语义化类替代的TailwindCSS原子类模式
   - **使用自动化检查脚本**: `.specify/scripts/bash/check-css-semantics.sh` (已创建)
   - 建立CSS类命名规范和代码审查流程

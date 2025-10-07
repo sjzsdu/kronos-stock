@@ -1,0 +1,84 @@
+{# 消息模态框组件 (信息、警告、错误、成功)
+   参数:
+   - modal_id: 模态框ID
+   - title: 标题
+   - message: 消息内容
+   - message_type: 消息类型 (info, success, warning, error)
+   - button_text: 按钮文本 (默认"确定")
+   - auto_close: 自动关闭时间(秒) - 可选
+   - on_close: 关闭回调函数名
+#}
+
+{% set type_config = {
+    'info': {
+        'icon': 'fas fa-info-circle',
+        'color': 'info'
+    },
+    'success': {
+        'icon': 'fas fa-check-circle', 
+        'color': 'success'
+    },
+    'warning': {
+        'icon': 'fas fa-exclamation-triangle',
+        'color': 'warning'
+    },
+    'error': {
+        'icon': 'fas fa-times-circle',
+        'color': 'danger'
+    }
+} %}
+
+{% set config = type_config.get(message_type, type_config['info']) %}
+
+<div id="{{ modal_id }}" class="modal modal--hidden">
+    <div class="modal__backdrop" onclick="closeModal('{{ modal_id }}')"></div>
+    
+    <div class="modal__container modal__container--small">
+        <div class="modal__content">
+            
+            <!-- 消息头部 -->
+            <div class="modal__header modal__header--{{ config.color }}">
+                <div class="modal__title-section">
+                    <div class="modal__icon modal__icon--{{ message_type }}">
+                        <i class="{{ config.icon }}"></i>
+                    </div>
+                    <h3 class="modal__title">{{ title }}</h3>
+                </div>
+                <button class="modal__close" onclick="closeModal('{{ modal_id }}')" type="button">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- 消息内容 -->
+            <div class="modal__body">
+                <div class="message-content message-content--{{ message_type }}">
+                    {{ message | safe }}
+                </div>
+                {{ caller() if caller }}
+            </div>
+            
+            <!-- 操作按钮 -->
+            <div class="modal__footer modal__footer--center">
+                <button type="button" 
+                        class="btn btn--{{ config.color }}"
+                        onclick="{% if on_close %}{{ on_close }}();{% endif %}closeModal('{{ modal_id }}')">
+                    {{ button_text or '确定' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if auto_close %}
+<script>
+// 自动关闭功能
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('{{ modal_id }}');
+    if (modal && !modal.classList.contains('modal--hidden')) {
+        setTimeout(function() {
+            closeModal('{{ modal_id }}');
+        }, {{ auto_close }} * 1000);
+    }
+});
+</script>
+{% endif %}

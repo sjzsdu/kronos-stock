@@ -1,0 +1,63 @@
+{# 多行文本输入组件
+   参数:
+   - field_id: 字段ID
+   - field_name: 字段名称
+   - field_label: 字段标签
+   - field_value: 字段默认值
+   - placeholder: 占位符文本
+   - rows: 行数 (默认4)
+   - cols: 列数
+   - required: 是否必填 (boolean)
+   - disabled: 是否禁用 (boolean)
+   - readonly: 是否只读 (boolean)
+   - maxlength: 最大长度
+   - icon: FontAwesome图标类名
+   - help_text: 帮助文本
+#}
+<div class="form-group">
+    {% if field_label %}
+    <label for="{{ field_id }}" class="form-label">
+        {% if icon %}
+        <i class="{{ icon }}"></i>
+        {% endif %}
+        {{ field_label }}
+    </label>
+    {% endif %}
+    
+    <textarea 
+        id="{{ field_id }}" 
+        name="{{ field_name }}" 
+        {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+        {% if rows %}rows="{{ rows }}"{% else %}rows="4"{% endif %}
+        {% if cols %}cols="{{ cols }}"{% endif %}
+        {% if required %}required{% endif %}
+        {% if disabled %}disabled{% endif %}
+        {% if readonly %}readonly{% endif %}
+        {% if maxlength %}maxlength="{{ maxlength }}"{% endif %}
+        class="form-textarea"
+    >{{ field_value or '' }}</textarea>
+    
+    {% if help_text %}
+    <p class="form-help">{{ help_text }}</p>
+    {% endif %}
+    
+    {% if maxlength %}
+    <div class="form-counter">
+        <span id="{{ field_id }}-counter">{{ (field_value | length) if field_value else 0 }}</span>/{{ maxlength }}
+    </div>
+    
+    <script>
+    // 字符计数功能
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('{{ field_id }}');
+        const counter = document.getElementById('{{ field_id }}-counter');
+        
+        if (textarea && counter) {
+            textarea.addEventListener('input', function() {
+                counter.textContent = this.value.length;
+            });
+        }
+    });
+    </script>
+    {% endif %}
+</div>

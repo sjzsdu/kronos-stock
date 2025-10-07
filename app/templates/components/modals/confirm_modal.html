@@ -1,0 +1,68 @@
+{# 确认对话框组件
+   参数:
+   - modal_id: 模态框ID
+   - title: 标题
+   - message: 确认消息
+   - confirm_text: 确认按钮文本 (默认"确认")
+   - cancel_text: 取消按钮文本 (默认"取消")  
+   - confirm_style: 确认按钮样式 (default, success, warning, danger)
+   - icon_type: 图标类型 (question, warning, danger, info)
+   - on_confirm: 确认回调函数名
+   - on_cancel: 取消回调函数名
+   - confirm_action: 确认按钮的动作属性 (HTMX等)
+#}
+
+{% set icon_map = {
+    'question': 'fas fa-question-circle',
+    'warning': 'fas fa-exclamation-triangle', 
+    'danger': 'fas fa-exclamation-triangle',
+    'info': 'fas fa-info-circle',
+    'success': 'fas fa-check-circle'
+} %}
+
+{% set icon_class = icon_map.get(icon_type, 'fas fa-question-circle') %}
+{% set modal_type = confirm_style or 'default' %}
+
+<div id="{{ modal_id }}" class="modal modal--hidden">
+    <div class="modal__backdrop" onclick="closeModal('{{ modal_id }}')"></div>
+    
+    <div class="modal__container modal__container--small">
+        <div class="modal__content">
+            
+            <!-- 确认对话框头部 -->
+            <div class="modal__header modal__header--{{ modal_type }}">
+                <div class="modal__title-section">
+                    <div class="modal__icon modal__icon--{{ icon_type or 'question' }}">
+                        <i class="{{ icon_class }}"></i>
+                    </div>
+                    <h3 class="modal__title">{{ title or '确认操作' }}</h3>
+                </div>
+                <button class="modal__close" onclick="closeModal('{{ modal_id }}')" type="button">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- 确认消息 -->
+            <div class="modal__body">
+                <p class="confirm-message">{{ message }}</p>
+                {{ caller() if caller }}
+            </div>
+            
+            <!-- 操作按钮 -->
+            <div class="modal__footer">
+                <button type="button" 
+                        class="btn btn--secondary"
+                        onclick="{% if on_cancel %}{{ on_cancel }}();{% endif %}closeModal('{{ modal_id }}')">
+                    {{ cancel_text or '取消' }}
+                </button>
+                
+                <button type="button" 
+                        class="btn btn--{{ confirm_style or 'primary' }}"
+                        {% if confirm_action %}{{ confirm_action | safe }}{% endif %}
+                        onclick="{% if on_confirm %}{{ on_confirm }}();{% endif %}">
+                    {{ confirm_text or '确认' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,188 @@
+{# HTMX分页组件
+   参数:
+   - pagination_id: 分页器ID
+   - endpoint: 分页端点URL模板 (例如: '/api/data?page={page}')
+   - target: 目标容器选择器
+   - current_page: 当前页码
+   - total_pages: 总页数
+   - per_page: 每页显示数量
+   - show_info: 是否显示信息文本
+   - show_size_selector: 是否显示每页数量选择器
+   - swap: 交换策略
+   - indicator: 加载指示器
+#}
+
+<div id="{{ pagination_id }}" class="htmx-pagination">
+    
+    {% if show_info and total_pages > 0 %}
+    <!-- 分页信息 -->
+    <div class="htmx-pagination__info">
+        <span>共 {{ total_pages }} 页，每页 {{ per_page }} 条</span>
+    </div>
+    {% endif %}
+    
+    {% if total_pages > 1 %}
+    <!-- 分页控件 -->
+    <div class="htmx-pagination__controls">
+        
+        <!-- 上一页 -->
+        <button type="button"
+                class="htmx-pagination__btn htmx-pagination__btn--prev"
+                {% if current_page <= 1 %}disabled{% endif %}
+                hx-get="{{ endpoint.replace('{page}', (current_page - 1) | string) }}"
+                hx-target="{{ target }}"
+                {% if swap %}hx-swap="{{ swap }}"{% endif %}
+                {% if indicator %}hx-indicator="{{ indicator }}"{% endif %}>
+            <i class="fas fa-chevron-left"></i>
+            上一页
+        </button>
+        
+        <!-- 页码列表 -->
+        <div class="htmx-pagination__pages">
+            {% set start_page = [1, current_page - 2] | max %}
+            {% set end_page = [total_pages, current_page + 2] | min %}
+            
+            {% if start_page > 1 %}
+            <button type="button"
+                    class="htmx-pagination__btn"
+                    hx-get="{{ endpoint.replace('{page}', '1') }}"
+                    hx-target="{{ target }}"
+                    {% if swap %}hx-swap="{{ swap }}"{% endif %}
+                    {% if indicator %}hx-indicator="{{ indicator }}"{% endif %}>
+                1
+            </button>
+            {% if start_page > 2 %}
+            <span class="htmx-pagination__ellipsis">...</span>
+            {% endif %}
+            {% endif %}
+            
+            {% for page in range(start_page, end_page + 1) %}
+            <button type="button"
+                    class="htmx-pagination__btn 
+                           {% if page == current_page %}htmx-pagination__btn--active{% endif %}"
+                    {% if page != current_page %}
+                    hx-get="{{ endpoint.replace('{page}', page | string) }}"
+                    hx-target="{{ target }}"
+                    {% if swap %}hx-swap="{{ swap }}"{% endif %}
+                    {% if indicator %}hx-indicator="{{ indicator }}"{% endif %}
+                    {% endif %}>
+                {{ page }}
+            </button>
+            {% endfor %}
+            
+            {% if end_page < total_pages %}
+            {% if end_page < total_pages - 1 %}
+            <span class="htmx-pagination__ellipsis">...</span>
+            {% endif %}
+            <button type="button"
+                    class="htmx-pagination__btn"
+                    hx-get="{{ endpoint.replace('{page}', total_pages | string) }}"
+                    hx-target="{{ target }}"
+                    {% if swap %}hx-swap="{{ swap }}"{% endif %}
+                    {% if indicator %}hx-indicator="{{ indicator }}"{% endif %}>
+                {{ total_pages }}
+            </button>
+            {% endif %}
+        </div>
+        
+        <!-- 下一页 -->
+        <button type="button"
+                class="htmx-pagination__btn htmx-pagination__btn--next"
+                {% if current_page >= total_pages %}disabled{% endif %}
+                hx-get="{{ endpoint.replace('{page}', (current_page + 1) | string) }}"
+                hx-target="{{ target }}"
+                {% if swap %}hx-swap="{{ swap }}"{% endif %}
+                {% if indicator %}hx-indicator="{{ indicator }}"{% endif %}>
+            下一页
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+    {% endif %}
+    
+    {% if show_size_selector %}
+    <!-- 每页数量选择器 -->
+    <div class="htmx-pagination__size-selector">
+        <label for="{{ pagination_id }}-size">每页显示：</label>
+        <select id="{{ pagination_id }}-size" 
+                class="htmx-pagination__size-select"
+                onchange="updatePageSize(this.value, '{{ endpoint }}', '{{ target }}')">
+            {% for size in [10, 20, 50, 100] %}
+            <option value="{{ size }}" {% if size == per_page %}selected{% endif %}>
+                {{ size }} 条
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+    
+    <!-- 快速跳转 -->
+    <div class="htmx-pagination__jump">
+        <label for="{{ pagination_id }}-jump">跳转到：</label>
+        <input type="number" 
+               id="{{ pagination_id }}-jump"
+               class="htmx-pagination__jump-input"
+               min="1" 
+               max="{{ total_pages }}"
+               value="{{ current_page }}"
+               onkeypress="if(event.key==='Enter') jumpToPage(this.value, '{{ endpoint }}', '{{ target }}')">
+        <button type="button" 
+                class="htmx-pagination__jump-btn"
+                onclick="jumpToPage(document.getElementById('{{ pagination_id }}-jump').value, '{{ endpoint }}', '{{ target }}')">
+            跳转
+        </button>
+    </div>
+</div>
+
+<script>
+// HTMX分页增强功能
+function jumpToPage(page, endpoint, target) {
+    const pageNum = parseInt(page);
+    if (pageNum >= 1 && pageNum <= {{ total_pages }}) {
+        htmx.ajax('GET', endpoint.replace('{page}', pageNum), {
+            target: target,
+            {% if swap %}swap: '{{ swap }}',{% endif %}
+            {% if indicator %}indicator: '{{ indicator }}'{% endif %}
+        });
+    }
+}
+
+function updatePageSize(size, endpoint, target) {
+    // 更新每页大小并跳转到第一页
+    const newEndpoint = endpoint.includes('?') 
+        ? endpoint + '&per_page=' + size
+        : endpoint + '?per_page=' + size;
+    
+    htmx.ajax('GET', newEndpoint.replace('{page}', '1'), {
+        target: target,
+        {% if swap %}swap: '{{ swap }}',{% endif %}
+        {% if indicator %}indicator: '{{ indicator }}'{% endif %}
+    });
+}
+
+// 分页按钮状态管理
+document.addEventListener('DOMContentLoaded', function() {
+    const pagination = document.getElementById('{{ pagination_id }}');
+    if (!pagination) return;
+    
+    // 监听HTMX请求事件
+    pagination.addEventListener('htmx:beforeRequest', function(e) {
+        // 禁用所有分页按钮
+        const buttons = pagination.querySelectorAll('.htmx-pagination__btn');
+        buttons.forEach(btn => btn.disabled = true);
+        
+        pagination.classList.add('htmx-pagination--loading');
+    });
+    
+    document.addEventListener('htmx:afterRequest', function(e) {
+        // 重新启用分页按钮
+        const buttons = pagination.querySelectorAll('.htmx-pagination__btn');
+        buttons.forEach(btn => {
+            if (!btn.classList.contains('htmx-pagination__btn--active')) {
+                btn.disabled = false;
+            }
+        });
+        
+        pagination.classList.remove('htmx-pagination--loading');
+    });
+});
+</script>
