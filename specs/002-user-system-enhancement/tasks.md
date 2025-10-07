@@ -203,7 +203,7 @@
   - 应用导航状态类：`.nav-item-active`, `.nav-submenu-show`
   - 确保折叠/展开行为通过 `.sidebar-collapsed` 类控制
 
-- [ ] T067 **重构用户头像组件** `app/templates/components/user_avatar.html`
+- [x] T067 **重构用户头像组件** `app/templates/components/user_avatar.html` ✅
   - 定义 `.avatar`, `.avatar-sm`, `.avatar-lg` 尺寸系统
   - 使用 `.avatar-placeholder`, `.avatar-status` 状态指示
   - 应用下拉菜单：`.dropdown`, `.dropdown-menu`, `.dropdown-item`
@@ -214,7 +214,7 @@
   - 确保动画和过渡效果通过CSS组件类实现
 
 ### 表单和交互组件 - **完整语义化组件库**
-- [ ] T069 **重构表单组件模板目录** `app/templates/components/forms/`
+- [ ] T069 **重构表单组件模板目录** `app/templates/components/forms/` ✅
   - **input_field.html**: 使用 `.form-group`, `.form-input`, `.form-error` 结构
   - **textarea_field.html**: 应用 `.form-textarea`, `.form-label`, `.form-hint`
   - **select_field.html**: 使用 `.form-select`, `.form-option-group`

@@ -3,26 +3,7 @@
 {% block title %}用户登录 - Kronos 智能投资平台{% endblock %}
 
 {% block head %}
-<style>
-    /* 登录页面专用样式 */
-    .login-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-    }
-    
-    .login-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .brand-logo {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-</style>
+<!-- 使用语义化CSS类，无需内联样式 -->
 {% endblock %}
 
 {% block content %}
@@ -53,13 +34,13 @@
                   class="form">
                 
                 <!-- 错误/成功消息区域 -->
-                <div id="login-messages" class="hidden"></div>
+                <div id="login-messages" class="notification-area notification-area--hidden"></div>
 
-                <div class="form__body">
+                <div class="card__body">
                     <!-- 邮箱输入 -->
-                    <div class="form__group">
-                        <label for="email" class="form__label">
-                            <i class="fas fa-envelope form__icon"></i>
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i>
                             邮箱地址
                         </label>
                         <input id="email" 
@@ -67,40 +48,40 @@
                                type="email" 
                                required
                                autocomplete="email"
-                               class="form__input"
+                               class="form-input"
                                placeholder="请输入邮箱地址">
                     </div>
 
                     <!-- 密码输入 -->
-                    <div class="form__group">
-                        <label for="password" class="form__label">
-                            <i class="fas fa-lock form__icon"></i>
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock"></i>
                             密码
                         </label>
-                        <div class="form__input-group">
+                        <div class="form-input-group">
                             <input id="password" 
                                    name="password" 
                                    type="password" 
                                    required
                                    autocomplete="current-password"
-                                   class="form__input form__input--with-button"
+                                   class="form-input"
                                    placeholder="请输入密码">
                             <button type="button" 
                                     onclick="togglePassword('password')"
-                                    class="form__input-button">
+                                    class="form-input-button">
                                 <i class="fas fa-eye" id="password-eye"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- 记住我和忘记密码 -->
-                    <div class="form__actions">
-                        <div class="form__checkbox-group">
+                    <div class="form-actions">
+                        <div class="form-checkbox-group">
                             <input id="remember-me" 
                                    name="remember_me" 
                                    type="checkbox"
-                                   class="form__checkbox">
-                            <label for="remember-me" class="form__checkbox-label">
+                                   class="form-checkbox">
+                            <label for="remember-me" class="form-checkbox-label">
                                 记住我
                             </label>
                         </div>
@@ -114,16 +95,16 @@
                 </div>
 
                 <!-- 登录按钮 -->
-                <div class="form__submit">
+                <div class="card__footer">
                     <button type="submit" 
                             id="login-button"
-                            class="btn btn--primary btn--full-width btn--with-icon">
-                        <span class="btn__icon">
-                            <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                            class="btn-primary btn--lg w-full">
+                        <span id="login-text">
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            立即登录
                         </span>
-                        <span id="login-text">立即登录</span>
-                        <span id="login-loading" class="hidden">
-                            <i class="fas fa-spinner fa-spin"></i>
+                        <span id="login-loading" class="btn--loading hidden">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>
                             登录中...
                         </span>
                     </button>
@@ -188,20 +169,18 @@ function handleLoginResponse(event) {
         if (xhr.status === 200 && response.success) {
             // 登录成功
             messagesDiv.innerHTML = `
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-check-circle text-green-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-green-800">
-                                登录成功！正在跳转...
-                            </p>
-                        </div>
+                <div class="alert alert-success">
+                    <div class="alert__icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="alert__content">
+                        <p class="alert__message">
+                            登录成功！正在跳转...
+                        </p>
                     </div>
                 </div>
             `;
-            messagesDiv.classList.remove('hidden');
+            messagesDiv.classList.remove('notification-area--hidden');
             
             // 保存token到localStorage
             if (response.token) {
@@ -226,20 +205,18 @@ function handleLoginResponse(event) {
 function showError(message) {
     const messagesDiv = document.getElementById('login-messages');
     messagesDiv.innerHTML = `
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-red-800">
-                        ${message}
-                    </p>
-                </div>
+        <div class="alert alert-error">
+            <div class="alert__icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="alert__content">
+                <p class="alert__message">
+                    ${message}
+                </p>
             </div>
         </div>
     `;
-    messagesDiv.classList.remove('hidden');
+    messagesDiv.classList.remove('notification-area--hidden');
 }
 
 // 表单提交时显示加载状态

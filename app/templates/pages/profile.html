@@ -9,8 +9,12 @@
                 <div class="card-content">
                     <div class="profile-header">
                         <div class="avatar-container">
-                            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="用户头像" class="avatar">
-                            <button class="change-avatar-btn" onclick="changeAvatar()">
+                            <div class="avatar avatar--lg">
+                                <div class="avatar__image">
+                                    <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="用户头像" class="avatar__img">
+                                </div>
+                            </div>
+                            <button class="avatar__upload-btn" onclick="changeAvatar()">
                                 <i class="fas fa-camera"></i>
                             </button>
                         </div>

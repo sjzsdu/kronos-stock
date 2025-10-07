@@ -1,66 +1,123 @@
-<form hx-post="{{ url_for('views.prediction_result_component') }}"
-      hx-target="#prediction-results"
-      hx-trigger="submit"
-      hx-indicator="#prediction-loading"
-      class="prediction-form">
-    
-    <div class="form-group">
-        <label for="stock_code">股票代码:</label>
-        <input type="text" 
-               id="stock_code" 
-               name="stock_code" 
-               placeholder="例如: 000001, 600000" 
-               required>
-        <small class="form-help">支持6位数字代码或带交易所前缀的代码</small>
-    </div>
-
-    <div class="form-row">
-        <div class="form-group">
-            <label for="lookback">历史数据天数:</label>
-            <input type="number" 
-                   id="lookback" 
-                   name="lookback" 
-                   value="30" 
-                   min="7" 
-                   max="252" 
-                   required>
-            <small class="form-help">7-252天</small>
-        </div>
-
-        <div class="form-group">
-            <label for="pred_len">预测天数:</label>
-            <input type="number" 
-                   id="pred_len" 
-                   name="pred_len" 
-                   value="5" 
-                   min="1" 
-                   max="30" 
-                   required>
-            <small class="form-help">1-30天</small>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="temperature">温度参数:</label>
-        <input type="range" 
-               id="temperature" 
-               name="temperature" 
-               value="0.7" 
-               min="0.1" 
-               max="2.0" 
-               step="0.1"
-               oninput="this.nextElementSibling.value = this.value">
-        <output>0.7</output>
-        <small class="form-help">较低值更保守，较高值更有创造性</small>
-    </div>
-
-    <div class="form-actions">
-        <button type="submit" class="btn btn-primary">
-            开始预测
-        </button>
+<!-- 股票选择表单组件 - 语义化CSS版本 -->
+<div class="stock-form" data-component="stock-form">
+    <form class="form form--stock-prediction" 
+          hx-post="{{ url_for('views.prediction') }}" 
+          hx-target="#prediction-result" 
+          hx-swap="innerHTML"
+          hx-indicator="#loading-indicator"
+          data-form="stock-prediction">
         
-        <div id="prediction-loading" class="loading-indicator htmx-indicator">
-            <span>预测中...</span>
+        <div class="card__header">
+            <h3 class="card__title">
+                <i class="fas fa-chart-line form__title-icon"></i>
+                智能股票预测
+            </h3>
+            <p class="card__subtitle">
+                输入股票代码，获取基于AI模型的价格预测分析
+            </p>
         </div>
-    </div>
-</form>
+
+        <div class="card__body">
+            <div class="form-group form-group--required">
+                <label for="stock_code" class="form-label">
+                    <i class="fas fa-search form__label-icon"></i>
+                    股票代码
+                </label>
+                <div class="form-input-group">
+                    <input type="text" 
+                           id="stock_code" 
+                           name="stock_code" 
+                           class="form-input form-input--with-icon" 
+                           placeholder="请输入6位股票代码，如：000001"
+                           maxlength="6"
+                           pattern="[0-9]{6}"
+                           required
+                           autocomplete="off"
+                           data-input="stock-code">
+                    <div class="form-input-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                </div>
+                <div class="form-hint">
+                    支持沪深A股，请输入6位数字代码
+                </div>
+                <div class="form-error" id="stock_code_error" style="display: none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="prediction_days" class="form-label">
+                    <i class="fas fa-calendar form__label-icon"></i>
+                    预测天数
+                </label>
+                <select id="prediction_days" 
+                        name="prediction_days" 
+                        class="form-select"
+                        data-select="prediction-days">
+                    <option value="1">1天 (短期)</option>
+                    <option value="3">3天 (中期)</option>
+                    <option value="5" selected>5天 (推荐)</option>
+                    <option value="7">7天 (长期)</option>
+                </select>
+                <div class="form-hint">
+                    推荐选择5天预测，获得最佳准确性
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confidence_level" class="form-label">
+                    <i class="fas fa-shield-alt form__label-icon"></i>
+                    置信度要求
+                </label>
+                <div class="form__radio-group">
+                    <label class="form__radio-item">
+                        <input type="radio" name="confidence_level" value="0.7" class="form-radio">
+                        <span class="form__radio-checkmark"></span>
+                        <span class="form__radio-label">
+                            <span class="form__radio-text">标准 (70%)</span>
+                            <span class="form__radio-desc">平衡准确性和覆盖率</span>
+                        </span>
+                    </label>
+                    <label class="form__radio-item">
+                        <input type="radio" name="confidence_level" value="0.8" checked class="form-radio">
+                        <span class="form__radio-checkmark"></span>
+                        <span class="form__radio-label">
+                            <span class="form__radio-text">高 (80%)</span>
+                            <span class="form__radio-desc">推荐设置，高质量预测</span>
+                        </span>
+                    </label>
+                    <label class="form__radio-item">
+                        <input type="radio" name="confidence_level" value="0.9" class="form-radio">
+                        <span class="form__radio-checkmark"></span>
+                        <span class="form__radio-label">
+                            <span class="form__radio-text">极高 (90%)</span>
+                            <span class="form__radio-desc">最高准确性，预测较少</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn--primary btn--lg btn--with-icon" data-button="submit">
+                <i class="fas fa-magic btn__icon"></i>
+                <span class="btn__text">开始预测</span>
+                <div class="btn__spinner" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+            </button>
+            
+            <button type="button" class="btn btn--secondary btn--lg" data-button="reset">
+                <i class="fas fa-redo btn__icon"></i>
+                <span class="btn__text">重置表单</span>
+            </button>
+        </div>
+
+        <!-- 加载指示器 -->
+        <div id="loading-indicator" class="form__loading-indicator" style="display: none;">
+            <div class="loading-spinner">
+                <div class="spinner spinner--primary"></div>
+                <div class="loading-text">正在分析股票数据...</div>
+            </div>
+        </div>
+    </form>
+</div>

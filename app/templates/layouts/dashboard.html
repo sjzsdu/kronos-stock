@@ -48,14 +48,14 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="user-info__details">
-                        <p class="text-sm font-medium text-gray-900 truncate">
+                        <p class="user-info__name">
                             {% if current_user and current_user.is_authenticated %}
                                 {{ current_user.nickname or current_user.username }}
                             {% else %}
                                 访客用户
                             {% endif %}
                         </p>
-                        <p class="text-xs text-gray-500 truncate">
+                        <p class="user-info__email">
                             {% if current_user and current_user.is_authenticated %}
                                 {{ current_user.email }}
                             {% else %}
@@ -67,115 +67,113 @@
             </div>
             
             <!-- 主导航菜单 -->
-            <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+            <nav class="sidebar__content">
                 <!-- 仪表板 -->
-                <a href="{{ url_for('views.index') }}" class="nav-item {% if request.endpoint == 'views.index' %}active{% endif %}">
-                    <i class="fas fa-tachometer-alt w-5 h-5"></i>
+                <a href="{{ url_for('views.index') }}" class="nav-item {% if request.endpoint == 'views.index' %}nav-item--active{% endif %}">
+                    <i class="nav-item__icon fas fa-tachometer-alt"></i>
                     <span>仪表板</span>
                 </a>
                 
                 <!-- 智能预测 -->
-                <a href="{{ url_for('views.prediction') }}" class="nav-item {% if request.endpoint == 'views.prediction' %}active{% endif %}">
-                    <i class="fas fa-crystal-ball w-5 h-5"></i>
+                <a href="{{ url_for('views.prediction') }}" class="nav-item {% if request.endpoint == 'views.prediction' %}nav-item--active{% endif %}">
+                    <i class="nav-item__icon fas fa-crystal-ball"></i>
                     <span>智能预测</span>
                 </a>
                 
                 <!-- 市场分析 -->
                 <div class="nav-group">
-                    <button class="nav-group-toggle {% if request.endpoint and request.endpoint.startswith('views.market') %}active{% endif %}" onclick="toggleNavGroup('market-group')">
-                        <div class="flex items-center">
-                            <i class="fas fa-chart-bar w-5 h-5"></i>
+                    <button class="nav-item {% if request.endpoint and request.endpoint.startswith('views.market') %}nav-item--active{% endif %}" onclick="toggleNavGroup('market-group')">
+                        <div class="nav-group__header">
+                            <i class="nav-item__icon fas fa-chart-bar"></i>
                             <span>市场分析</span>
                         </div>
-                        <i class="fas fa-chevron-right transform transition-transform" id="market-group-icon"></i>
+                        <i class="nav-group__toggle fas fa-chevron-right" id="market-group-icon"></i>
                     </button>
-                    <div id="market-group" class="nav-submenu {% if request.endpoint and request.endpoint.startswith('views.market') %}show{% endif %}">
-                        <a href="{{ url_for('views.market_sse') }}" class="nav-subitem {% if request.endpoint == 'views.market_sse' %}active{% endif %}">
+                    <div id="market-group" class="nav-submenu {% if request.endpoint and request.endpoint.startswith('views.market') %}nav-submenu--show{% endif %}">
+                        <a href="{{ url_for('views.market_sse') }}" class="nav-subitem {% if request.endpoint == 'views.market_sse' %}nav-subitem--active{% endif %}">
                             市场概览
                         </a>
-                        <a href="{{ url_for('views.market_sse') }}" class="nav-subitem {% if request.endpoint == 'views.market_sse' %}active{% endif %}">
+                        <a href="{{ url_for('views.market_sse') }}" class="nav-subitem {% if request.endpoint == 'views.market_sse' %}nav-subitem--active{% endif %}">
                             沪市行情
                         </a>
-                        <a href="{{ url_for('views.market_szse') }}" class="nav-subitem {% if request.endpoint == 'views.market_szse' %}active{% endif %}">
+                        <a href="{{ url_for('views.market_szse') }}" class="nav-subitem {% if request.endpoint == 'views.market_szse' %}nav-subitem--active{% endif %}">
                             深市行情
                         </a>
-                        <a href="{{ url_for('views.market_top_list') }}" class="nav-subitem {% if request.endpoint == 'views.market_top_list' %}active{% endif %}">
+                        <a href="{{ url_for('views.market_top_list') }}" class="nav-subitem {% if request.endpoint == 'views.market_top_list' %}nav-subitem--active{% endif %}">
                             涨跌排行
                         </a>
                     </div>
                 </div>
                 
                 <!-- 历史记录 -->
-                <a href="{{ url_for('views.history') }}" class="nav-item {% if request.endpoint == 'views.history' %}active{% endif %}">
-                    <i class="fas fa-history w-5 h-5"></i>
+                <a href="{{ url_for('views.history') }}" class="nav-item {% if request.endpoint == 'views.history' %}nav-item--active{% endif %}">
+                    <i class="nav-item__icon fas fa-history"></i>
                     <span>历史记录</span>
                 </a>
                 
                 <!-- 用户设置 -->
                 <div class="nav-group">
-                    <button class="nav-group-toggle {% if request.endpoint and request.endpoint.startswith('user_views') %}active{% endif %}" onclick="toggleNavGroup('user-group')">
-                        <div class="flex items-center">
-                            <i class="fas fa-user-cog w-5 h-5"></i>
+                    <button class="nav-item {% if request.endpoint and request.endpoint.startswith('user_views') %}nav-item--active{% endif %}" onclick="toggleNavGroup('user-group')">
+                        <div class="nav-group__header">
+                            <i class="nav-item__icon fas fa-user-cog"></i>
                             <span>个人中心</span>
                         </div>
-                        <i class="fas fa-chevron-right transform transition-transform" id="user-group-icon"></i>
+                        <i class="nav-group__toggle fas fa-chevron-right" id="user-group-icon"></i>
                     </button>
-                    <div id="user-group" class="nav-submenu {% if request.endpoint and request.endpoint.startswith('user_views') %}show{% endif %}">
-                        <a href="{{ url_for('user_views.profile_page') }}" class="nav-subitem {% if request.endpoint == 'user_views.profile_page' %}active{% endif %}">
+                    <div id="user-group" class="nav-submenu {% if request.endpoint and request.endpoint.startswith('user_views') %}nav-submenu--show{% endif %}">
+                        <a href="{{ url_for('user_views.profile_page') }}" class="nav-subitem {% if request.endpoint == 'user_views.profile_page' %}nav-subitem--active{% endif %}">
                             个人资料
                         </a>
-                        <a href="{{ url_for('user_views.settings_page') }}" class="nav-subitem {% if request.endpoint == 'user_views.settings_page' %}active{% endif %}">
+                        <a href="{{ url_for('user_views.settings_page') }}" class="nav-subitem {% if request.endpoint == 'user_views.settings_page' %}nav-subitem--active{% endif %}">
                             系统设置
                         </a>
-                        <a href="{{ url_for('user_views.settings_page') }}" class="nav-subitem {% if request.endpoint == 'user_views.settings_page' %}active{% endif %}">
+                        <a href="{{ url_for('user_views.settings_page') }}" class="nav-subitem {% if request.endpoint == 'user_views.settings_page' %}nav-subitem--active{% endif %}">
                             安全设置
                         </a>
                     </div>
                 </div>
                 
                 <!-- 分隔线 -->
-                <div class="border-t border-gray-200 my-4"></div>
+                <div class="nav-divider"></div>
                 
                 <!-- 帮助中心 -->
                 <a href="#" class="nav-item">
-                    <i class="fas fa-question-circle w-5 h-5"></i>
+                    <i class="nav-item__icon fas fa-question-circle"></i>
                     <span>帮助中心</span>
                 </a>
                 
                 <!-- 退出登录 -->
-                <a href="{{ url_for('auth.logout') }}" class="nav-item text-red-600 hover:bg-red-50 hover:text-red-700">
-                    <i class="fas fa-sign-out-alt w-5 h-5"></i>
+                <a href="{{ url_for('auth.logout') }}" class="nav-item nav-item--danger">
+                    <i class="nav-item__icon fas fa-sign-out-alt"></i>
                     <span>退出登录</span>
                 </a>
             </nav>
             
             <!-- 侧边栏底部 -->
-            <div class="p-4 border-t border-gray-200">
-                <div class="text-xs text-gray-500 text-center">
+            <div class="sidebar__footer">
+                <div class="sidebar__version">
                     <p>版本 v2.0.0</p>
-                    <p class="mt-1">© 2025 Kronos</p>
+                    <p>© 2025 Kronos</p>
                 </div>
             </div>
         </aside>
         
         <!-- 侧边栏遮罩层 (移动端) -->
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden hidden"></div>
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
         
         <!-- 主要内容区域 -->
-        <div class="flex-1 flex flex-col overflow-hidden lg:ml-0">
+        <div class="dashboard-main">
             <!-- 顶部导航栏 -->
-            <header class="bg-white shadow-sm border-b border-gray-200 lg:pl-0">
-                <div class="flex items-center justify-between px-4 py-3">
+            <header class="dashboard-header">
+                <div class="dashboard-header__content">
                     <!-- 移动端菜单按钮 -->
-                    <button id="sidebar-toggle" class="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
-                        <i class="fas fa-bars text-lg"></i>
+                    <button id="sidebar-toggle" class="dashboard-header__toggle">
+                        <i class="fas fa-bars"></i>
                     </button>
                     
                     <!-- 页面标题 -->
-                    <div class="flex-1 lg:flex-none">
-                        <h1 class="text-lg font-semibold text-gray-900">
-                            {% block page_title %}仪表板{% endblock %}
-                        </h1>
+                    <div class="dashboard-header__title">
+                        <h1>{% block page_title %}仪表板{% endblock %}</h1>
                     </div>
                     
                     <!-- 右侧工具栏 -->
