@@ -1,0 +1,613 @@
+/**
+ * 交互式图表组件样式
+ */
+
+/* 主容器 */
+.interactive-charts {
+  width: 100%;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  position: relative;
+}
+
+.interactive-charts.dark {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+/* 图表包装器 */
+.chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* 工具栏 */
+.chart-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.interactive-charts.dark .chart-toolbar {
+  background: #374151;
+  border-bottom-color: #4b5563;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.toolbar-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.toolbar-btn.active {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.interactive-charts.dark .toolbar-btn {
+  background: #4b5563;
+  color: #d1d5db;
+}
+
+.interactive-charts.dark .toolbar-btn:hover {
+  background: #6b7280;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 2rem;
+  background: #e2e8f0;
+  margin: 0 0.5rem;
+}
+
+.interactive-charts.dark .toolbar-separator {
+  background: #4b5563;
+}
+
+/* 图表容器 */
+.chart-container {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: #fff;
+}
+
+.interactive-charts.dark .chart-container {
+  background: #1f2937;
+}
+
+.chart-canvas {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* 图表覆盖层 */
+.chart-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 十字线 */
+.crosshair-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+}
+
+.crosshair-line {
+  position: absolute;
+  background: rgba(59, 130, 246, 0.7);
+  pointer-events: none;
+}
+
+.crosshair-x {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.crosshair-y {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.crosshair-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+  display: none;
+}
+
+/* 选择框 */
+.selection-box {
+  position: absolute;
+  border: 2px dashed #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  display: none;
+  pointer-events: none;
+}
+
+/* 标注容器 */
+.annotations-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.annotation {
+  position: absolute;
+  cursor: pointer;
+}
+
+.annotation-line {
+  stroke: #ef4444;
+  stroke-width: 2;
+  fill: none;
+  cursor: move;
+}
+
+.annotation-rectangle {
+  stroke: #ef4444;
+  stroke-width: 2;
+  fill: rgba(239, 68, 68, 0.1);
+  cursor: move;
+}
+
+.annotation-circle {
+  stroke: #ef4444;
+  stroke-width: 2;
+  fill: rgba(239, 68, 68, 0.1);
+  cursor: move;
+}
+
+.annotation-text {
+  font-size: 12px;
+  fill: #374151;
+  cursor: move;
+  user-select: none;
+}
+
+.annotation-handle {
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  position: absolute;
+  cursor: nw-resize;
+  transform: translate(-50%, -50%);
+}
+
+.annotation.selected .annotation-handle {
+  display: block;
+}
+
+.annotation:not(.selected) .annotation-handle {
+  display: none;
+}
+
+/* 图表信息栏 */
+.chart-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.interactive-charts.dark .chart-info {
+  background: #374151;
+  border-top-color: #4b5563;
+  color: #9ca3af;
+}
+
+.chart-status {
+  font-weight: 500;
+}
+
+.chart-coordinates {
+  font-family: monospace;
+}
+
+/* 右键菜单 */
+.context-menu {
+  position: fixed;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 0;
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.interactive-charts.dark .context-menu {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.context-menu-item:hover {
+  background: #f1f5f9;
+}
+
+.interactive-charts.dark .context-menu-item:hover {
+  background: #4b5563;
+}
+
+.context-menu-separator {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 0.25rem 0;
+}
+
+.interactive-charts.dark .context-menu-separator {
+  background: #4b5563;
+}
+
+/* SVG图表样式 */
+.chart-canvas svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.grid-x,
+.grid-y {
+  stroke: #e5e7eb;
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+.interactive-charts.dark .grid-x,
+.interactive-charts.dark .grid-y {
+  stroke: #4b5563;
+}
+
+.line-path {
+  fill: none;
+  stroke-width: 2;
+}
+
+.data-point {
+  cursor: pointer;
+  transition: r 0.2s ease;
+}
+
+.data-point:hover {
+  r: 5;
+}
+
+.volume-bar {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.volume-bar:hover {
+  opacity: 1 !important;
+}
+
+.scatter-point {
+  cursor: pointer;
+  transition: r 0.2s ease;
+}
+
+.scatter-point:hover {
+  r: 6;
+}
+
+/* 坐标轴样式 */
+.x-axis,
+.y-axis {
+  font-size: 12px;
+  fill: #64748b;
+}
+
+.interactive-charts.dark .x-axis,
+.interactive-charts.dark .y-axis {
+  fill: #9ca3af;
+}
+
+.x-axis path,
+.y-axis path {
+  stroke: #d1d5db;
+}
+
+.interactive-charts.dark .x-axis path,
+.interactive-charts.dark .y-axis path {
+  stroke: #4b5563;
+}
+
+/* 缩放控制 */
+.zoom-controls {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 20;
+}
+
+.zoom-btn {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-btn:hover {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.interactive-charts.dark .zoom-btn {
+  background: rgba(55, 65, 81, 0.9);
+  color: #d1d5db;
+}
+
+/* 全屏模式 */
+.interactive-charts:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  border-radius: 0;
+}
+
+.interactive-charts:fullscreen .chart-container {
+  height: calc(100vh - 120px);
+}
+
+/* 加载状态 */
+.interactive-charts.loading {
+  opacity: 0.7;
+}
+
+.interactive-charts.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2rem;
+  height: 2rem;
+  margin: -1rem 0 0 -1rem;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 100;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .chart-toolbar {
+    padding: 0.75rem;
+    justify-content: center;
+  }
+  
+  .toolbar-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+  
+  .chart-info {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .crosshair-tooltip {
+    font-size: 0.6875rem;
+    padding: 0.375rem;
+  }
+  
+  .zoom-controls {
+    bottom: 0.5rem;
+    right: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-toolbar {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .toolbar-btn {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .toolbar-separator {
+    display: none;
+  }
+  
+  .chart-container {
+    min-height: 250px;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .toolbar-btn {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .data-point,
+  .scatter-point {
+    r: 6;
+  }
+  
+  .crosshair-container {
+    display: none !important;
+  }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .toolbar-btn {
+    border: 1px solid currentColor;
+  }
+  
+  .crosshair-line {
+    background: #000;
+  }
+  
+  .selection-box {
+    border-color: #000;
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .toolbar-btn,
+  .data-point,
+  .volume-bar,
+  .scatter-point {
+    transition: none !important;
+  }
+  
+  .interactive-charts.loading::after {
+    animation: none !important;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .chart-toolbar,
+  .chart-info,
+  .zoom-controls {
+    display: none !important;
+  }
+  
+  .interactive-charts {
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  
+  .chart-overlay {
+    display: none !important;
+  }
+}
+
+/* 辅助功能 */
+.toolbar-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.annotation:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 工具提示样式增强 */
+.toolbar-btn[title]::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  margin-bottom: 0.5rem;
+  z-index: 200;
+}
+
+.toolbar-btn:hover[title]::after {
+  opacity: 1;
+}
+
+/* 性能优化 */
+.chart-canvas,
+.chart-overlay {
+  will-change: transform;
+}
+
+.interactive-charts.panning * {
+  pointer-events: none;
+}
+
+.interactive-charts.zooming * {
+  pointer-events: none;
+}

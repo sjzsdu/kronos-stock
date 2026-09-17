@@ -1,0 +1,471 @@
+/**
+ * 实时更新组件样式
+ */
+
+/* 主容器 */
+.realtime-updates {
+  width: 100%;
+  background: #fff;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+/* 状态面板 */
+.status-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* 连接状态 */
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-indicator {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.status-indicator.disconnected {
+  background: #ef4444;
+}
+
+.status-indicator.connecting {
+  background: #f59e0b;
+  animation: pulse 1s infinite;
+}
+
+.status-indicator.connected {
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+}
+
+.status-indicator.error {
+  background: #dc2626;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.status-text {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+/* 连接状态指示器动画 */
+.status-indicator.connected::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid #22c55e;
+  border-radius: 50%;
+  animation: ripple 2s infinite;
+  opacity: 0.6;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* 连接操作按钮 */
+.connection-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.connect-btn {
+  background: #22c55e;
+  color: #fff;
+}
+
+.connect-btn:hover:not(:disabled) {
+  background: #16a34a;
+}
+
+.disconnect-btn {
+  background: #ef4444;
+  color: #fff;
+}
+
+.disconnect-btn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.reconnect-btn {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.reconnect-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 指标面板 */
+.metrics-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 消息日志 */
+.message-log {
+  max-height: 300px;
+  overflow: hidden;
+  border-top: 1px solid #e2e8f0;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.log-header h4 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.log-clear {
+  padding: 0.25rem 0.75rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.log-clear:hover {
+  background: #cbd5e1;
+}
+
+.log-content {
+  height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+.log-entry {
+  display: flex;
+  margin-bottom: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.log-entry.sent {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.log-entry.received {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.log-time {
+  color: #9ca3af;
+  margin-right: 0.5rem;
+  min-width: 70px;
+}
+
+.log-direction {
+  color: #fbbf24;
+  margin-right: 0.5rem;
+  min-width: 60px;
+  font-weight: 600;
+}
+
+.log-data {
+  color: #d1d5db;
+  flex: 1;
+  word-break: break-all;
+}
+
+/* 滚动条样式 */
+.log-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.log-content::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.log-content::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border-radius: 4px;
+}
+
+.log-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 迷你模式 */
+.realtime-updates.mini {
+  border: none;
+  border-radius: 0;
+}
+
+.realtime-updates.mini .status-panel {
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+}
+
+.realtime-updates.mini .metrics-panel,
+.realtime-updates.mini .message-log {
+  display: none;
+}
+
+/* 浮动模式 */
+.realtime-updates.floating {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 300px;
+  z-index: 1000;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .status-panel {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .metrics-panel {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .realtime-updates.floating {
+    position: static;
+    width: 100%;
+    margin: 1rem;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-panel {
+    grid-template-columns: 1fr;
+  }
+  
+  .connection-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+}
+
+/* 深色主题 */
+@media (prefers-color-scheme: dark) {
+  .realtime-updates {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .status-panel {
+    background: #374151;
+    border-bottom-color: #4b5563;
+  }
+  
+  .status-text {
+    color: #e5e7eb;
+  }
+  
+  .metrics-panel {
+    background: #374151;
+    border-bottom-color: #4b5563;
+  }
+  
+  .metric-label {
+    color: #9ca3af;
+  }
+  
+  .metric-value {
+    color: #f3f4f6;
+  }
+  
+  .log-header {
+    background: #4b5563;
+    border-bottom-color: #6b7280;
+  }
+  
+  .log-header h4 {
+    color: #f3f4f6;
+  }
+  
+  .log-clear {
+    background: #6b7280;
+    color: #d1d5db;
+  }
+  
+  .log-clear:hover {
+    background: #9ca3af;
+  }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .status-indicator {
+    border: 2px solid currentColor;
+  }
+  
+  .action-btn {
+    border: 1px solid currentColor;
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .status-indicator,
+  .status-indicator::before {
+    animation: none !important;
+  }
+  
+  .action-btn {
+    transition: none !important;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .realtime-updates {
+    background: white !important;
+    border: 1px solid black !important;
+    page-break-inside: avoid;
+  }
+  
+  .connection-actions,
+  .log-clear {
+    display: none !important;
+  }
+  
+  .message-log {
+    max-height: none !important;
+  }
+}
+
+/* 辅助功能 */
+.action-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.status-indicator[aria-label] {
+  cursor: help;
+}
+
+/* 加载状态 */
+.realtime-updates.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.realtime-updates.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

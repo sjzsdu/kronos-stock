@@ -1,0 +1,14 @@
+{# 表单成功反馈组件 #}
+<div class="alert alert--success alert-dismissible">
+    <div class="alert__content">
+        <div class="alert__icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="alert__body">
+            <p class="alert__message">{{ message or '操作成功完成' }}</p>
+        </div>
+    </div>
+    <button class="alert__close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+    </button>
+</div>

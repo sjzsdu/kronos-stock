@@ -45,6 +45,16 @@ def settings_page():
                          user=current_user, profile=profile)
 
 
+@user_views.route('/security')
+@login_required
+def security_page():
+    """安全设置页面"""
+    profile = UserService.get_user_profile(current_user.id)
+    
+    return render_template('user/security.html', 
+                         user=current_user, profile=profile)
+
+
 @user_views.route('/watchlist')
 @login_required
 def watchlist_page():
@@ -307,3 +317,97 @@ def htmx_delete_account():
     except Exception as e:
         return render_template('components/form_error.html', 
                              message='删除账户失败，请稍后重试'), 500
+
+
+@user_views.route('/htmx/sessions')
+@login_required
+def htmx_load_sessions():
+    """HTMX加载用户会话"""
+    try:
+        sessions = UserService.get_user_sessions(current_user.id)
+        
+        return render_template('components/user_sessions.html', sessions=sessions)
+        
+    except Exception as e:
+        return render_template('components/form_error.html', 
+                             message='加载会话信息失败'), 500
+
+
+@user_views.route('/htmx/privacy', methods=['POST'])
+@login_required
+def htmx_update_privacy():
+    """HTMX更新隐私设置"""
+    try:
+        privacy_settings = {
+            'public_profile': request.form.get('public_profile') == 'on',
+            'share_predictions': request.form.get('share_predictions') == 'on',
+            'data_analytics': request.form.get('data_analytics') == 'on'
+        }
+        
+        profile_data = {
+            'privacy_settings': privacy_settings
+        }
+        
+        success, message = UserService.update_user_profile(current_user.id, profile_data)
+        
+        if success:
+            return render_template('components/form_success.html', message='隐私设置已保存')
+        else:
+            return render_template('components/form_error.html', message=message), 422
+            
+    except Exception as e:
+        return render_template('components/form_error.html', 
+                             message='保存隐私设置失败，请稍后重试'), 500
+
+
+@user_views.route('/htmx/clear-data', methods=['POST'])
+@login_required
+def htmx_clear_data():
+    """HTMX清除用户数据"""
+    try:
+        success, message = UserService.clear_user_data(current_user.id)
+        
+        if success:
+            return render_template('components/form_success.html', message='用户数据已清除')
+        else:
+            return render_template('components/form_error.html', message=message), 422
+            
+    except Exception as e:
+        return render_template('components/form_error.html', 
+                             message='清除数据失败，请稍后重试'), 500
+
+
+@user_views.route('/htmx/sessions/<int:session_id>', methods=['DELETE'])
+@login_required
+def htmx_revoke_session(session_id):
+    """HTMX撤销指定会话"""
+    try:
+        success, message = UserService.revoke_session(current_user.id, session_id)
+        
+        if success:
+            # 重新加载会话列表
+            sessions = UserService.get_user_sessions(current_user.id)
+            return render_template('components/user_sessions.html', sessions=sessions)
+        else:
+            return render_template('components/form_error.html', message=message), 422
+            
+    except Exception as e:
+        return render_template('components/form_error.html', 
+                             message='撤销会话失败，请稍后重试'), 500
+
+
+@user_views.route('/htmx/sessions/revoke-all', methods=['POST'])
+@login_required  
+def htmx_revoke_all_sessions():
+    """HTMX撤销所有其他会话"""
+    try:
+        success, message = UserService.revoke_all_sessions(current_user.id)
+        
+        if success:
+            return render_template('components/form_success.html', message='已终止所有其他会话')
+        else:
+            return render_template('components/form_error.html', message=message), 422
+            
+    except Exception as e:
+        return render_template('components/form_error.html', 
+                             message='撤销会话失败，请稍后重试'), 500

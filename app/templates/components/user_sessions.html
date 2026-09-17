@@ -1,0 +1,122 @@
+{# 用户会话列表组件 #}
+<div class="session-list">
+    {% if sessions %}
+        {% for session in sessions %}
+        <div class="session-item">
+            <div class="session-item__info">
+                <div class="session-item__device">
+                    <i class="fas {% if 'Mobile' in session.user_agent %}fa-mobile-alt{% elif 'Tablet' in session.user_agent %}fa-tablet-alt{% else %}fa-desktop{% endif %}"></i>
+                    <div class="session-item__details">
+                        <h4 class="session-item__title">
+                            {{ session.device_name or '未知设备' }}
+                            {% if session.is_current %}
+                            <span class="badge badge--success">当前会话</span>
+                            {% endif %}
+                        </h4>
+                        <p class="session-item__description">
+                            {{ session.location or '未知位置' }} • {{ session.ip_address }}
+                        </p>
+                        <p class="session-item__time">
+                            最后活跃: {{ session.last_activity.strftime('%Y-%m-%d %H:%M') if session.last_activity else '未知' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="session-item__actions">
+                {% if not session.is_current %}
+                <button type="button" 
+                        class="btn btn--sm btn--danger btn--outline"
+                        hx-delete="{{ url_for('user_views.htmx_revoke_session', session_id=session.id) }}"
+                        hx-target="#form-feedback"
+                        hx-confirm="确定要终止此会话吗？">
+                    终止会话
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="session-actions">
+            <button type="button" 
+                    class="btn btn--secondary"
+                    hx-post="{{ url_for('user_views.htmx_revoke_all_sessions') }}"
+                    hx-target="#form-feedback"
+                    hx-confirm="确定要终止所有其他会话吗？">
+                <i class="fas fa-sign-out-alt"></i>
+                终止所有其他会话
+            </button>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-desktop"></i>
+            <h3>暂无活跃会话</h3>
+            <p>您目前只有当前会话处于活跃状态。</p>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.session-item__device {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.session-item__device > i {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.session-item__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.session-item__description,
+.session-item__time {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.session-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+</style>

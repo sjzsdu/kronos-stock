@@ -1,0 +1,74 @@
+{# 账户删除完成页面 #}
+<div class="account-deleted">
+    <div class="account-deleted__content">
+        <div class="account-deleted__icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        
+        <h2 class="account-deleted__title">账户已删除</h2>
+        
+        <div class="account-deleted__message">
+            <p>{{ message or '您的账户已成功删除。感谢您使用Kronos股票预测系统。' }}</p>
+        </div>
+        
+        <div class="account-deleted__actions">
+            <a href="{{ home_url or '/' }}" class="btn btn--primary">
+                <i class="fas fa-home"></i>
+                返回首页
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// 3秒后自动跳转到首页
+setTimeout(() => {
+    window.location.href = '{{ home_url or "/" }}';
+}, 3000);
+
+// 清除本地存储的用户数据
+localStorage.clear();
+sessionStorage.clear();
+</script>
+
+<style>
+.account-deleted {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    padding: 2rem;
+}
+
+.account-deleted__content {
+    text-align: center;
+    max-width: 400px;
+}
+
+.account-deleted__icon {
+    margin-bottom: 1rem;
+}
+
+.account-deleted__icon i {
+    font-size: 4rem;
+    color: var(--color-success);
+}
+
+.account-deleted__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.account-deleted__message {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.account-deleted__actions {
+    display: flex;
+    justify-content: center;
+}
+</style>

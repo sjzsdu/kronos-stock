@@ -1,0 +1,551 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}安全设置{% endblock %}
+{% block page_title %}账户安全{% endblock %}
+
+{% block content %}
+<div class="card security-container">
+    <!-- 安全设置标题 -->
+    <div class="card__header">
+        <h2 class="card__title">
+            <i class="fas fa-shield-alt"></i>
+            账户安全设置
+        </h2>
+        <p class="card__description">
+            管理您的账户安全，包括密码、登录设备和隐私设置
+        </p>
+    </div>
+
+    <!-- 安全设置内容 -->
+    <div class="card__body">
+        <!-- 表单反馈区域 -->
+        <div id="form-feedback" class="form-feedback"></div>
+
+        <!-- 密码管理 -->
+        <div class="settings-section">
+            <div class="settings-section__header">
+                <h3 class="settings-section__title">
+                    <i class="fas fa-key"></i>
+                    密码管理
+                </h3>
+                <p class="settings-section__description">
+                    定期更新密码以保护您的账户安全
+                </p>
+            </div>
+            
+            <form id="change-password-form" 
+                  hx-post="{{ url_for('user_views.htmx_change_password') }}" 
+                  hx-target="#form-feedback"
+                  hx-swap="innerHTML"
+                  class="form">
+                <div class="form-grid form-grid--2">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-lock"></i>
+                            当前密码 *
+                        </label>
+                        <input type="password" 
+                               name="current_password" 
+                               required
+                               class="form-input">
+                        <span class="form-hint">请输入您当前的登录密码</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-key"></i>
+                            新密码 *
+                        </label>
+                        <input type="password" 
+                               name="new_password" 
+                               required
+                               minlength="8"
+                               class="form-input"
+                               id="new-password">
+                        <span class="form-hint">密码长度至少8位，建议包含字母、数字和特殊字符</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-key"></i>
+                            确认新密码 *
+                        </label>
+                        <input type="password" 
+                               name="confirm_password" 
+                               required
+                               class="form-input"
+                               id="confirm-password">
+                        <span class="form-hint">请再次输入新密码进行确认</span>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn--primary">
+                        <i class="fas fa-save"></i>
+                        更新密码
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 登录安全 -->
+        <div class="settings-section">
+            <div class="settings-section__header">
+                <h3 class="settings-section__title">
+                    <i class="fas fa-user-shield"></i>
+                    登录安全
+                </h3>
+                <p class="settings-section__description">
+                    管理您的登录方式和安全验证
+                </p>
+            </div>
+            
+            <div class="security-options">
+                <!-- 双因子认证 -->
+                <div class="security-option">
+                    <div class="security-option__info">
+                        <h4 class="security-option__title">双因子认证 (2FA)</h4>
+                        <p class="security-option__description">
+                            通过手机应用或短信验证码增强账户安全
+                        </p>
+                    </div>
+                    <div class="security-option__action">
+                        <label class="toggle">
+                            <input type="checkbox" 
+                                   name="two_factor_auth"
+                                   {% if profile and profile.two_factor_enabled %}checked{% endif %}>
+                            <span class="toggle__slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 登录通知 -->
+                <div class="security-option">
+                    <div class="security-option__info">
+                        <h4 class="security-option__title">登录通知</h4>
+                        <p class="security-option__description">
+                            当有新设备登录时发送邮件通知
+                        </p>
+                    </div>
+                    <div class="security-option__action">
+                        <label class="toggle">
+                            <input type="checkbox" 
+                                   name="login_notifications"
+                                   {% if profile and profile.login_notifications %}checked{% endif %}>
+                            <span class="toggle__slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 自动登出 -->
+                <div class="security-option">
+                    <div class="security-option__info">
+                        <h4 class="security-option__title">自动登出</h4>
+                        <p class="security-option__description">
+                            无操作时自动登出以保护账户安全
+                        </p>
+                    </div>
+                    <div class="security-option__action">
+                        <select name="auto_logout" class="form-select">
+                            <option value="0">禁用</option>
+                            <option value="30">30分钟</option>
+                            <option value="60">1小时</option>
+                            <option value="180">3小时</option>
+                            <option value="720">12小时</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 活跃会话 -->
+        <div class="settings-section">
+            <div class="settings-section__header">
+                <h3 class="settings-section__title">
+                    <i class="fas fa-desktop"></i>
+                    活跃会话
+                </h3>
+                <p class="settings-section__description">
+                    查看和管理您在不同设备上的登录会话
+                </p>
+            </div>
+            
+            <div class="session-list" 
+                 hx-get="{{ url_for('user_views.htmx_load_sessions') }}"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+                <!-- 会话列表将通过HTMX加载 -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    加载会话信息...
+                </div>
+            </div>
+        </div>
+
+        <!-- 隐私设置 -->
+        <div class="settings-section">
+            <div class="settings-section__header">
+                <h3 class="settings-section__title">
+                    <i class="fas fa-user-secret"></i>
+                    隐私设置
+                </h3>
+                <p class="settings-section__description">
+                    控制您的个人信息和数据使用设置
+                </p>
+            </div>
+            
+            <form id="privacy-form" 
+                  hx-post="{{ url_for('user_views.htmx_update_privacy') }}" 
+                  hx-target="#form-feedback"
+                  hx-swap="innerHTML"
+                  class="form">
+                <div class="privacy-options">
+                    <!-- 个人资料公开 -->
+                    <div class="privacy-option">
+                        <div class="privacy-option__info">
+                            <h4 class="privacy-option__title">公开个人资料</h4>
+                            <p class="privacy-option__description">
+                                允许其他用户查看您的基本信息和投资记录
+                            </p>
+                        </div>
+                        <div class="privacy-option__action">
+                            <label class="toggle">
+                                <input type="checkbox" 
+                                       name="public_profile"
+                                       {% if profile and profile.public_profile %}checked{% endif %}>
+                                <span class="toggle__slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 分享预测记录 -->
+                    <div class="privacy-option">
+                        <div class="privacy-option__info">
+                            <h4 class="privacy-option__title">分享预测记录</h4>
+                            <p class="privacy-option__description">
+                                允许在社区中分享您的预测成果
+                            </p>
+                        </div>
+                        <div class="privacy-option__action">
+                            <label class="toggle">
+                                <input type="checkbox" 
+                                       name="share_predictions"
+                                       {% if profile and profile.share_predictions %}checked{% endif %}>
+                                <span class="toggle__slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 数据分析 -->
+                    <div class="privacy-option">
+                        <div class="privacy-option__info">
+                            <h4 class="privacy-option__title">使用数据分析</h4>
+                            <p class="privacy-option__description">
+                                同意使用您的匿名数据来改进预测模型
+                            </p>
+                        </div>
+                        <div class="privacy-option__action">
+                            <label class="toggle">
+                                <input type="checkbox" 
+                                       name="data_analytics"
+                                       {% if profile and profile.data_analytics %}checked{% endif %}>
+                                <span class="toggle__slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn--primary">
+                        <i class="fas fa-save"></i>
+                        保存隐私设置
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 危险区域 -->
+        <div class="settings-section settings-section--danger">
+            <div class="settings-section__header">
+                <h3 class="settings-section__title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    危险区域
+                </h3>
+                <p class="settings-section__description">
+                    以下操作不可逆，请谨慎处理
+                </p>
+            </div>
+            
+            <div class="danger-actions">
+                <!-- 清除数据 -->
+                <div class="danger-action">
+                    <div class="danger-action__info">
+                        <h4 class="danger-action__title">清除所有预测数据</h4>
+                        <p class="danger-action__description">
+                            永久删除您的所有预测记录和统计数据
+                        </p>
+                    </div>
+                    <button type="button" 
+                            class="btn btn--danger btn--outline"
+                            onclick="confirmClearData()">
+                        清除数据
+                    </button>
+                </div>
+
+                <!-- 删除账户 -->
+                <div class="danger-action">
+                    <div class="danger-action__info">
+                        <h4 class="danger-action__title">删除账户</h4>
+                        <p class="danger-action__description">
+                            永久删除您的账户和所有相关数据，此操作无法撤销
+                        </p>
+                    </div>
+                    <button type="button" 
+                            class="btn btn--danger"
+                            onclick="confirmDeleteAccount()">
+                        删除账户
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 确认模态框 -->
+<div id="confirm-modal"></div>
+
+<style>
+/* 安全设置页面特定样式 */
+.security-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.settings-section__header {
+    margin-bottom: 1.5rem;
+}
+
+.settings-section__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.settings-section__description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.security-options,
+.privacy-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.security-option,
+.privacy-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    background: var(--background-secondary);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.security-option__info,
+.privacy-option__info {
+    flex: 1;
+}
+
+.security-option__title,
+.privacy-option__title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.security-option__description,
+.privacy-option__description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.security-option__action,
+.privacy-option__action {
+    margin-left: 1rem;
+}
+
+.settings-section--danger {
+    border-color: var(--color-danger);
+}
+
+.settings-section--danger .settings-section__title {
+    color: var(--color-danger);
+}
+
+.danger-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.danger-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--color-danger-light);
+    border: 1px solid var(--color-danger);
+    border-radius: 0.5rem;
+}
+
+.danger-action__title {
+    font-weight: 600;
+    color: var(--color-danger);
+    margin-bottom: 0.25rem;
+}
+
+.danger-action__description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.session-list {
+    min-height: 100px;
+}
+</style>
+
+<script>
+// 密码确认验证
+document.getElementById('confirm-password').addEventListener('input', function() {
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = this.value;
+    
+    if (newPassword && confirmPassword) {
+        if (newPassword !== confirmPassword) {
+            this.setCustomValidity('密码不匹配');
+        } else {
+            this.setCustomValidity('');
+        }
+    }
+});
+
+// 确认清除数据
+function confirmClearData() {
+    const modalHtml = `
+        <div class="modal">
+            <div class="modal__backdrop" onclick="closeModal()"></div>
+            <div class="modal__container modal__container--small">
+                <div class="modal__content">
+                    <div class="modal__header">
+                        <h3 class="modal__title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            确认清除数据
+                        </h3>
+                    </div>
+                    <div class="modal__body">
+                        <p>您确定要清除所有预测数据吗？此操作将永久删除：</p>
+                        <ul>
+                            <li>所有预测记录</li>
+                            <li>历史统计数据</li>
+                            <li>关注列表</li>
+                        </ul>
+                        <p><strong>此操作无法撤销！</strong></p>
+                    </div>
+                    <div class="modal__actions">
+                        <button type="button" class="btn btn--secondary" onclick="closeModal()">
+                            取消
+                        </button>
+                        <button type="button" class="btn btn--danger" onclick="clearUserData()">
+                            确认清除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('confirm-modal').innerHTML = modalHtml;
+}
+
+// 确认删除账户
+function confirmDeleteAccount() {
+    const modalHtml = `
+        <div class="modal">
+            <div class="modal__backdrop" onclick="closeModal()"></div>
+            <div class="modal__container modal__container--small">
+                <div class="modal__content">
+                    <div class="modal__header">
+                        <h3 class="modal__title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            确认删除账户
+                        </h3>
+                    </div>
+                    <div class="modal__body">
+                        <p>您确定要删除账户吗？此操作将永久删除：</p>
+                        <ul>
+                            <li>账户信息</li>
+                            <li>所有预测数据</li>
+                            <li>个人设置</li>
+                            <li>历史记录</li>
+                        </ul>
+                        <p><strong>此操作无法撤销！请输入密码确认：</strong></p>
+                        <form hx-post="{{ url_for('user_views.htmx_delete_account') }}" 
+                              hx-target="#form-feedback">
+                            <input type="password" 
+                                   name="password" 
+                                   placeholder="输入当前密码"
+                                   required
+                                   class="form-input">
+                        </form>
+                    </div>
+                    <div class="modal__actions">
+                        <button type="button" class="btn btn--secondary" onclick="closeModal()">
+                            取消
+                        </button>
+                        <button type="submit" class="btn btn--danger">
+                            确认删除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('confirm-modal').innerHTML = modalHtml;
+}
+
+// 关闭模态框
+function closeModal() {
+    document.getElementById('confirm-modal').innerHTML = '';
+}
+
+// 清除用户数据
+function clearUserData() {
+    // 发送HTMX请求清除数据
+    htmx.ajax('POST', '{{ url_for("user_views.htmx_clear_data") }}', {
+        target: '#form-feedback',
+        swap: 'innerHTML'
+    }).then(() => {
+        closeModal();
+    });
+}
+</script>
+{% endblock %}

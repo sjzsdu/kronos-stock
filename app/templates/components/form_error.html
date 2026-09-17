@@ -1,0 +1,27 @@
+{# 表单错误反馈组件 #}
+<div class="alert alert--error alert-dismissible">
+    <div class="alert__content">
+        <div class="alert__icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="alert__body">
+            <p class="alert__message">{{ message or '操作失败，请稍后重试' }}</p>
+            {% if details %}
+            <div class="alert__details">
+                {% if details is mapping %}
+                    <ul>
+                    {% for field, error in details.items() %}
+                        <li><strong>{{ field }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>{{ details }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <button class="alert__close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+    </button>
+</div>

@@ -1,0 +1,623 @@
+/**
+ * 工具提示组件样式
+ */
+
+/* 工具提示容器 */
+.tooltip-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* 基础工具提示样式 */
+.tooltip {
+  position: absolute;
+  max-width: 300px;
+  padding: 0;
+  margin: 0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  line-height: 1.4;
+  pointer-events: auto;
+  word-wrap: break-word;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* 内容区域 */
+.tooltip-content {
+  padding: 8px 12px;
+  position: relative;
+}
+
+/* 标题样式 */
+.tooltip-title {
+  padding: 8px 12px 0;
+  font-weight: 600;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 4px;
+}
+
+/* 关闭按钮 */
+.tooltip-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.tooltip-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ====================
+   主题样式
+   ==================== */
+
+/* 深色主题（默认） */
+.tooltip-dark {
+  background: #2d3748;
+  color: #e2e8f0;
+  border: 1px solid #4a5568;
+}
+
+.tooltip-dark .tooltip-title {
+  color: #f7fafc;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 浅色主题 */
+.tooltip-light {
+  background: #ffffff;
+  color: #2d3748;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tooltip-light .tooltip-title {
+  color: #1a202c;
+  border-bottom-color: #e2e8f0;
+}
+
+.tooltip-light .tooltip-close {
+  background: rgba(0, 0, 0, 0.1);
+  color: #4a5568;
+}
+
+.tooltip-light .tooltip-close:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* 主色主题 */
+.tooltip-primary {
+  background: #3182ce;
+  color: #ffffff;
+  border: 1px solid #2c5282;
+}
+
+.tooltip-primary .tooltip-title {
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 成功主题 */
+.tooltip-success {
+  background: #38a169;
+  color: #ffffff;
+  border: 1px solid #2f855a;
+}
+
+.tooltip-success .tooltip-title {
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 警告主题 */
+.tooltip-warning {
+  background: #d69e2e;
+  color: #ffffff;
+  border: 1px solid #b7791f;
+}
+
+.tooltip-warning .tooltip-title {
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 错误主题 */
+.tooltip-error {
+  background: #e53e3e;
+  color: #ffffff;
+  border: 1px solid #c53030;
+}
+
+.tooltip-error .tooltip-title {
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 信息主题 */
+.tooltip-info {
+  background: #3182ce;
+  color: #ffffff;
+  border: 1px solid #2c5282;
+}
+
+.tooltip-info .tooltip-title {
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ====================
+   箭头样式
+   ==================== */
+
+.tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+/* 顶部箭头 */
+.tooltip-top .tooltip-arrow,
+.tooltip-top-start .tooltip-arrow,
+.tooltip-top-end .tooltip-arrow {
+  border-width: 6px 6px 0 6px;
+  border-color: transparent;
+  border-top-color: inherit;
+}
+
+.tooltip-dark.tooltip-top .tooltip-arrow,
+.tooltip-dark.tooltip-top-start .tooltip-arrow,
+.tooltip-dark.tooltip-top-end .tooltip-arrow {
+  border-top-color: #2d3748;
+}
+
+.tooltip-light.tooltip-top .tooltip-arrow,
+.tooltip-light.tooltip-top-start .tooltip-arrow,
+.tooltip-light.tooltip-top-end .tooltip-arrow {
+  border-top-color: #ffffff;
+}
+
+/* 底部箭头 */
+.tooltip-bottom .tooltip-arrow,
+.tooltip-bottom-start .tooltip-arrow,
+.tooltip-bottom-end .tooltip-arrow {
+  border-width: 0 6px 6px 6px;
+  border-color: transparent;
+  border-bottom-color: inherit;
+}
+
+.tooltip-dark.tooltip-bottom .tooltip-arrow,
+.tooltip-dark.tooltip-bottom-start .tooltip-arrow,
+.tooltip-dark.tooltip-bottom-end .tooltip-arrow {
+  border-bottom-color: #2d3748;
+}
+
+.tooltip-light.tooltip-bottom .tooltip-arrow,
+.tooltip-light.tooltip-bottom-start .tooltip-arrow,
+.tooltip-light.tooltip-bottom-end .tooltip-arrow {
+  border-bottom-color: #ffffff;
+}
+
+/* 左侧箭头 */
+.tooltip-left .tooltip-arrow,
+.tooltip-left-start .tooltip-arrow,
+.tooltip-left-end .tooltip-arrow {
+  border-width: 6px 0 6px 6px;
+  border-color: transparent;
+  border-left-color: inherit;
+}
+
+.tooltip-dark.tooltip-left .tooltip-arrow,
+.tooltip-dark.tooltip-left-start .tooltip-arrow,
+.tooltip-dark.tooltip-left-end .tooltip-arrow {
+  border-left-color: #2d3748;
+}
+
+.tooltip-light.tooltip-left .tooltip-arrow,
+.tooltip-light.tooltip-left-start .tooltip-arrow,
+.tooltip-light.tooltip-left-end .tooltip-arrow {
+  border-left-color: #ffffff;
+}
+
+/* 右侧箭头 */
+.tooltip-right .tooltip-arrow,
+.tooltip-right-start .tooltip-arrow,
+.tooltip-right-end .tooltip-arrow {
+  border-width: 6px 6px 6px 0;
+  border-color: transparent;
+  border-right-color: inherit;
+}
+
+.tooltip-dark.tooltip-right .tooltip-arrow,
+.tooltip-dark.tooltip-right-start .tooltip-arrow,
+.tooltip-dark.tooltip-right-end .tooltip-arrow {
+  border-right-color: #2d3748;
+}
+
+.tooltip-light.tooltip-right .tooltip-arrow,
+.tooltip-light.tooltip-right-start .tooltip-arrow,
+.tooltip-light.tooltip-right-end .tooltip-arrow {
+  border-right-color: #ffffff;
+}
+
+/* ====================
+   动画效果
+   ==================== */
+
+/* 淡入淡出 */
+.tooltip-fade {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* 缩放 */
+.tooltip-scale {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* 滑动 */
+.tooltip-slide {
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tooltip-slide.tooltip-top,
+.tooltip-slide.tooltip-top-start,
+.tooltip-slide.tooltip-top-end {
+  transform: translateY(10px);
+}
+
+.tooltip-slide.tooltip-bottom,
+.tooltip-slide.tooltip-bottom-start,
+.tooltip-slide.tooltip-bottom-end {
+  transform: translateY(-10px);
+}
+
+.tooltip-slide.tooltip-left,
+.tooltip-slide.tooltip-left-start,
+.tooltip-slide.tooltip-left-end {
+  transform: translateX(10px);
+}
+
+.tooltip-slide.tooltip-right,
+.tooltip-slide.tooltip-right-start,
+.tooltip-slide.tooltip-right-end {
+  transform: translateX(-10px);
+}
+
+/* ====================
+   触发器样式
+   ==================== */
+
+.tooltip-trigger {
+  position: relative;
+}
+
+.tooltip-trigger[data-tooltip]:hover,
+.tooltip-trigger[title]:hover {
+  cursor: help;
+}
+
+/* 点击触发器样式 */
+.tooltip-trigger[data-trigger="click"] {
+  cursor: pointer;
+}
+
+.tooltip-trigger[data-trigger="click"]:focus {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
+}
+
+/* ====================
+   特殊内容样式
+   ==================== */
+
+/* HTML内容样式 */
+.tooltip-content p {
+  margin: 0 0 8px;
+}
+
+.tooltip-content p:last-child {
+  margin-bottom: 0;
+}
+
+.tooltip-content ul,
+.tooltip-content ol {
+  margin: 0 0 8px 16px;
+  padding: 0;
+}
+
+.tooltip-content li {
+  margin-bottom: 2px;
+}
+
+.tooltip-content code {
+  padding: 2px 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+}
+
+.tooltip-light .tooltip-content code {
+  background: #f7fafc;
+  color: #e53e3e;
+}
+
+.tooltip-content strong {
+  font-weight: 600;
+}
+
+.tooltip-content em {
+  font-style: italic;
+}
+
+.tooltip-content a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.tooltip-content a:hover {
+  text-decoration: none;
+}
+
+/* 表格样式 */
+.tooltip-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.tooltip-content th,
+.tooltip-content td {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltip-light .tooltip-content th,
+.tooltip-light .tooltip-content td {
+  border-bottom-color: #e2e8f0;
+}
+
+.tooltip-content th {
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tooltip-light .tooltip-content th {
+  background: #f7fafc;
+}
+
+/* ====================
+   大小变体
+   ==================== */
+
+/* 小尺寸 */
+.tooltip-small {
+  max-width: 200px;
+  font-size: 12px;
+}
+
+.tooltip-small .tooltip-content {
+  padding: 6px 8px;
+}
+
+.tooltip-small .tooltip-title {
+  padding: 6px 8px 0;
+  font-size: 11px;
+}
+
+/* 大尺寸 */
+.tooltip-large {
+  max-width: 400px;
+  font-size: 14px;
+}
+
+.tooltip-large .tooltip-content {
+  padding: 12px 16px;
+}
+
+.tooltip-large .tooltip-title {
+  padding: 12px 16px 0;
+  font-size: 15px;
+}
+
+/* 超大尺寸 */
+.tooltip-xlarge {
+  max-width: 500px;
+  font-size: 15px;
+}
+
+.tooltip-xlarge .tooltip-content {
+  padding: 16px 20px;
+}
+
+.tooltip-xlarge .tooltip-title {
+  padding: 16px 20px 0;
+  font-size: 16px;
+}
+
+/* ====================
+   响应式设计
+   ==================== */
+
+@media (max-width: 768px) {
+  .tooltip {
+    max-width: 280px;
+    font-size: 13px;
+  }
+  
+  .tooltip-large {
+    max-width: 320px;
+  }
+  
+  .tooltip-xlarge {
+    max-width: 340px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tooltip {
+    max-width: 240px;
+    font-size: 12px;
+  }
+  
+  .tooltip-content {
+    padding: 6px 10px;
+  }
+  
+  .tooltip-title {
+    padding: 6px 10px 0;
+    font-size: 12px;
+  }
+  
+  .tooltip-large,
+  .tooltip-xlarge {
+    max-width: 280px;
+  }
+}
+
+/* ====================
+   辅助功能
+   ==================== */
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .tooltip-dark {
+    background: #000000;
+    border-color: #ffffff;
+    color: #ffffff;
+  }
+  
+  .tooltip-light {
+    background: #ffffff;
+    border-color: #000000;
+    color: #000000;
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip,
+  .tooltip-arrow {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* 焦点指示器 */
+.tooltip:focus {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
+}
+
+/* ====================
+   打印样式
+   ==================== */
+
+@media print {
+  .tooltip {
+    display: none !important;
+  }
+}
+
+/* ====================
+   特殊状态
+   ==================== */
+
+/* 加载状态 */
+.tooltip.loading {
+  opacity: 0.7;
+}
+
+.tooltip.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid currentColor;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: tooltip-spin 1s linear infinite;
+}
+
+@keyframes tooltip-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 错误状态 */
+.tooltip.error {
+  border-color: #e53e3e;
+  box-shadow: 0 0 0 1px rgba(229, 62, 62, 0.2);
+}
+
+/* 警告状态 */
+.tooltip.warning {
+  border-color: #d69e2e;
+  box-shadow: 0 0 0 1px rgba(214, 158, 46, 0.2);
+}
+
+/* ====================
+   工具提示组合
+   ==================== */
+
+/* 嵌套工具提示 */
+.tooltip .tooltip-trigger {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+
+/* 图标工具提示 */
+.tooltip-icon-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #a0aec0;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: help;
+  margin-left: 4px;
+}
+
+.tooltip-icon-trigger:hover {
+  background: #718096;
+}
+
+/* 按钮工具提示 */
+button[data-tooltip],
+.btn[data-tooltip] {
+  position: relative;
+}
+
+/* 链接工具提示 */
+a[data-tooltip] {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}

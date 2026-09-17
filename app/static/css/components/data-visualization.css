@@ -1,0 +1,507 @@
+/**
+ * 数据可视化组件样式
+ */
+
+/* 主容器 */
+.data-visualization {
+  width: 100%;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.data-visualization:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 深色主题 */
+.data-visualization.dark {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+/* 图表头部 */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.data-visualization.dark .chart-header {
+  background: #374151;
+  border-bottom-color: #4b5563;
+}
+
+.chart-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.data-visualization.dark .chart-title {
+  color: #f1f5f9;
+}
+
+/* 控制按钮 */
+.chart-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chart-control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-control-btn:hover {
+  background: #3b82f6;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.chart-control-btn:active {
+  transform: translateY(0);
+}
+
+.data-visualization.dark .chart-control-btn {
+  background: #4b5563;
+  color: #d1d5db;
+}
+
+.data-visualization.dark .chart-control-btn:hover {
+  background: #3b82f6;
+  color: #fff;
+}
+
+/* 图表容器 */
+.chart-container {
+  position: relative;
+  min-height: 300px;
+  background: #fff;
+}
+
+.data-visualization.dark .chart-container {
+  background: #1f2937;
+}
+
+.chart-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 加载状态 */
+.chart-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 10;
+}
+
+.data-visualization.dark .chart-loading {
+  background: rgba(31, 41, 55, 0.95);
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.data-visualization.dark .loading-text {
+  color: #9ca3af;
+}
+
+/* 错误状态 */
+.chart-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 10;
+}
+
+.data-visualization.dark .chart-error {
+  background: rgba(31, 41, 55, 0.95);
+}
+
+.chart-error i {
+  font-size: 3rem;
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.error-text {
+  font-size: 1rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.data-visualization.dark .error-text {
+  color: #9ca3af;
+}
+
+.retry-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* 图表底部 */
+.chart-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.data-visualization.dark .chart-footer {
+  background: #374151;
+  border-top-color: #4b5563;
+}
+
+/* 图例 */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.data-visualization.dark .legend-item {
+  color: #9ca3af;
+}
+
+.legend-color {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* 统计信息 */
+.chart-stats {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.data-visualization.dark .chart-stats {
+  color: #6b7280;
+}
+
+/* 全屏模式 */
+.data-visualization:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  border-radius: 0;
+}
+
+.data-visualization:fullscreen .chart-container {
+  height: calc(100vh - 140px);
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .chart-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .chart-controls {
+    order: -1;
+  }
+  
+  .chart-footer {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .chart-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-header,
+  .chart-footer {
+    padding: 1rem;
+  }
+  
+  .chart-title {
+    font-size: 1.125rem;
+  }
+  
+  .chart-control-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+  
+  .chart-container {
+    min-height: 250px;
+  }
+}
+
+/* 图表类型特定样式 */
+
+/* 线图样式 */
+.chart-type-line .chart-container {
+  padding: 1rem;
+}
+
+/* 柱状图样式 */
+.chart-type-bar .chart-container {
+  padding: 0.5rem 1rem;
+}
+
+/* 饼图样式 */
+.chart-type-pie .chart-container {
+  padding: 2rem 1rem;
+}
+
+.chart-type-pie .chart-footer {
+  justify-content: center;
+}
+
+/* K线图样式 */
+.chart-type-candlestick .chart-container {
+  padding: 0.5rem;
+}
+
+.chart-type-candlestick .chart-stats {
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+/* 实时更新指示器 */
+.realtime-indicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid #22c55e;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: #16a34a;
+  z-index: 5;
+}
+
+.realtime-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 数据点高亮 */
+.data-point-highlight {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(59, 130, 246, 0.2);
+  border: 2px solid #3b82f6;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: highlightPulse 1s ease-out;
+}
+
+@keyframes highlightPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+/* 缩放控制 */
+.zoom-controls {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 5;
+}
+
+.zoom-btn {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.zoom-btn:hover {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.data-visualization.dark .zoom-btn {
+  background: rgba(55, 65, 81, 0.9);
+  color: #d1d5db;
+}
+
+/* 工具提示增强 */
+.custom-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.custom-tooltip::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 0.25rem solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.85);
+}
+
+/* 性能优化 */
+.chart-canvas {
+  will-change: transform;
+}
+
+.data-visualization.animating * {
+  pointer-events: none;
+}
+
+/* 打印样式 */
+@media print {
+  .chart-header,
+  .chart-footer {
+    background: transparent !important;
+    border: none !important;
+  }
+  
+  .chart-controls,
+  .realtime-indicator,
+  .zoom-controls {
+    display: none !important;
+  }
+  
+  .data-visualization {
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .data-visualization {
+    border: 2px solid currentColor;
+  }
+  
+  .chart-control-btn {
+    border: 1px solid currentColor;
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner,
+  .realtime-dot,
+  .data-point-highlight {
+    animation: none !important;
+  }
+  
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}

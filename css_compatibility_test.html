@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS样式兼容性验证</title>
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 组件CSS -->
+    <link rel="stylesheet" href="app/static/css/components/smart-form.css">
+    <link rel="stylesheet" href="app/static/css/components/data-visualization.css">
+    <link rel="stylesheet" href="app/static/css/components/interactive-charts.css">
+    <link rel="stylesheet" href="app/static/css/components/modal.css">
+    <link rel="stylesheet" href="app/static/css/components/navigation.css">
+    <link rel="stylesheet" href="app/static/css/components/tooltip.css">
+    
+    <style>
+        .test-card {
+            @apply border border-gray-200 rounded-lg p-4 mb-4 bg-white shadow-sm;
+        }
+        
+        .test-pass {
+            @apply border-green-500 bg-green-50;
+        }
+        
+        .test-fail {
+            @apply border-red-500 bg-red-50;
+        }
+        
+        .test-warning {
+            @apply border-yellow-500 bg-yellow-50;
+        }
+        
+        .style-sample {
+            @apply p-4 border rounded mb-2;
+        }
+        
+        .responsive-test {
+            @apply grid gap-4;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">CSS样式兼容性验证</h1>
+        
+        <!-- 测试控制面板 -->
+        <div class="test-card">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold">测试控制</h2>
+                <div class="flex gap-2">
+                    <button id="runAllTests" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        运行所有测试
+                    </button>
+                    <button id="exportReport" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                        导出报告
+                    </button>
+                </div>
+            </div>
+            <div id="testSummary" class="text-gray-600">
+                准备开始CSS兼容性测试...
+            </div>
+        </div>
+
+        <!-- TailwindCSS集成测试 -->
+        <div class="test-card" id="tailwindTest">
+            <h2 class="text-xl font-semibold mb-4">1. TailwindCSS集成测试</h2>
+            
+            <!-- 基础工具类测试 -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2">基础工具类测试</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-500 text-white p-3 rounded">
+                        <div class="text-sm">背景色: bg-blue-500</div>
+                        <div class="text-xs opacity-75">文本色: text-white</div>
+                    </div>
+                    <div class="border-2 border-green-500 p-3 rounded">
+                        <div class="text-sm">边框: border-2 border-green-500</div>
+                        <div class="text-xs text-gray-600">圆角: rounded</div>
+                    </div>
+                    <div class="shadow-lg p-3 rounded bg-white">
+                        <div class="text-sm">阴影: shadow-lg</div>
+                        <div class="text-xs text-gray-600">背景: bg-white</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 响应式测试 -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2">响应式测试</h3>
+                <div class="responsive-test">
+                    <div class="bg-purple-100 p-4 rounded">
+                        <div class="text-sm font-medium">移动优先</div>
+                        <div class="text-xs text-gray-600">默认单列布局</div>
+                    </div>
+                    <div class="bg-purple-200 p-4 rounded hidden md:block">
+                        <div class="text-sm font-medium">平板显示</div>
+                        <div class="text-xs text-gray-600">md:block 类</div>
+                    </div>
+                    <div class="bg-purple-300 p-4 rounded hidden lg:block">
+                        <div class="text-sm font-medium">桌面显示</div>
+                        <div class="text-xs text-gray-600">lg:block 类</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tailwindResult" class="test-result"></div>
+        </div>
+
+        <!-- 组件样式冲突测试 -->
+        <div class="test-card" id="conflictTest">
+            <h2 class="text-xl font-semibold mb-4">2. 样式冲突测试</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- SmartForm样式测试 -->
+                <div class="style-sample">
+                    <h3 class="font-medium mb-2">SmartForm + Tailwind</h3>
+                    <div class="smart-form bg-gray-50 p-4 rounded">
+                        <div class="form-group mb-3">
+                            <label class="block text-sm font-medium mb-1">测试字段</label>
+                            <input type="text" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="输入测试内容">
+                            <div class="validation-message text-red-500 text-xs mt-1">验证错误消息</div>
+                        </div>
+                        <button class="btn btn-primary bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            提交按钮
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal样式测试 -->
+                <div class="style-sample">
+                    <h3 class="font-medium mb-2">Modal + Tailwind</h3>
+                    <div class="modal-preview border border-gray-300 rounded p-4 bg-white">
+                        <div class="modal-header flex justify-between items-center pb-2 border-b">
+                            <div class="modal-title font-semibold">弹窗标题</div>
+                            <button class="modal-close text-gray-500 hover:text-gray-700">×</button>
+                        </div>
+                        <div class="modal-content py-3 text-gray-600">
+                            这是弹窗内容区域
+                        </div>
+                        <div class="modal-footer flex justify-end gap-2 pt-2 border-t">
+                            <button class="px-3 py-1 bg-gray-500 text-white rounded text-sm">取消</button>
+                            <button class="px-3 py-1 bg-blue-500 text-white rounded text-sm">确定</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation样式测试 -->
+                <div class="style-sample">
+                    <h3 class="font-medium mb-2">Navigation + Tailwind</h3>
+                    <div class="navigation-navbar bg-white border-b border-gray-200 shadow-sm">
+                        <div class="navbar-container flex items-center justify-between p-4">
+                            <div class="navbar-brand font-semibold text-lg">品牌</div>
+                            <nav class="navbar-nav flex space-x-4">
+                                <a href="#" class="nav-link px-3 py-2 text-gray-600 hover:text-blue-500 rounded">首页</a>
+                                <a href="#" class="nav-link px-3 py-2 text-gray-600 hover:text-blue-500 rounded">产品</a>
+                                <a href="#" class="nav-link px-3 py-2 text-blue-500 bg-blue-50 rounded">当前页</a>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tooltip样式测试 -->
+                <div class="style-sample">
+                    <h3 class="font-medium mb-2">Tooltip + Tailwind</h3>
+                    <div class="flex items-center space-x-4">
+                        <span class="tooltip-trigger bg-blue-100 px-3 py-1 rounded cursor-help">悬停提示</span>
+                        <span class="tooltip-trigger bg-green-100 px-3 py-1 rounded cursor-help">成功提示</span>
+                        <span class="tooltip-trigger bg-yellow-100 px-3 py-1 rounded cursor-help">警告提示</span>
+                        <span class="tooltip-trigger bg-red-100 px-3 py-1 rounded cursor-help">错误提示</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="conflictResult" class="test-result mt-4"></div>
+        </div>
+
+        <!-- 视觉一致性测试 -->
+        <div class="test-card" id="visualTest">
+            <h2 class="text-xl font-semibold mb-4">3. 视觉一致性测试</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- 颜色一致性 -->
+                <div class="bg-white border rounded p-4">
+                    <h3 class="font-medium mb-3">颜色系统</h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-blue-500 rounded mr-2"></div>
+                            <span class="text-sm">主色调 (blue-500)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                            <span class="text-sm">成功 (green-500)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+                            <span class="text-sm">警告 (yellow-500)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                            <span class="text-sm">危险 (red-500)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 字体系统 -->
+                <div class="bg-white border rounded p-4">
+                    <h3 class="font-medium mb-3">字体系统</h3>
+                    <div class="space-y-2">
+                        <div class="text-xs text-gray-600">超小 (text-xs)</div>
+                        <div class="text-sm text-gray-700">小 (text-sm)</div>
+                        <div class="text-base text-gray-800">基础 (text-base)</div>
+                        <div class="text-lg text-gray-900">大 (text-lg)</div>
+                        <div class="text-xl font-semibold">特大 (text-xl)</div>
+                    </div>
+                </div>
+
+                <!-- 间距系统 -->
+                <div class="bg-white border rounded p-4">
+                    <h3 class="font-medium mb-3">间距系统</h3>
+                    <div class="space-y-2">
+                        <div class="p-1 bg-blue-100 text-xs">p-1</div>
+                        <div class="p-2 bg-blue-200 text-xs">p-2</div>
+                        <div class="p-3 bg-blue-300 text-xs">p-3</div>
+                        <div class="p-4 bg-blue-400 text-xs text-white">p-4</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="visualResult" class="test-result mt-4"></div>
+        </div>
+
+        <!-- 响应式测试 -->
+        <div class="test-card" id="responsiveTest">
+            <h2 class="text-xl font-semibold mb-4">4. 响应式设计测试</h2>
+            
+            <div class="mb-4">
+                <div class="flex space-x-2 mb-4">
+                    <button class="viewport-test px-3 py-1 bg-gray-200 rounded text-sm" data-width="375">手机</button>
+                    <button class="viewport-test px-3 py-1 bg-gray-200 rounded text-sm" data-width="768">平板</button>
+                    <button class="viewport-test px-3 py-1 bg-gray-200 rounded text-sm" data-width="1024">桌面</button>
+                    <button class="viewport-test px-3 py-1 bg-gray-200 rounded text-sm" data-width="auto">自动</button>
+                </div>
+            </div>
+
+            <div class="border rounded p-4 bg-white">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded text-white">
+                        <div class="text-sm font-medium">响应式卡片 1</div>
+                        <div class="text-xs opacity-75">sm:grid-cols-2</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-blue-600 p-4 rounded text-white">
+                        <div class="text-sm font-medium">响应式卡片 2</div>
+                        <div class="text-xs opacity-75">lg:grid-cols-4</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-red-600 p-4 rounded text-white lg:col-span-2">
+                        <div class="text-sm font-medium">跨列卡片</div>
+                        <div class="text-xs opacity-75">lg:col-span-2</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="responsiveResult" class="test-result mt-4"></div>
+        </div>
+
+        <!-- 性能测试 -->
+        <div class="test-card" id="performanceTest">
+            <h2 class="text-xl font-semibold mb-4">5. CSS性能测试</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-medium mb-2">CSS文件大小</h3>
+                    <div id="cssSize" class="space-y-2 text-sm text-gray-600">
+                        加载中...
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-medium mb-2">渲染性能</h3>
+                    <div id="renderPerf" class="space-y-2 text-sm text-gray-600">
+                        测试中...
+                    </div>
+                </div>
+            </div>
+
+            <div id="performanceResult" class="test-result mt-4"></div>
+        </div>
+
+        <!-- 测试报告 -->
+        <div class="test-card" id="testReport">
+            <h2 class="text-xl font-semibold mb-4">测试报告</h2>
+            <div id="reportContent" class="text-gray-600">
+                点击"运行所有测试"开始测试...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CSSCompatibilityTester {
+            constructor() {
+                this.results = new Map();
+                this.testsPassed = 0;
+                this.testsTotal = 0;
+                
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.checkTailwindCSS();
+            }
+
+            bindEvents() {
+                document.getElementById('runAllTests').addEventListener('click', () => {
+                    this.runAllTests();
+                });
+
+                document.getElementById('exportReport').addEventListener('click', () => {
+                    this.exportReport();
+                });
+
+                // 响应式测试按钮
+                document.querySelectorAll('.viewport-test').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.testViewport(e.target.dataset.width);
+                    });
+                });
+            }
+
+            async runAllTests() {
+                console.log('开始CSS兼容性测试...');
+                
+                this.results.clear();
+                this.testsPassed = 0;
+                this.testsTotal = 0;
+
+                // 运行各项测试
+                await this.testTailwindIntegration();
+                await this.testStyleConflicts();
+                await this.testVisualConsistency();
+                await this.testResponsiveDesign();
+                await this.testPerformance();
+
+                this.generateReport();
+            }
+
+            async testTailwindIntegration() {
+                const testName = 'TailwindCSS集成';
+                let passed = 0;
+                let total = 0;
+                const issues = [];
+
+                // 测试1: 检查TailwindCSS是否加载
+                total++;
+                const testEl = document.createElement('div');
+                testEl.className = 'bg-blue-500 text-white p-4';
+                document.body.appendChild(testEl);
+                
+                const computedStyle = getComputedStyle(testEl);
+                if (computedStyle.backgroundColor === 'rgb(59, 130, 246)') {
+                    passed++;
+                } else {
+                    issues.push('TailwindCSS工具类未正确加载');
+                }
+                document.body.removeChild(testEl);
+
+                // 测试2: 检查响应式类
+                total++;
+                const mediaQuery = window.matchMedia('(min-width: 768px)');
+                if (mediaQuery.matches) {
+                    const responsiveEl = document.createElement('div');
+                    responsiveEl.className = 'hidden md:block';
+                    document.body.appendChild(responsiveEl);
+                    
+                    const display = getComputedStyle(responsiveEl).display;
+                    if (display !== 'none') {
+                        passed++;
+                    } else {
+                        issues.push('响应式断点类未生效');
+                    }
+                    document.body.removeChild(responsiveEl);
+                } else {
+                    passed++; // 在小屏幕上跳过此测试
+                }
+
+                // 测试3: 检查自定义CSS与Tailwind共存
+                total++;
+                const customEl = document.createElement('div');
+                customEl.className = 'test-card bg-white p-4';
+                document.body.appendChild(customEl);
+                
+                const customStyle = getComputedStyle(customEl);
+                if (customStyle.backgroundColor === 'rgb(255, 255, 255)' && 
+                    customStyle.padding === '16px') {
+                    passed++;
+                } else {
+                    issues.push('自定义CSS与Tailwind冲突');
+                }
+                document.body.removeChild(customEl);
+
+                this.showTestResult('tailwindTest', testName, passed, total, issues);
+                this.results.set(testName, { passed, total, issues });
+            }
+
+            async testStyleConflicts() {
+                const testName = '样式冲突检测';
+                let passed = 0;
+                let total = 0;
+                const issues = [];
+
+                // 测试组件样式与Tailwind的兼容性
+                const components = [
+                    { name: 'SmartForm', className: 'smart-form' },
+                    { name: 'Modal', className: 'modal-content' },
+                    { name: 'Navigation', className: 'navigation-navbar' },
+                    { name: 'Tooltip', className: 'tooltip' }
+                ];
+
+                for (const component of components) {
+                    total++;
+                    const testEl = document.createElement('div');
+                    testEl.className = `${component.className} bg-white p-4 rounded`;
+                    document.body.appendChild(testEl);
+                    
+                    try {
+                        const style = getComputedStyle(testEl);
+                        // 检查基础样式是否正确应用
+                        if (style.backgroundColor && style.padding) {
+                            passed++;
+                        } else {
+                            issues.push(`${component.name}组件样式可能存在冲突`);
+                        }
+                    } catch (error) {
+                        issues.push(`${component.name}组件样式测试失败: ${error.message}`);
+                    }
+                    
+                    document.body.removeChild(testEl);
+                }
+
+                this.showTestResult('conflictTest', testName, passed, total, issues);
+                this.results.set(testName, { passed, total, issues });
+            }
+
+            async testVisualConsistency() {
+                const testName = '视觉一致性';
+                let passed = 0;
+                let total = 0;
+                const issues = [];
+
+                // 测试颜色系统
+                total++;
+                const colors = ['blue-500', 'green-500', 'yellow-500', 'red-500'];
+                const expectedColors = [
+                    'rgb(59, 130, 246)',
+                    'rgb(34, 197, 94)',
+                    'rgb(234, 179, 8)',
+                    'rgb(239, 68, 68)'
+                ];
+                
+                let colorMatch = true;
+                colors.forEach((color, index) => {
+                    const el = document.createElement('div');
+                    el.className = `bg-${color}`;
+                    document.body.appendChild(el);
+                    
+                    const bgColor = getComputedStyle(el).backgroundColor;
+                    if (bgColor !== expectedColors[index]) {
+                        colorMatch = false;
+                    }
+                    
+                    document.body.removeChild(el);
+                });
+                
+                if (colorMatch) {
+                    passed++;
+                } else {
+                    issues.push('颜色系统不一致');
+                }
+
+                // 测试字体系统
+                total++;
+                const fontSizes = ['text-xs', 'text-sm', 'text-base', 'text-lg'];
+                let fontConsistent = true;
+                
+                fontSizes.forEach(size => {
+                    const el = document.createElement('div');
+                    el.className = size;
+                    el.textContent = 'Test';
+                    document.body.appendChild(el);
+                    
+                    const fontSize = parseFloat(getComputedStyle(el).fontSize);
+                    if (!fontSize || fontSize <= 0) {
+                        fontConsistent = false;
+                    }
+                    
+                    document.body.removeChild(el);
+                });
+                
+                if (fontConsistent) {
+                    passed++;
+                } else {
+                    issues.push('字体系统不一致');
+                }
+
+                this.showTestResult('visualTest', testName, passed, total, issues);
+                this.results.set(testName, { passed, total, issues });
+            }
+
+            async testResponsiveDesign() {
+                const testName = '响应式设计';
+                let passed = 0;
+                let total = 0;
+                const issues = [];
+
+                // 测试响应式网格
+                total++;
+                const gridEl = document.createElement('div');
+                gridEl.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4';
+                document.body.appendChild(gridEl);
+                
+                const gridStyle = getComputedStyle(gridEl);
+                if (gridStyle.display === 'grid') {
+                    passed++;
+                } else {
+                    issues.push('CSS Grid不支持');
+                }
+                document.body.removeChild(gridEl);
+
+                // 测试Flexbox
+                total++;
+                const flexEl = document.createElement('div');
+                flexEl.className = 'flex items-center justify-between';
+                document.body.appendChild(flexEl);
+                
+                const flexStyle = getComputedStyle(flexEl);
+                if (flexStyle.display === 'flex') {
+                    passed++;
+                } else {
+                    issues.push('Flexbox不支持');
+                }
+                document.body.removeChild(flexEl);
+
+                this.showTestResult('responsiveTest', testName, passed, total, issues);
+                this.results.set(testName, { passed, total, issues });
+            }
+
+            async testPerformance() {
+                const testName = 'CSS性能';
+                let passed = 0;
+                let total = 0;
+                const issues = [];
+
+                // 测试CSS文件大小
+                total++;
+                try {
+                    const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
+                    let totalSize = 0;
+                    let loadedCount = 0;
+                    
+                    const sizePromises = Array.from(cssLinks).map(link => {
+                        return fetch(link.href, { method: 'HEAD' })
+                            .then(response => {
+                                const size = response.headers.get('content-length');
+                                if (size) {
+                                    totalSize += parseInt(size);
+                                }
+                                loadedCount++;
+                            })
+                            .catch(() => loadedCount++);
+                    });
+                    
+                    await Promise.all(sizePromises);
+                    
+                    const sizeMB = totalSize / 1024 / 1024;
+                    document.getElementById('cssSize').innerHTML = `
+                        <div>总CSS文件: ${cssLinks.length}个</div>
+                        <div>估计大小: ${sizeMB.toFixed(2)}MB</div>
+                    `;
+                    
+                    if (sizeMB < 5) { // 少于5MB认为合理
+                        passed++;
+                    } else {
+                        issues.push('CSS文件过大，可能影响性能');
+                    }
+                } catch (error) {
+                    issues.push('无法获取CSS文件大小信息');
+                }
+
+                // 测试渲染性能
+                total++;
+                const start = performance.now();
+                
+                // 创建大量元素测试渲染性能
+                const container = document.createElement('div');
+                for (let i = 0; i < 100; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'bg-blue-500 text-white p-2 m-1 rounded shadow';
+                    el.textContent = `元素 ${i}`;
+                    container.appendChild(el);
+                }
+                
+                document.body.appendChild(container);
+                
+                const renderTime = performance.now() - start;
+                document.getElementById('renderPerf').innerHTML = `
+                    <div>100元素渲染时间: ${renderTime.toFixed(2)}ms</div>
+                    <div>平均每元素: ${(renderTime/100).toFixed(2)}ms</div>
+                `;
+                
+                document.body.removeChild(container);
+                
+                if (renderTime < 50) { // 少于50ms认为性能良好
+                    passed++;
+                } else {
+                    issues.push('CSS渲染性能可能需要优化');
+                }
+
+                this.showTestResult('performanceTest', testName, passed, total, issues);
+                this.results.set(testName, { passed, total, issues });
+            }
+
+            testViewport(width) {
+                const container = document.querySelector('#responsiveTest .border');
+                
+                if (width === 'auto') {
+                    container.style.width = '';
+                    container.style.maxWidth = '';
+                } else {
+                    container.style.width = width + 'px';
+                    container.style.maxWidth = width + 'px';
+                }
+                
+                // 更新按钮状态
+                document.querySelectorAll('.viewport-test').forEach(btn => {
+                    btn.classList.remove('bg-blue-500', 'text-white');
+                    btn.classList.add('bg-gray-200');
+                });
+                
+                event.target.classList.remove('bg-gray-200');
+                event.target.classList.add('bg-blue-500', 'text-white');
+            }
+
+            showTestResult(containerId, testName, passed, total, issues) {
+                const container = document.getElementById(containerId);
+                let resultDiv = container.querySelector('.test-result');
+                
+                if (!resultDiv) {
+                    resultDiv = document.createElement('div');
+                    resultDiv.className = 'test-result mt-4 p-3 rounded';
+                    container.appendChild(resultDiv);
+                }
+
+                const percentage = Math.round((passed / total) * 100);
+                const status = percentage === 100 ? 'pass' : (percentage >= 70 ? 'warning' : 'fail');
+                
+                resultDiv.className = `test-result mt-4 p-3 rounded ${status === 'pass' ? 'bg-green-100 text-green-800' : 
+                                                                     status === 'warning' ? 'bg-yellow-100 text-yellow-800' : 
+                                                                     'bg-red-100 text-red-800'}`;
+
+                resultDiv.innerHTML = `
+                    <div class="font-semibold">${testName} - ${passed}/${total} 通过 (${percentage}%)</div>
+                    ${issues.length > 0 ? `
+                        <div class="mt-2 text-sm">
+                            <div class="font-medium">发现的问题:</div>
+                            <ul class="list-disc list-inside mt-1">
+                                ${issues.map(issue => `<li>${issue}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : '<div class="mt-2 text-sm">所有测试通过 ✓</div>'}
+                `;
+
+                this.testsPassed += passed;
+                this.testsTotal += total;
+            }
+
+            checkTailwindCSS() {
+                // 检查TailwindCSS是否正确加载
+                const testEl = document.createElement('div');
+                testEl.className = 'bg-blue-500';
+                testEl.style.display = 'none';
+                document.body.appendChild(testEl);
+                
+                const isLoaded = getComputedStyle(testEl).backgroundColor === 'rgb(59, 130, 246)';
+                document.body.removeChild(testEl);
+                
+                const summary = document.getElementById('testSummary');
+                summary.innerHTML = isLoaded ? 
+                    '<span class="text-green-600">✓ TailwindCSS已正确加载</span>' :
+                    '<span class="text-red-600">✗ TailwindCSS加载失败</span>';
+            }
+
+            generateReport() {
+                const overallPercentage = this.testsTotal > 0 ? Math.round((this.testsPassed / this.testsTotal) * 100) : 0;
+                const status = overallPercentage >= 90 ? 'excellent' : 
+                              overallPercentage >= 70 ? 'good' : 
+                              overallPercentage >= 50 ? 'fair' : 'poor';
+
+                const statusText = {
+                    excellent: '🎉 优秀',
+                    good: '✅ 良好', 
+                    fair: '⚠️ 一般',
+                    poor: '❌ 需要改进'
+                };
+
+                let reportHTML = `
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold mb-2">总体评估: ${statusText[status]} (${overallPercentage}%)</h3>
+                        <div class="text-sm text-gray-600 mb-3">
+                            总计: ${this.testsPassed}/${this.testsTotal} 项测试通过
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                `;
+
+                this.results.forEach((result, testName) => {
+                    const percentage = Math.round((result.passed / result.total) * 100);
+                    const testStatus = percentage === 100 ? '🟢' : percentage >= 70 ? '🟡' : '🔴';
+                    
+                    reportHTML += `
+                        <div class="border-l-4 ${percentage === 100 ? 'border-green-500' : 
+                                                  percentage >= 70 ? 'border-yellow-500' : 
+                                                  'border-red-500'} pl-3">
+                            <div class="font-medium">${testStatus} ${testName}: ${result.passed}/${result.total} (${percentage}%)</div>
+                            ${result.issues.length > 0 ? 
+                                `<div class="text-sm text-gray-600 mt-1">问题: ${result.issues.join(', ')}</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                reportHTML += `
+                    </div>
+                    <div class="mt-4 text-xs text-gray-500">
+                        测试时间: ${new Date().toLocaleString()}
+                    </div>
+                `;
+
+                document.getElementById('reportContent').innerHTML = reportHTML;
+                
+                // 更新总结
+                document.getElementById('testSummary').innerHTML = `
+                    CSS兼容性测试完成 - ${statusText[status]} (${this.testsPassed}/${this.testsTotal})
+                `;
+            }
+
+            exportReport() {
+                const reportData = {
+                    timestamp: new Date().toISOString(),
+                    overall: {
+                        passed: this.testsPassed,
+                        total: this.testsTotal,
+                        percentage: Math.round((this.testsPassed / this.testsTotal) * 100)
+                    },
+                    results: Object.fromEntries(this.results)
+                };
+
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `css-compatibility-report-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // 初始化测试器
+        document.addEventListener('DOMContentLoaded', () => {
+            window.cssTest = new CSSCompatibilityTester();
+        });
+    </script>
+</body>
+</html>

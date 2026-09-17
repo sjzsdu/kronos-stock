@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript组件集成测试</title>
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 外部依赖 -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- 组件CSS -->
+    <link rel="stylesheet" href="app/static/css/components/smart-form.css">
+    <link rel="stylesheet" href="app/static/css/components/data-visualization.css">
+    <link rel="stylesheet" href="app/static/css/components/interactive-charts.css">
+    <link rel="stylesheet" href="app/static/css/components/modal.css">
+    <link rel="stylesheet" href="app/static/css/components/navigation.css">
+    <link rel="stylesheet" href="app/static/css/components/tooltip.css">
+    
+    <style>
+        .test-section {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin: 1rem 0;
+            padding: 1rem;
+        }
+        
+        .test-section.success {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+        
+        .test-section.error {
+            border-color: #f56565;
+            background: #fff5f5;
+        }
+        
+        .test-result {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+        
+        .test-result.pass {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .test-result.fail {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .demo-container {
+            min-height: 200px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">JavaScript组件集成测试</h1>
+        
+        <!-- 测试控制面板 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center gap-4">
+                <button id="runAllTests" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    运行所有测试
+                </button>
+                <button id="clearResults" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    清除结果
+                </button>
+                <div id="testProgress" class="flex-1 text-right text-sm text-gray-600">
+                    准备就绪
+                </div>
+            </div>
+        </div>
+
+        <!-- 组件管理器测试 -->
+        <div class="test-section" id="jsManagerTest">
+            <h2 class="text-xl font-semibold mb-4">1. JSComponentManager 测试</h2>
+            <div class="demo-container">
+                <p class="text-gray-600 mb-2">测试组件注册、初始化、事件通信等核心功能</p>
+                <button id="testManager" class="bg-green-500 text-white px-3 py-1 rounded text-sm">
+                    测试管理器
+                </button>
+            </div>
+            <div id="managerResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- SmartForm测试 -->
+        <div class="test-section" id="smartFormTest">
+            <h2 class="text-xl font-semibold mb-4">2. SmartForm 测试</h2>
+            <div class="demo-container">
+                <form id="testForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">用户名 *</label>
+                        <input type="text" name="username" 
+                               class="w-full px-3 py-2 border rounded"
+                               data-validation="required|min:3" 
+                               placeholder="至少3个字符">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">邮箱 *</label>
+                        <input type="email" name="email" 
+                               class="w-full px-3 py-2 border rounded"
+                               data-validation="required|email" 
+                               placeholder="请输入有效邮箱">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">年龄</label>
+                        <input type="number" name="age" 
+                               class="w-full px-3 py-2 border rounded"
+                               data-validation="number|min:18|max:100" 
+                               placeholder="18-100">
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+                        提交测试
+                    </button>
+                </form>
+            </div>
+            <div id="formResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- DataVisualization测试 -->
+        <div class="test-section" id="dataVizTest">
+            <h2 class="text-xl font-semibold mb-4">3. DataVisualization 测试</h2>
+            <div class="demo-container">
+                <div class="flex gap-2 mb-4">
+                    <button id="createLineChart" class="bg-purple-500 text-white px-3 py-1 rounded text-sm">
+                        折线图
+                    </button>
+                    <button id="createBarChart" class="bg-purple-500 text-white px-3 py-1 rounded text-sm">
+                        柱状图
+                    </button>
+                    <button id="createPieChart" class="bg-purple-500 text-white px-3 py-1 rounded text-sm">
+                        饼图
+                    </button>
+                    <button id="updateChartData" class="bg-orange-500 text-white px-3 py-1 rounded text-sm">
+                        更新数据
+                    </button>
+                </div>
+                <div id="chartContainer" style="height: 300px; border: 1px solid #ddd;"></div>
+            </div>
+            <div id="vizResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- RealTimeUpdates测试 -->
+        <div class="test-section" id="realtimeTest">
+            <h2 class="text-xl font-semibold mb-4">4. RealTimeUpdates 测试</h2>
+            <div class="demo-container">
+                <div class="flex gap-2 mb-4">
+                    <button id="connectWS" class="bg-indigo-500 text-white px-3 py-1 rounded text-sm">
+                        连接WebSocket
+                    </button>
+                    <button id="disconnectWS" class="bg-red-500 text-white px-3 py-1 rounded text-sm">
+                        断开连接
+                    </button>
+                    <button id="sendMessage" class="bg-green-500 text-white px-3 py-1 rounded text-sm">
+                        发送消息
+                    </button>
+                </div>
+                <div id="wsStatus" class="mb-2 text-sm">
+                    状态: <span class="font-mono">未连接</span>
+                </div>
+                <div id="wsMessages" class="bg-gray-50 p-2 rounded text-xs font-mono max-h-32 overflow-y-auto">
+                    等待消息...
+                </div>
+            </div>
+            <div id="realtimeResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- InteractiveCharts测试 -->
+        <div class="test-section" id="interactiveTest">
+            <h2 class="text-xl font-semibold mb-4">5. InteractiveCharts 测试</h2>
+            <div class="demo-container">
+                <div class="flex gap-2 mb-4">
+                    <button id="createInteractiveChart" class="bg-teal-500 text-white px-3 py-1 rounded text-sm">
+                        创建交互图表
+                    </button>
+                    <button id="toggleZoom" class="bg-teal-500 text-white px-3 py-1 rounded text-sm">
+                        缩放模式
+                    </button>
+                    <button id="addAnnotation" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm">
+                        添加标注
+                    </button>
+                </div>
+                <div id="interactiveChartContainer" style="height: 300px; border: 1px solid #ddd;"></div>
+            </div>
+            <div id="interactiveResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Modal测试 -->
+        <div class="test-section" id="modalTest">
+            <h2 class="text-xl font-semibold mb-4">6. Modal 测试</h2>
+            <div class="demo-container">
+                <div class="flex gap-2 mb-4">
+                    <button id="openSimpleModal" class="bg-pink-500 text-white px-3 py-1 rounded text-sm">
+                        简单弹窗
+                    </button>
+                    <button id="openFormModal" class="bg-pink-500 text-white px-3 py-1 rounded text-sm">
+                        表单弹窗
+                    </button>
+                    <button id="openConfirmModal" class="bg-red-500 text-white px-3 py-1 rounded text-sm">
+                        确认弹窗
+                    </button>
+                    <button id="openDraggableModal" class="bg-purple-500 text-white px-3 py-1 rounded text-sm">
+                        可拖拽弹窗
+                    </button>
+                </div>
+                <div class="text-sm text-gray-600">
+                    点击按钮测试不同类型的弹窗功能
+                </div>
+            </div>
+            <div id="modalResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Navigation测试 -->
+        <div class="test-section" id="navTest">
+            <h2 class="text-xl font-semibold mb-4">7. Navigation 测试</h2>
+            <div class="demo-container">
+                <div class="flex gap-2 mb-4">
+                    <button id="createNavbar" class="bg-cyan-500 text-white px-3 py-1 rounded text-sm">
+                        顶部导航
+                    </button>
+                    <button id="createSidebar" class="bg-cyan-500 text-white px-3 py-1 rounded text-sm">
+                        侧边栏
+                    </button>
+                    <button id="createTabs" class="bg-cyan-500 text-white px-3 py-1 rounded text-sm">
+                        标签页
+                    </button>
+                    <button id="createBreadcrumb" class="bg-orange-500 text-white px-3 py-1 rounded text-sm">
+                        面包屑
+                    </button>
+                </div>
+                <div id="navContainer" class="border rounded p-2 min-h-24">
+                    导航组件将在此显示
+                </div>
+            </div>
+            <div id="navResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Tooltip测试 -->
+        <div class="test-section" id="tooltipTest">
+            <h2 class="text-xl font-semibold mb-4">8. Tooltip 测试</h2>
+            <div class="demo-container">
+                <div class="flex gap-4 items-center flex-wrap">
+                    <span data-tooltip="这是一个简单的工具提示" 
+                          class="bg-blue-100 px-2 py-1 rounded cursor-help">
+                        悬停查看提示
+                    </span>
+                    
+                    <button data-tooltip="点击触发的工具提示" 
+                            data-trigger="click"
+                            data-theme="light"
+                            class="bg-green-500 text-white px-3 py-1 rounded">
+                        点击提示
+                    </button>
+                    
+                    <input type="text" 
+                           data-tooltip="这是一个表单字段的提示信息，支持多行文本显示" 
+                           data-placement="top"
+                           data-theme="warning"
+                           class="border px-2 py-1 rounded"
+                           placeholder="聚焦查看提示">
+                    
+                    <div data-tooltip="<strong>HTML内容</strong><br>支持<em>格式化</em>文本" 
+                         data-allow-html="true"
+                         data-theme="dark"
+                         class="bg-purple-100 px-2 py-1 rounded cursor-help">
+                         HTML提示
+                    </div>
+                </div>
+                <button id="testTooltipAPI" class="mt-4 bg-gray-500 text-white px-3 py-1 rounded text-sm">
+                    测试API功能
+                </button>
+            </div>
+            <div id="tooltipResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- 综合测试结果 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+            <h3 class="text-lg font-semibold mb-4">测试总结</h3>
+            <div id="testSummary" class="text-gray-600">
+                等待测试开始...
+            </div>
+        </div>
+    </div>
+
+    <!-- 基础组件脚本 -->
+    <script src="app/static/js/utils/js_components.js"></script>
+    
+    <!-- 组件脚本 -->
+    <script src="app/static/js/components/smart-form.js"></script>
+    <script src="app/static/js/components/data-visualization.js"></script>
+    <script src="app/static/js/components/realtime-updates.js"></script>
+    <script src="app/static/js/components/interactive-charts.js"></script>
+    <script src="app/static/js/components/modal.js"></script>
+    <script src="app/static/js/components/navigation-main.js"></script>
+    <script src="app/static/js/components/tooltip.js"></script>
+
+    <!-- 测试脚本 -->
+    <script>
+        // 测试管理器
+        class ComponentTestManager {
+            constructor() {
+                this.tests = new Map();
+                this.results = new Map();
+                this.currentTest = null;
+                
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                document.getElementById('runAllTests').addEventListener('click', () => {
+                    this.runAllTests();
+                });
+
+                document.getElementById('clearResults').addEventListener('click', () => {
+                    this.clearResults();
+                });
+
+                // 绑定各个组件测试按钮
+                this.bindComponentTests();
+            }
+
+            bindComponentTests() {
+                // JSComponentManager测试
+                document.getElementById('testManager').addEventListener('click', () => {
+                    this.testComponentManager();
+                });
+
+                // SmartForm测试
+                this.initSmartFormTest();
+
+                // DataVisualization测试
+                this.initDataVizTest();
+
+                // RealTimeUpdates测试
+                this.initRealtimeTest();
+
+                // InteractiveCharts测试
+                this.initInteractiveTest();
+
+                // Modal测试
+                this.initModalTest();
+
+                // Navigation测试
+                this.initNavTest();
+
+                // Tooltip测试
+                this.initTooltipTest();
+            }
+
+            async runAllTests() {
+                this.updateProgress('开始运行所有测试...');
+                
+                const tests = [
+                    () => this.testComponentManager(),
+                    () => this.testSmartForm(),
+                    () => this.testDataVisualization(),
+                    () => this.testRealTimeUpdates(),
+                    () => this.testInteractiveCharts(),
+                    () => this.testModal(),
+                    () => this.testNavigation(),
+                    () => this.testTooltip()
+                ];
+
+                for (let i = 0; i < tests.length; i++) {
+                    this.updateProgress(`运行测试 ${i + 1}/${tests.length}...`);
+                    await new Promise(resolve => {
+                        setTimeout(() => {
+                            tests[i]();
+                            resolve();
+                        }, 500);
+                    });
+                }
+
+                this.generateSummary();
+                this.updateProgress('所有测试完成');
+            }
+
+            testComponentManager() {
+                const testName = 'JSComponentManager';
+                const container = document.getElementById('managerResult');
+                
+                try {
+                    let success = 0;
+                    let total = 0;
+                    const messages = [];
+
+                    // 测试1: 检查JSComponentManager是否存在
+                    total++;
+                    if (typeof JSComponentManager !== 'undefined') {
+                        success++;
+                        messages.push('✓ JSComponentManager类存在');
+                    } else {
+                        messages.push('✗ JSComponentManager类不存在');
+                    }
+
+                    // 测试2: 检查BaseComponent是否存在
+                    total++;
+                    if (typeof BaseComponent !== 'undefined') {
+                        success++;
+                        messages.push('✓ BaseComponent类存在');
+                    } else {
+                        messages.push('✗ BaseComponent类不存在');
+                    }
+
+                    // 测试3: 尝试创建组件管理器实例
+                    total++;
+                    try {
+                        const manager = new JSComponentManager();
+                        success++;
+                        messages.push('✓ 可以创建JSComponentManager实例');
+                        
+                        // 测试4: 检查关键方法
+                        total++;
+                        if (typeof manager.register === 'function' && 
+                            typeof manager.get === 'function' && 
+                            typeof manager.emit === 'function') {
+                            success++;
+                            messages.push('✓ 核心API方法存在');
+                        } else {
+                            messages.push('✗ 缺少核心API方法');
+                        }
+                    } catch (error) {
+                        messages.push('✗ 无法创建JSComponentManager实例: ' + error.message);
+                    }
+
+                    this.showResult(container, testName, success, total, messages);
+                    
+                } catch (error) {
+                    this.showError(container, testName, error);
+                }
+            }
+
+            testSmartForm() {
+                const testName = 'SmartForm';
+                const container = document.getElementById('formResult');
+                
+                try {
+                    let success = 0;
+                    let total = 0;
+                    const messages = [];
+
+                    // 测试1: 检查SmartForm类
+                    total++;
+                    if (typeof SmartForm !== 'undefined') {
+                        success++;
+                        messages.push('✓ SmartForm类存在');
+                        
+                        // 测试2: 创建表单实例
+                        total++;
+                        try {
+                            const form = new SmartForm('#testForm');
+                            success++;
+                            messages.push('✓ 可以创建SmartForm实例');
+                            
+                            // 测试3: 检查验证功能
+                            total++;
+                            const usernameField = document.querySelector('#testForm input[name="username"]');
+                            if (usernameField) {
+                                usernameField.value = 'ab'; // 少于3个字符
+                                const isValid = form.validateField(usernameField);
+                                if (!isValid) {
+                                    success++;
+                                    messages.push('✓ 表单验证功能正常');
+                                } else {
+                                    messages.push('✗ 表单验证功能异常');
+                                }
+                            } else {
+                                messages.push('✗ 找不到测试表单字段');
+                            }
+                            
+                        } catch (error) {
+                            messages.push('✗ 无法创建SmartForm实例: ' + error.message);
+                        }
+                    } else {
+                        messages.push('✗ SmartForm类不存在');
+                    }
+
+                    this.showResult(container, testName, success, total, messages);
+                    
+                } catch (error) {
+                    this.showError(container, testName, error);
+                }
+            }
+
+            initSmartFormTest() {
+                const form = document.getElementById('testForm');
+                if (form && typeof SmartForm !== 'undefined') {
+                    const smartForm = new SmartForm('#testForm', {
+                        realTimeValidation: true,
+                        showErrors: true
+                    });
+                }
+            }
+
+            testDataVisualization() {
+                const testName = 'DataVisualization';
+                const container = document.getElementById('vizResult');
+                
+                try {
+                    let success = 0;
+                    let total = 0;
+                    const messages = [];
+
+                    // 测试1: 检查DataVisualization类
+                    total++;
+                    if (typeof DataVisualization !== 'undefined') {
+                        success++;
+                        messages.push('✓ DataVisualization类存在');
+                        
+                        // 测试2: 检查Plotly依赖
+                        total++;
+                        if (typeof Plotly !== 'undefined') {
+                            success++;
+                            messages.push('✓ Plotly依赖加载成功');
+                            
+                            // 测试3: 尝试创建图表
+                            total++;
+                            try {
+                                const viz = new DataVisualization('#chartContainer');
+                                success++;
+                                messages.push('✓ 可以创建DataVisualization实例');
+                            } catch (error) {
+                                messages.push('✗ 无法创建DataVisualization实例: ' + error.message);
+                            }
+                        } else {
+                            messages.push('✗ Plotly依赖未加载');
+                        }
+                    } else {
+                        messages.push('✗ DataVisualization类不存在');
+                    }
+
+                    this.showResult(container, testName, success, total, messages);
+                    
+                } catch (error) {
+                    this.showError(container, testName, error);
+                }
+            }
+
+            initDataVizTest() {
+                let viz = null;
+                
+                if (typeof DataVisualization !== 'undefined') {
+                    viz = new DataVisualization('#chartContainer');
+                }
+
+                document.getElementById('createLineChart').addEventListener('click', () => {
+                    if (viz) {
+                        viz.createChart('line', {
+                            x: [1, 2, 3, 4, 5],
+                            y: [10, 25, 30, 15, 40],
+                            name: '测试数据'
+                        }, { title: '折线图测试' });
+                    }
+                });
+
+                document.getElementById('createBarChart').addEventListener('click', () => {
+                    if (viz) {
+                        viz.createChart('bar', {
+                            x: ['A', 'B', 'C', 'D'],
+                            y: [20, 35, 30, 25],
+                            name: '柱状图'
+                        }, { title: '柱状图测试' });
+                    }
+                });
+
+                document.getElementById('createPieChart').addEventListener('click', () => {
+                    if (viz) {
+                        viz.createChart('pie', {
+                            labels: ['苹果', '橘子', '香蕉', '葡萄'],
+                            values: [35, 25, 20, 20]
+                        }, { title: '饼图测试' });
+                    }
+                });
+            }
+
+            testRealTimeUpdates() {
+                const testName = 'RealTimeUpdates';
+                const container = document.getElementById('realtimeResult');
+                
+                try {
+                    let success = 0;
+                    let total = 0;
+                    const messages = [];
+
+                    // 测试1: 检查RealTimeUpdates类
+                    total++;
+                    if (typeof RealTimeUpdates !== 'undefined') {
+                        success++;
+                        messages.push('✓ RealTimeUpdates类存在');
+                        
+                        // 测试2: 检查WebSocket支持
+                        total++;
+                        if (typeof WebSocket !== 'undefined') {
+                            success++;
+                            messages.push('✓ WebSocket支持可用');
+                            
+                            // 测试3: 尝试创建实例
+                            total++;
+                            try {
+                                const realtime = new RealTimeUpdates();
+                                success++;
+                                messages.push('✓ 可以创建RealTimeUpdates实例');
+                            } catch (error) {
+                                messages.push('✗ 无法创建RealTimeUpdates实例: ' + error.message);
+                            }
+                        } else {
+                            messages.push('✗ WebSocket不支持');
+                        }
+                    } else {
+                        messages.push('✗ RealTimeUpdates类不存在');
+                    }
+
+                    this.showResult(container, testName, success, total, messages);
+                    
+                } catch (error) {
+                    this.showError(container, testName, error);
+                }
+            }
+
+            initRealtimeTest() {
+                let realtime = null;
+                
+                if (typeof RealTimeUpdates !== 'undefined') {
+                    realtime = new RealTimeUpdates();
+                }
+
+                document.getElementById('connectWS').addEventListener('click', () => {
+                    if (realtime) {
+                        // 模拟连接（实际项目中需要真实的WebSocket服务器）
+                        document.getElementById('wsStatus').innerHTML = '状态: <span class="text-yellow-600">尝试连接...</span>';
+                        setTimeout(() => {
+                            document.getElementById('wsStatus').innerHTML = '状态: <span class="text-red-600">连接失败（测试环境）</span>';
+                        }, 1000);
+                    }
+                });
+            }
+
+            testInteractiveCharts() {
+                const testName = 'InteractiveCharts';
+                const container = document.getElementById('interactiveResult');
+                
+                try {
+                    let success = 0;
+                    let total = 0;
+                    const messages = [];
+
+                    total++;
+                    if (typeof InteractiveCharts !== 'undefined') {
+                        success++;
+                        messages.push('✓ InteractiveCharts类存在');
+                        
+                        total++;
+                        if (typeof Plotly !== 'undefined') {
+                            success++;
+                            messages.push('✓ Plotly依赖可用');
+                        } else {
+                            messages.push('✗ Plotly依赖不可用');
+                        }
+                    } else {
+                        messages.push('✗ InteractiveCharts类不存在');
+                    }
+
+                    this.showResult(container, testName, success, total, messages);
+                    
+                } catch (error) {
+                    this.showError(container, testName, error);
+                }
+            }
+
+            initInteractiveTest() {
+                document.getElementById('createInteractiveChart').addEventListener('click', () => {
+                    if (typeof InteractiveCharts !== 'undefined') {
+                        const chart = new InteractiveCharts('#interactiveChartContainer');
+                        // 添加测试数据
+                        const data = Array.from({length: 50}, (_, i) => ({
+                            x: i,
+                            y: Math.sin(i / 5) * 10 + Math.random() * 5
+                        }));
+                        chart.loadData(data);
+                    }
+                });
+            }
+
+            testModal() {
+                const testName = 'Modal';
+                const container = document.getElementById('modalResult');
+                
+                try {
+                    let success = 0;
+                    let total = 0;
+                    const messages = [];
+
+                    total++;
+                    if (typeof Modal !== 'undefined') {
+                        success++;
+                        messages.push('✓ Modal类存在');
+                        
+                        total++;
+                        try {
+                            const modal = new Modal();
+                            success++;
+                            messages.push('✓ 可以创建Modal实例');
+                        } catch (error) {
+                            messages.push('✗ 无法创建Modal实例: ' + error.message);
+                        }
+                    } else {
+                        messages.push('✗ Modal类不存在');
+                    }
+
+                    this.showResult(container, testName, success, total, messages);
+                    
+                } catch (error) {
+                    this.showError(container, testName, error);
+                }
+            }
+
+            initModalTest() {
+                document.getElementById('openSimpleModal').addEventListener('click', () => {
+                    if (typeof Modal !== 'undefined') {
+                        Modal.show({
+                            title: '简单弹窗测试',
+                            content: '这是一个简单的弹窗内容测试。',
+                            size: 'medium'
+                        });
+                    }
+                });
+
+                document.getElementById('openConfirmModal').addEventListener('click', () => {
+                    if (typeof Modal !== 'undefined') {
+                        Modal.confirm({
+                            title: '确认操作',
+                            content: '您确定要执行这个操作吗？',
+                            onConfirm: () => alert('确认！'),
+                            onCancel: () => alert('取消！')
+                        });
+                    }
+                });
+            }
+
+            testNavigation() {
+                const testName = 'Navigation';
+                const container = document.getElementById('navResult');
+                
+                try {
+                    let success = 0;
+                    let total = 0;
+                    const messages = [];
+
+                    total++;
+                    if (typeof Navigation !== 'undefined') {
+                        success++;
+                        messages.push('✓ Navigation类存在');
+                    } else {
+                        messages.push('✗ Navigation类不存在');
+                    }
+
+                    this.showResult(container, testName, success, total, messages);
+                    
+                } catch (error) {
+                    this.showError(container, testName, error);
+                }
+            }
+
+            initNavTest() {
+                document.getElementById('createNavbar').addEventListener('click', () => {
+                    if (typeof Navigation !== 'undefined') {
+                        const nav = new Navigation('#navContainer', {
+                            type: 'navbar',
+                            items: [
+                                { text: '首页', href: '#home' },
+                                { text: '产品', href: '#products' },
+                                { text: '服务', href: '#services' },
+                                { text: '关于', href: '#about' }
+                            ]
+                        });
+                    }
+                });
+            }
+
+            testTooltip() {
+                const testName = 'Tooltip';
+                const container = document.getElementById('tooltipResult');
+                
+                try {
+                    let success = 0;
+                    let total = 0;
+                    const messages = [];
+
+                    total++;
+                    if (typeof Tooltip !== 'undefined') {
+                        success++;
+                        messages.push('✓ Tooltip类存在');
+                        
+                        total++;
+                        const tooltipElements = document.querySelectorAll('[data-tooltip]');
+                        if (tooltipElements.length > 0) {
+                            success++;
+                            messages.push(`✓ 找到${tooltipElements.length}个工具提示元素`);
+                        } else {
+                            messages.push('✗ 未找到工具提示元素');
+                        }
+                    } else {
+                        messages.push('✗ Tooltip类不存在');
+                    }
+
+                    this.showResult(container, testName, success, total, messages);
+                    
+                } catch (error) {
+                    this.showError(container, testName, error);
+                }
+            }
+
+            initTooltipTest() {
+                document.getElementById('testTooltipAPI').addEventListener('click', () => {
+                    if (typeof Tooltip !== 'undefined') {
+                        const button = document.getElementById('testTooltipAPI');
+                        Tooltip.show(button, 'API创建的工具提示！', {
+                            theme: 'success',
+                            placement: 'top'
+                        });
+                    }
+                });
+            }
+
+            showResult(container, testName, success, total, messages) {
+                const isSuccess = success === total;
+                const percentage = Math.round((success / total) * 100);
+                
+                container.className = `test-result ${isSuccess ? 'pass' : 'fail'}`;
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <div class="font-semibold">${testName} - ${success}/${total} 通过 (${percentage}%)</div>
+                    <div class="mt-2">
+                        ${messages.map(msg => `<div>${msg}</div>`).join('')}
+                    </div>
+                `;
+                
+                this.results.set(testName, { success, total, percentage, messages });
+                
+                // 更新测试区块样式
+                const testSection = container.closest('.test-section');
+                if (testSection) {
+                    testSection.className = `test-section ${isSuccess ? 'success' : 'error'}`;
+                }
+            }
+
+            showError(container, testName, error) {
+                container.className = 'test-result fail';
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <div class="font-semibold">${testName} - 测试失败</div>
+                    <div class="mt-2">错误: ${error.message}</div>
+                `;
+                
+                this.results.set(testName, { success: 0, total: 1, percentage: 0, error: error.message });
+            }
+
+            generateSummary() {
+                const summary = document.getElementById('testSummary');
+                let totalSuccess = 0;
+                let totalTests = 0;
+                const failedTests = [];
+                
+                this.results.forEach((result, testName) => {
+                    totalSuccess += result.success;
+                    totalTests += result.total;
+                    
+                    if (result.success < result.total) {
+                        failedTests.push(testName);
+                    }
+                });
+                
+                const overallPercentage = totalTests > 0 ? Math.round((totalSuccess / totalTests) * 100) : 0;
+                const status = overallPercentage === 100 ? '🎉 全部通过' : '⚠️ 部分失败';
+                
+                summary.innerHTML = `
+                    <div class="text-lg font-semibold mb-2">${status}</div>
+                    <div class="mb-2">总计: ${totalSuccess}/${totalTests} 通过 (${overallPercentage}%)</div>
+                    ${failedTests.length > 0 ? 
+                        `<div class="text-red-600">失败的测试: ${failedTests.join(', ')}</div>` : 
+                        '<div class="text-green-600">所有组件测试通过！</div>'
+                    }
+                    <div class="mt-4 text-sm text-gray-500">
+                        测试时间: ${new Date().toLocaleString()}
+                    </div>
+                `;
+            }
+
+            clearResults() {
+                this.results.clear();
+                
+                // 清除所有测试结果
+                document.querySelectorAll('.test-result').forEach(result => {
+                    result.style.display = 'none';
+                });
+                
+                // 重置测试区块样式
+                document.querySelectorAll('.test-section').forEach(section => {
+                    section.className = 'test-section';
+                });
+                
+                // 清除总结
+                document.getElementById('testSummary').innerHTML = '等待测试开始...';
+                this.updateProgress('测试结果已清除');
+            }
+
+            updateProgress(message) {
+                document.getElementById('testProgress').textContent = message;
+            }
+        }
+
+        // 初始化测试管理器
+        document.addEventListener('DOMContentLoaded', () => {
+            window.testManager = new ComponentTestManager();
+            console.log('JavaScript组件集成测试页面已加载');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,691 @@
+/**
+ * 模态对话框组件样式
+ */
+
+/* 全局样式 */
+body.modal-open {
+  overflow: hidden;
+}
+
+body.dragging {
+  cursor: move !important;
+  user-select: none;
+}
+
+body.resizing {
+  cursor: nw-resize !important;
+  user-select: none;
+}
+
+/* 模态容器 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* 遮罩层 */
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+/* 对话框 */
+.modal-dialog {
+  position: relative;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  transform: scale(0.9);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal.show .modal-dialog {
+  transform: scale(1);
+}
+
+.modal.hide .modal-dialog {
+  transform: scale(0.9);
+}
+
+.modal-dialog.draggable {
+  cursor: move;
+}
+
+.modal-dialog.dragging {
+  transition: none !important;
+  cursor: move !important;
+}
+
+.modal-dialog.resizing {
+  transition: none !important;
+}
+
+/* 尺寸变体 */
+.modal-small .modal-dialog {
+  width: 400px;
+  max-width: 400px;
+}
+
+.modal-medium .modal-dialog {
+  width: 600px;
+  max-width: 600px;
+}
+
+.modal-large .modal-dialog {
+  width: 800px;
+  max-width: 800px;
+}
+
+.modal-fullscreen .modal-dialog {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  border-radius: 0;
+}
+
+.modal-auto .modal-dialog {
+  width: auto;
+  min-width: 300px;
+}
+
+/* 对话框内容 */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+/* 头部 */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.modal-header.draggable-handle {
+  cursor: move;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  flex: 1;
+}
+
+.modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.modal-close:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.modal-close:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 主体 */
+.modal-body {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 底部 */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+/* 按钮 */
+.modal-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.modal-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.modal-btn-primary {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.modal-btn-primary:hover {
+  background: #2563eb;
+}
+
+.modal-btn-secondary {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.modal-btn-secondary:hover {
+  background: #cbd5e1;
+  color: #475569;
+}
+
+.modal-btn-danger {
+  background: #ef4444;
+  color: #fff;
+}
+
+.modal-btn-danger:hover {
+  background: #dc2626;
+}
+
+.modal-btn-success {
+  background: #22c55e;
+  color: #fff;
+}
+
+.modal-btn-success:hover {
+  background: #16a34a;
+}
+
+/* 调整大小手柄 */
+.resize-handles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.resize-handle {
+  position: absolute;
+  pointer-events: all;
+  z-index: 10;
+}
+
+.resize-n {
+  top: -3px;
+  left: 10px;
+  right: 10px;
+  height: 6px;
+  cursor: n-resize;
+}
+
+.resize-e {
+  top: 10px;
+  right: -3px;
+  bottom: 10px;
+  width: 6px;
+  cursor: e-resize;
+}
+
+.resize-s {
+  bottom: -3px;
+  left: 10px;
+  right: 10px;
+  height: 6px;
+  cursor: s-resize;
+}
+
+.resize-w {
+  top: 10px;
+  left: -3px;
+  bottom: 10px;
+  width: 6px;
+  cursor: w-resize;
+}
+
+.resize-ne {
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  cursor: ne-resize;
+}
+
+.resize-nw {
+  top: -3px;
+  left: -3px;
+  width: 12px;
+  height: 12px;
+  cursor: nw-resize;
+}
+
+.resize-se {
+  bottom: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  cursor: se-resize;
+}
+
+.resize-sw {
+  bottom: -3px;
+  left: -3px;
+  width: 12px;
+  height: 12px;
+  cursor: sw-resize;
+}
+
+/* 动画效果 */
+
+/* 淡入淡出 */
+.modal-fade {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade.show .modal-dialog {
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-fade.hide .modal-dialog {
+  animation: fadeOut 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* 滑入滑出 */
+.modal-slide {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.modal-slide .modal-dialog {
+  transform: translateY(-50px);
+}
+
+.modal-slide.show .modal-dialog {
+  transform: translateY(0);
+  animation: slideDown 0.3s ease;
+}
+
+.modal-slide.hide .modal-dialog {
+  transform: translateY(-50px);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+
+/* 缩放效果 */
+.modal-zoom {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-zoom .modal-dialog {
+  transform: scale(0.3);
+}
+
+.modal-zoom.show .modal-dialog {
+  transform: scale(1);
+  animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-zoom.hide .modal-dialog {
+  transform: scale(0.3);
+  animation: zoomOut 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes zoomOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* 翻转效果 */
+.modal-flip {
+  perspective: 1000px;
+}
+
+.modal-flip .modal-dialog {
+  transform: rotateY(-90deg);
+  transition: transform 0.4s ease;
+}
+
+.modal-flip.show .modal-dialog {
+  transform: rotateY(0deg);
+  animation: flipIn 0.4s ease;
+}
+
+.modal-flip.hide .modal-dialog {
+  transform: rotateY(90deg);
+  animation: flipOut 0.4s ease;
+}
+
+@keyframes flipIn {
+  from {
+    transform: rotateY(-90deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes flipOut {
+  from {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: rotateY(90deg);
+    opacity: 0;
+  }
+}
+
+/* 深色主题 */
+@media (prefers-color-scheme: dark) {
+  .modal-dialog {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .modal-title {
+    color: #f3f4f6;
+  }
+  
+  .modal-close {
+    color: #9ca3af;
+  }
+  
+  .modal-close:hover {
+    background: #4b5563;
+    color: #f3f4f6;
+  }
+  
+  .modal-body {
+    color: #e5e7eb;
+  }
+  
+  .modal-body::-webkit-scrollbar-track {
+    background: #374151;
+  }
+  
+  .modal-body::-webkit-scrollbar-thumb {
+    background: #6b7280;
+  }
+  
+  .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+  
+  .modal-btn-secondary {
+    background: #4b5563;
+    color: #d1d5db;
+  }
+  
+  .modal-btn-secondary:hover {
+    background: #6b7280;
+    color: #f3f4f6;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 1rem;
+    width: calc(100% - 2rem) !important;
+    max-width: calc(100% - 2rem) !important;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1rem;
+  }
+  
+  .modal-title {
+    font-size: 1.125rem;
+  }
+  
+  .modal-close {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+  
+  .modal-footer {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+  
+  .modal-btn {
+    width: 100%;
+  }
+  
+  .resize-handles {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-dialog {
+    margin: 0.5rem;
+    width: calc(100% - 1rem) !important;
+    max-width: calc(100% - 1rem) !important;
+    height: auto;
+    max-height: calc(100% - 1rem);
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 0.75rem;
+  }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .modal-dialog {
+    border: 2px solid currentColor;
+  }
+  
+  .modal-btn {
+    border: 1px solid currentColor;
+  }
+  
+  .modal-close {
+    border: 1px solid currentColor;
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .modal,
+  .modal-dialog {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .modal.show .modal-dialog {
+    transform: scale(1) !important;
+    opacity: 1 !important;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .modal {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    background: transparent !important;
+  }
+  
+  .modal-backdrop {
+    display: none !important;
+  }
+  
+  .modal-dialog {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    transform: none !important;
+    max-width: none !important;
+    max-height: none !important;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    background: transparent !important;
+  }
+  
+  .modal-close,
+  .resize-handles {
+    display: none !important;
+  }
+}
+
+/* 辅助功能 */
+.modal[aria-hidden="true"] {
+  display: none;
+}
+
+.modal-dialog[role="dialog"] {
+  outline: none;
+}
+
+/* 性能优化 */
+.modal-dialog {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.modal.show {
+  will-change: auto;
+}
